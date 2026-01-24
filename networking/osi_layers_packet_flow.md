@@ -1,6 +1,7 @@
 # OSI Model and Packet Encapsulation/Decapsulation
 
 ## Table of Contents
+
 1. [Overview](#overview)
 2. [The OSI Model](#the-osi-model)
 3. [Protocol Data Units (PDUs)](#protocol-data-units-pdus)
@@ -16,7 +17,10 @@
 
 ## Overview
 
-This document explains how data is transformed as it passes through the layers of the OSI (Open Systems Interconnection) model. As data travels down the stack (sending), each layer adds its own header (and sometimes trailer) - a process called **encapsulation**. When receiving, each layer removes its respective header/trailer - called **decapsulation**.
+This document explains how data is transformed as it passes through the layers of the OSI (Open Systems
+Interconnection) model. As data travels down the stack (sending), each layer adds its own header (and
+sometimes trailer) - a process called **encapsulation**. When receiving, each layer removes its respective
+header/trailer - called **decapsulation**.
 
 ---
 
@@ -76,15 +80,15 @@ The OSI model consists of 7 layers, each with specific responsibilities:
 
 ### Layer Summary Table
 
-| Layer | Name | PDU | Function | Devices |
-|-------|------|-----|----------|---------|
-| 7 | Application | Data | User interface, application services | - |
-| 6 | Presentation | Data | Format, encryption, compression | - |
-| 5 | Session | Data | Session establishment, maintenance | - |
-| 4 | Transport | Segment/Datagram | End-to-end delivery, reliability | - |
-| 3 | Network | Packet | Routing, logical addressing | Router, L3 Switch |
-| 2 | Data Link | Frame | Physical addressing, framing | Switch, Bridge, AP |
-| 1 | Physical | Bits | Physical transmission | Hub, Repeater, Cable |
+| Layer | Name         | PDU              | Function                             | Devices              |
+| ----- | ------------ | ---------------- | ------------------------------------ | -------------------- |
+| 7     | Application  | Data             | User interface, application services | -                    |
+| 6     | Presentation | Data             | Format, encryption, compression      | -                    |
+| 5     | Session      | Data             | Session establishment, maintenance   | -                    |
+| 4     | Transport    | Segment/Datagram | End-to-end delivery, reliability     | -                    |
+| 3     | Network      | Packet           | Routing, logical addressing          | Router, L3 Switch    |
+| 2     | Data Link    | Frame            | Physical addressing, framing         | Switch, Bridge, AP   |
+| 1     | Physical     | Bits             | Physical transmission                | Hub, Repeater, Cable |
 
 ---
 
@@ -177,6 +181,7 @@ When data is sent, it travels DOWN the OSI stack, with each layer adding its hea
 └─────────────────────────────────────────────────────────────────────┘
 
 ```
+
 ## Decapsulation Process (Receiving)
 
 When data is received, it travels UP the OSI stack, with each layer removing its header:
@@ -243,6 +248,7 @@ When data is received, it travels UP the OSI stack, with each layer removing its
 **Purpose**: Provides network services directly to end-user applications
 
 **What it does to data**:
+
 - No encapsulation header added (provides the actual data)
 - Formats data according to application protocol (HTTP, FTP, etc.)
 
@@ -268,6 +274,7 @@ When data is received, it travels UP the OSI stack, with each layer removing its
 **Purpose**: Data translation, encryption, and compression
 
 **What it does to data**:
+
 - **Encryption/Decryption**: SSL/TLS encryption
 - **Compression**: Reduces data size
 - **Format Conversion**: Character encoding (ASCII, Unicode)
@@ -288,6 +295,7 @@ When data is received, it travels UP the OSI stack, with each layer removing its
 **Purpose**: Manages sessions between applications
 
 **What it does to data**:
+
 - **Session establishment**: Creates connection
 - **Session maintenance**: Keeps connection alive
 - **Session termination**: Closes connection properly
@@ -313,8 +321,8 @@ When data is received, it travels UP the OSI stack, with each layer removing its
 #### TCP Header Structure (20-60 bytes)
 
 ```
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |          Source Port          |       Destination Port        |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -332,36 +340,36 @@ When data is received, it travels UP the OSI stack, with each layer removing its
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
-| Field | Size | Description |
-|-------|------|-------------|
-| Source Port | 16 bits | Sender's port number |
-| Destination Port | 16 bits | Receiver's port number |
-| Sequence Number | 32 bits | Byte position in stream |
-| Acknowledgment Number | 32 bits | Next expected byte |
-| Data Offset | 4 bits | Header length (in 32-bit words) |
-| Flags | 9 bits | SYN, ACK, FIN, RST, PSH, URG, etc. |
-| Window | 16 bits | Receive window size |
-| Checksum | 16 bits | Error detection |
-| Urgent Pointer | 16 bits | Urgent data offset |
+| Field                 | Size    | Description                        |
+| --------------------- | ------- | ---------------------------------- |
+| Source Port           | 16 bits | Sender's port number               |
+| Destination Port      | 16 bits | Receiver's port number             |
+| Sequence Number       | 32 bits | Byte position in stream            |
+| Acknowledgment Number | 32 bits | Next expected byte                 |
+| Data Offset           | 4 bits  | Header length (in 32-bit words)    |
+| Flags                 | 9 bits  | SYN, ACK, FIN, RST, PSH, URG, etc. |
+| Window                | 16 bits | Receive window size                |
+| Checksum              | 16 bits | Error detection                    |
+| Urgent Pointer        | 16 bits | Urgent data offset                 |
 
 #### TCP Flags
 
-| Flag | Name | Purpose |
-|------|------|---------|
-| SYN | Synchronize | Initiate connection |
-| ACK | Acknowledge | Acknowledge received data |
-| FIN | Finish | Terminate connection |
-| RST | Reset | Abort connection |
-| PSH | Push | Deliver data immediately |
-| URG | Urgent | Urgent data present |
-| ECE | ECN Echo | Congestion notification |
-| CWR | Congestion Window Reduced | Response to ECE |
+| Flag | Name                      | Purpose                   |
+| ---- | ------------------------- | ------------------------- |
+| SYN  | Synchronize               | Initiate connection       |
+| ACK  | Acknowledge               | Acknowledge received data |
+| FIN  | Finish                    | Terminate connection      |
+| RST  | Reset                     | Abort connection          |
+| PSH  | Push                      | Deliver data immediately  |
+| URG  | Urgent                    | Urgent data present       |
+| ECE  | ECN Echo                  | Congestion notification   |
+| CWR  | Congestion Window Reduced | Response to ECE           |
 
 #### UDP Header Structure (8 bytes)
 
 ```
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |          Source Port          |       Destination Port        |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -371,16 +379,16 @@ When data is received, it travels UP the OSI stack, with each layer removing its
 
 #### TCP vs UDP Comparison
 
-| Feature | TCP | UDP |
-|---------|-----|-----|
-| Connection | Connection-oriented | Connectionless |
-| Reliability | Guaranteed delivery | Best effort |
-| Ordering | Ordered delivery | No ordering |
-| Flow Control | Yes (sliding window) | No |
-| Congestion Control | Yes | No |
-| Header Size | 20-60 bytes | 8 bytes |
-| Speed | Slower | Faster |
-| Use Cases | HTTP, FTP, Email | DNS, VoIP, Streaming |
+| Feature            | TCP                  | UDP                  |
+| ------------------ | -------------------- | -------------------- |
+| Connection         | Connection-oriented  | Connectionless       |
+| Reliability        | Guaranteed delivery  | Best effort          |
+| Ordering           | Ordered delivery     | No ordering          |
+| Flow Control       | Yes (sliding window) | No                   |
+| Congestion Control | Yes                  | No                   |
+| Header Size        | 20-60 bytes          | 8 bytes              |
+| Speed              | Slower               | Faster               |
+| Use Cases          | HTTP, FTP, Email     | DNS, VoIP, Streaming |
 
 ---
 
@@ -393,8 +401,8 @@ When data is received, it travels UP the OSI stack, with each layer removing its
 #### IPv4 Header Structure (20-60 bytes)
 
 ```
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |Version|  IHL  |Type of Service|          Total Length         |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -410,32 +418,32 @@ When data is received, it travels UP the OSI stack, with each layer removing its
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ```
 
-| Field | Size | Description |
-|-------|------|-------------|
-| Version | 4 bits | IP version (4 or 6) |
-| IHL | 4 bits | Header length (in 32-bit words) |
-| Type of Service (DSCP/ECN) | 8 bits | QoS markings |
-| Total Length | 16 bits | Total packet size |
-| Identification | 16 bits | Fragment identification |
-| Flags | 3 bits | DF (Don't Fragment), MF (More Fragments) |
-| Fragment Offset | 13 bits | Fragment position |
-| TTL | 8 bits | Hop limit (decremented at each router) |
-| Protocol | 8 bits | Upper layer protocol (TCP=6, UDP=17) |
-| Header Checksum | 16 bits | Header error detection |
-| Source Address | 32 bits | Sender's IP address |
-| Destination Address | 32 bits | Receiver's IP address |
+| Field                      | Size    | Description                              |
+| -------------------------- | ------- | ---------------------------------------- |
+| Version                    | 4 bits  | IP version (4 or 6)                      |
+| IHL                        | 4 bits  | Header length (in 32-bit words)          |
+| Type of Service (DSCP/ECN) | 8 bits  | QoS markings                             |
+| Total Length               | 16 bits | Total packet size                        |
+| Identification             | 16 bits | Fragment identification                  |
+| Flags                      | 3 bits  | DF (Don't Fragment), MF (More Fragments) |
+| Fragment Offset            | 13 bits | Fragment position                        |
+| TTL                        | 8 bits  | Hop limit (decremented at each router)   |
+| Protocol                   | 8 bits  | Upper layer protocol (TCP=6, UDP=17)     |
+| Header Checksum            | 16 bits | Header error detection                   |
+| Source Address             | 32 bits | Sender's IP address                      |
+| Destination Address        | 32 bits | Receiver's IP address                    |
 
 #### Protocol Numbers
 
-| Number | Protocol |
-|--------|----------|
-| 1 | ICMP |
-| 6 | TCP |
-| 17 | UDP |
-| 47 | GRE |
-| 50 | ESP (IPsec) |
-| 51 | AH (IPsec) |
-| 89 | OSPF |
+| Number | Protocol    |
+| ------ | ----------- |
+| 1      | ICMP        |
+| 6      | TCP         |
+| 17     | UDP         |
+| 47     | GRE         |
+| 50     | ESP (IPsec) |
+| 51     | AH (IPsec)  |
+| 89     | OSPF        |
 
 #### IP Fragmentation
 
@@ -446,14 +454,14 @@ Original Packet (4000 bytes payload, MTU = 1500)
 ┌──────────────────────────────────────────────────────────────┐
 │ IP Header │              4000 bytes of data                  │
 └──────────────────────────────────────────────────────────────┘
-                              │
-                              ▼ Fragmentation
+│
+▼ Fragmentation
 ┌───────────────────────┐  ┌───────────────────────┐  ┌───────────────────────┐
 │ IP Header │ 1480 bytes│  │ IP Header │ 1480 bytes│  │ IP Header │ 1040 bytes│
 │ Offset=0  │  MF=1     │  │ Offset=185│  MF=1     │  │ Offset=370│  MF=0     │
 │ ID=12345  │           │  │ ID=12345  │           │  │ ID=12345  │           │
 └───────────────────────┘  └───────────────────────┘  └───────────────────────┘
-     Fragment 1                 Fragment 2                 Fragment 3
+Fragment 1                 Fragment 2                 Fragment 3
 ```
 
 ---
@@ -485,25 +493,25 @@ Original Packet (4000 bytes payload, MTU = 1500)
 └────────────────────────────────────────────────────────────────────────────┘
 ```
 
-| Field | Size | Description |
-|-------|------|-------------|
-| Preamble | 7 bytes | Synchronization pattern (10101010...) |
-| SFD (Start Frame Delimiter) | 1 byte | Marks frame start (10101011) |
-| Destination MAC | 6 bytes | Destination hardware address |
-| Source MAC | 6 bytes | Sender hardware address |
-| EtherType/Length | 2 bytes | Protocol type or frame length |
-| Payload | 46-1500 bytes | Data from upper layers |
-| FCS (Frame Check Sequence) | 4 bytes | CRC-32 checksum |
+| Field                       | Size          | Description                           |
+| --------------------------- | ------------- | ------------------------------------- |
+| Preamble                    | 7 bytes       | Synchronization pattern (10101010...) |
+| SFD (Start Frame Delimiter) | 1 byte        | Marks frame start (10101011)          |
+| Destination MAC             | 6 bytes       | Destination hardware address          |
+| Source MAC                  | 6 bytes       | Sender hardware address               |
+| EtherType/Length            | 2 bytes       | Protocol type or frame length         |
+| Payload                     | 46-1500 bytes | Data from upper layers                |
+| FCS (Frame Check Sequence)  | 4 bytes       | CRC-32 checksum                       |
 
 #### EtherType Values
 
-| Value | Protocol |
-|-------|----------|
-| 0x0800 | IPv4 |
-| 0x0806 | ARP |
-| 0x86DD | IPv6 |
-| 0x8100 | VLAN (802.1Q) |
-| 0x88CC | LLDP |
+| Value  | Protocol       |
+| ------ | -------------- |
+| 0x0800 | IPv4           |
+| 0x0806 | ARP            |
+| 0x86DD | IPv6           |
+| 0x8100 | VLAN (802.1Q)  |
+| 0x88CC | LLDP           |
 | 0x8847 | MPLS (unicast) |
 
 #### 802.1Q VLAN Tag
@@ -513,19 +521,19 @@ Original Packet (4000 bytes payload, MTU = 1500)
 │ Destination MAC  │   Source MAC     │802.1Q   │   EtherType      │     Payload      │
 │     6 bytes      │    6 bytes       │ 4 bytes │    2 bytes       │                  │
 └──────────────────┴──────────────────┴─────────┴──────────────────┴──────────────────┘
-                                          │
-                              ┌───────────┴───────────┐
-                              │ TPID │ PCP│DEI│ VID   │
-                              │0x8100│ 3b │1b │ 12b   │
-                              └───────────────────────┘
+│
+┌───────────┴───────────┐
+│ TPID │ PCP│DEI│ VID   │
+│0x8100│ 3b │1b │ 12b   │
+└───────────────────────┘
 ```
 
-| Field | Size | Description |
-|-------|------|-------------|
-| TPID | 16 bits | Tag Protocol ID (0x8100) |
-| PCP | 3 bits | Priority Code Point (QoS) |
-| DEI | 1 bit | Drop Eligible Indicator |
-| VID | 12 bits | VLAN ID (0-4095) |
+| Field | Size    | Description               |
+| ----- | ------- | ------------------------- |
+| TPID  | 16 bits | Tag Protocol ID (0x8100)  |
+| PCP   | 3 bits  | Priority Code Point (QoS) |
+| DEI   | 1 bit   | Drop Eligible Indicator   |
+| VID   | 12 bits | VLAN ID (0-4095)          |
 
 ---
 
@@ -534,29 +542,30 @@ Original Packet (4000 bytes payload, MTU = 1500)
 **Purpose**: Physical transmission of raw bits
 
 **What it does to data**:
+
 - Converts frames to electrical, optical, or radio signals
 - Handles bit timing and synchronization
 - Defines physical media specifications
 
 **Physical Media Types**:
 
-| Media | Characteristics |
-|-------|-----------------|
-| Twisted Pair (Cat5e/6/6a) | Electrical signals, 100m max, RJ-45 |
+| Media                     | Characteristics                      |
+| ------------------------- | ------------------------------------ |
+| Twisted Pair (Cat5e/6/6a) | Electrical signals, 100m max, RJ-45  |
 | Fiber Optic (Single-mode) | Light, up to 40+ km, low attenuation |
-| Fiber Optic (Multi-mode) | Light, up to 2 km, higher bandwidth |
-| Coaxial | Electrical, legacy, cable TV |
-| Wireless (802.11) | Radio waves, 2.4/5/6 GHz |
+| Fiber Optic (Multi-mode)  | Light, up to 2 km, higher bandwidth  |
+| Coaxial                   | Electrical, legacy, cable TV         |
+| Wireless (802.11)         | Radio waves, 2.4/5/6 GHz             |
 
 **Encoding Schemes**:
 
-| Scheme | Description |
-|--------|-------------|
-| NRZ (Non-Return to Zero) | Simple binary encoding |
-| Manchester | Transition in middle of each bit |
-| 4B/5B | 4 data bits encoded as 5 bits |
-| 8B/10B | 8 data bits encoded as 10 bits |
-| PAM-4 | 4-level pulse amplitude modulation |
+| Scheme                   | Description                        |
+| ------------------------ | ---------------------------------- |
+| NRZ (Non-Return to Zero) | Simple binary encoding             |
+| Manchester               | Transition in middle of each bit   |
+| 4B/5B                    | 4 data bits encoded as 5 bits      |
+| 8B/10B                   | 8 data bits encoded as 10 bits     |
+| PAM-4                    | 4-level pulse amplitude modulation |
 
 ---
 
@@ -592,12 +601,12 @@ The TCP/IP model is a simplified 4-layer model that maps to the OSI model:
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-| OSI Layer | TCP/IP Layer | Protocols |
-|-----------|--------------|-----------|
-| 7, 6, 5 | Application | HTTP, FTP, DNS, SMTP, SSH |
-| 4 | Transport | TCP, UDP |
-| 3 | Internet | IP, ICMP, IGMP, ARP |
-| 2, 1 | Network Access | Ethernet, Wi-Fi, PPP |
+| OSI Layer | TCP/IP Layer   | Protocols                 |
+| --------- | -------------- | ------------------------- |
+| 7, 6, 5   | Application    | HTTP, FTP, DNS, SMTP, SSH |
+| 4         | Transport      | TCP, UDP                  |
+| 3         | Internet       | IP, ICMP, IGMP, ARP       |
+| 2, 1      | Network Access | Ethernet, Wi-Fi, PPP      |
 
 ---
 
@@ -676,6 +685,7 @@ Here's what a complete packet looks like when you request a web page:
 │                                                                            │
 └────────────────────────────────────────────────────────────────────────────┘
 ```
+
 ---
 
 ## Inter-Layer Communication
@@ -737,17 +747,17 @@ Each layer communicates with adjacent layers through Service Access Points:
 
 ```
 Application Layer:    HTTP        FTP         SSH
-                        │          │           │
-                      Port 80   Port 21    Port 22
-                        │          │           │
-                        └──────────┼───────────┘
-                                   │
+│          │           │
+Port 80   Port 21    Port 22
+│          │           │
+└──────────┼───────────┘
+│
 Transport Layer:              TCP (Protocol 6)
-                                   │
-                                   │
+│
+│
 Network Layer:                  IP Packet
-                                   │
-                                   │
+│
+│
 Data Link:                   Ethernet Frame
 ```
 
@@ -755,14 +765,14 @@ Data Link:                   Ethernet Frame
 
 ```
 Ethernet Frame arrives
-        │
-        ▼
+│
+▼
 Check EtherType: 0x0800 → IPv4
-        │
-        ▼
+│
+▼
 Check Protocol: 6 → TCP
-        │
-        ▼
+│
+▼
 Check Dst Port: 80 → HTTP Server
 ```
 
@@ -925,13 +935,13 @@ When Host A needs to send to Host B on the same subnet:
 
 ### MTU Values by Media Type
 
-| Media Type | Typical MTU |
-|------------|-------------|
-| Ethernet | 1500 bytes |
-| Jumbo Frames | 9000 bytes |
-| PPPoE | 1492 bytes |
-| VPN/Tunnels | 1400-1460 bytes |
-| IPv6 Minimum | 1280 bytes |
+| Media Type     | Typical MTU                   |
+| -------------- | ----------------------------- |
+| Ethernet       | 1500 bytes                    |
+| Jumbo Frames   | 9000 bytes                    |
+| PPPoE          | 1492 bytes                    |
+| VPN/Tunnels    | 1400-1460 bytes               |
+| IPv6 Minimum   | 1280 bytes                    |
 | Wi-Fi (802.11) | 2304 bytes (but usually 1500) |
 
 ### Path MTU Discovery
@@ -964,14 +974,14 @@ When Host A needs to send to Host B on the same subnet:
 
 ### Layer-by-Layer Error Detection
 
-| Layer | Error Detection Method | Action on Error |
-|-------|----------------------|-----------------|
-| Physical | Signal quality, bit errors | Retransmit (if detected) |
-| Data Link | CRC-32 (FCS) | Drop frame |
-| Network | IP header checksum | Drop packet |
-| Transport (TCP) | Checksum + Sequence numbers | Retransmit segment |
-| Transport (UDP) | Checksum (optional) | Drop datagram |
-| Application | Application-specific | Varies |
+| Layer           | Error Detection Method      | Action on Error          |
+| --------------- | --------------------------- | ------------------------ |
+| Physical        | Signal quality, bit errors  | Retransmit (if detected) |
+| Data Link       | CRC-32 (FCS)                | Drop frame               |
+| Network         | IP header checksum          | Drop packet              |
+| Transport (TCP) | Checksum + Sequence numbers | Retransmit segment       |
+| Transport (UDP) | Checksum (optional)         | Drop datagram            |
+| Application     | Application-specific        | Varies                   |
 
 ### TCP Error Recovery
 
@@ -1029,25 +1039,25 @@ When Host A needs to send to Host B on the same subnet:
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-| DSCP Value | Name | Description |
-|------------|------|-------------|
-| 46 (EF) | Expedited Forwarding | Low-latency (VoIP) |
-| 34 (AF41) | Assured Forwarding | Video |
-| 26 (AF31) | Assured Forwarding | Streaming |
-| 0 (BE) | Best Effort | Default traffic |
+| DSCP Value | Name                 | Description        |
+| ---------- | -------------------- | ------------------ |
+| 46 (EF)    | Expedited Forwarding | Low-latency (VoIP) |
+| 34 (AF41)  | Assured Forwarding   | Video              |
+| 26 (AF31)  | Assured Forwarding   | Streaming          |
+| 0 (BE)     | Best Effort          | Default traffic    |
 
 ### 802.1p Priority (Layer 2)
 
-| Priority | Traffic Type |
-|----------|--------------|
-| 7 | Network Control |
-| 6 | Voice |
-| 5 | Video |
-| 4 | Controlled Load |
-| 3 | Excellent Effort |
-| 2 | Spare |
-| 1 | Background |
-| 0 | Best Effort |
+| Priority | Traffic Type     |
+| -------- | ---------------- |
+| 7        | Network Control  |
+| 6        | Voice            |
+| 5        | Video            |
+| 4        | Controlled Load  |
+| 3        | Excellent Effort |
+| 2        | Spare            |
+| 1        | Background       |
+| 0        | Best Effort      |
 
 ---
 
@@ -1080,11 +1090,11 @@ When Host A needs to send to Host B on the same subnet:
 ### Address Fields Based on To DS / From DS
 
 | To DS | From DS | Addr1 | Addr2 | Addr3 | Addr4 |
-|-------|---------|-------|-------|-------|-------|
-| 0 | 0 | DA | SA | BSSID | N/A |
-| 0 | 1 | DA | BSSID | SA | N/A |
-| 1 | 0 | BSSID | SA | DA | N/A |
-| 1 | 1 | RA | TA | DA | SA |
+| ----- | ------- | ----- | ----- | ----- | ----- |
+| 0     | 0       | DA    | SA    | BSSID | N/A   |
+| 0     | 1       | DA    | BSSID | SA    | N/A   |
+| 1     | 0       | BSSID | SA    | DA    | N/A   |
+| 1     | 1       | RA    | TA    | DA    | SA    |
 
 ---
 
@@ -1131,20 +1141,22 @@ When Host A needs to send to Host B on the same subnet:
 
 ## Glossary
 
-| Term | Definition |
-|------|------------|
-| Encapsulation | Adding headers/trailers as data moves down the stack |
-| Decapsulation | Removing headers/trailers as data moves up the stack |
-| PDU | Protocol Data Unit - the data unit at each layer |
-| MTU | Maximum Transmission Unit - largest packet size |
-| TTL | Time to Live - hop limit for packets |
-| FCS | Frame Check Sequence - CRC checksum at Layer 2 |
-| SAP | Service Access Point - interface between layers |
-| DSCP | Differentiated Services Code Point - QoS marking |
-| MSS | Maximum Segment Size - largest TCP payload |
-| Fragmentation | Splitting packets to fit MTU |
-| Reassembly | Combining fragments back to original packet |
-| Multiplexing | Multiple streams sharing one connection |
-| Demultiplexing | Delivering to correct upper-layer service |
+| Term           | Definition                                           |
+| -------------- | ---------------------------------------------------- |
+| Encapsulation  | Adding headers/trailers as data moves down the stack |
+| Decapsulation  | Removing headers/trailers as data moves up the stack |
+| PDU            | Protocol Data Unit - the data unit at each layer     |
+| MTU            | Maximum Transmission Unit - largest packet size      |
+| TTL            | Time to Live - hop limit for packets                 |
+| FCS            | Frame Check Sequence - CRC checksum at Layer 2       |
+| SAP            | Service Access Point - interface between layers      |
+| DSCP           | Differentiated Services Code Point - QoS marking     |
+| MSS            | Maximum Segment Size - largest TCP payload           |
+| Fragmentation  | Splitting packets to fit MTU                         |
+| Reassembly     | Combining fragments back to original packet          |
+| Multiplexing   | Multiple streams sharing one connection              |
+| Demultiplexing | Delivering to correct upper-layer service            |
+
 ```
 
+```

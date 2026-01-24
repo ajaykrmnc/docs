@@ -1,0 +1,123 @@
+CompileFlags:
+  # 1. Point this to your HOST wrapper script.
+  # Your previous config pointed to the path INSIDE the container, which Clangd on host cannot run.
+  Compiler: /export/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc
+
+  Remove:
+    # GCC flags that Clang doesn't understand (Clean up the logs)
+    - -fno-tree-ch
+    - -fno-var-tracking-assignments
+    - -Wno-psabi
+    - -fconserve-stack
+    - -mabi=*
+    - -Wno-stringop-truncation
+    - -Wno-format-truncation
+
+  Add:
+    - "-xc"
+    - "-std=gnu89"
+    - "-Wno-tautological-constant-compare"
+    - "-I/garage/workspace/ap/build/ap/arm64_gcc-11.3-gnu/strace-6.14/src"
+    - "-I/garage/workspace/common/common/proto/include"
+    - "-I/garage/workspace/common/common/proto/include/spectradata/"
+    - "-I/garage/workspace/common/common/utils/include"
+    - "-I/garage/workspace/common/common/di/include"
+    - "-I/garage/workspace/common/common/feature/include"
+
+// Python scripts
+
+import json
+import os
+import shutil
+import sys
+
+# --- Configuration ---
+JSON_FILE = 'compile_commands.json'
+BACKUP_FILE = 'compile_commands.json.bak'
+
+# 1. Sysroot Configuration (Updated to your specific libc path)
+SYSROOT_FLAG = '--sysroot=/export/arm-gnu-toolchain-11.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc'
+
+# 2. Path Mapping Configuration
+# TARGET: Replace -I/common/... with -I/garage/workspace/common/common/...
+SEARCH_PREFIX = "-I/common/"
+REPLACE_PREFIX = "-I/garage/workspace/common/common/"
+
+def process_compile_commands():
+    # Verify file exists
+    if not os.path.exists(JSON_FILE):
+        print(f"[Error] {JSON_FILE} not found in the current directory.")
+        sys.exit(1)
+
+    # Create backup
+    shutil.copyfile(JSON_FILE, BACKUP_FILE)
+    print(f"[Info] Backup created at {BACKUP_FILE}")
+
+    # Load JSON
+    with open(JSON_FILE, 'r') as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            print("[Error] Invalid JSON format.")
+            sys.exit(1)
+
+    entries_modified = 0
+    paths_rewritten = 0
+    sysroot_injected = 0
+
+    # Process each translation unit
+    for entry in data:
+        if 'arguments' not in entry:
+            continue
+
+        args = entry['arguments']
+        new_args = []
+        is_entry_modified = False
+
+        # Check if sysroot is already present in this entry to avoid duplicates
+        has_sysroot = any(arg.startswith('--sysroot') for arg in args)
+
+        for index, arg in enumerate(args):
+            current_arg = arg
+
+            # --- Task 1: Rewrite Include Paths ---
+            if current_arg.startswith(SEARCH_PREFIX):
+                # Replace the prefix
+                # e.g., "-I/common/utils" -> "-I/garage/workspace/common/common/utils"
+                current_arg = current_arg.replace(SEARCH_PREFIX, REPLACE_PREFIX, 1)
+                if current_arg != arg:
+                    paths_rewritten += 1
+                    is_entry_modified = True
+
+            # Append the (possibly modified) argument to the new list
+            new_args.append(current_arg)
+
+            # --- Task 2: Inject Sysroot ---
+            # We inject sysroot immediately after the compiler command (index 0)
+            if index == 0 and not has_sysroot:
+                new_args.append(SYSROOT_FLAG)
+                sysroot_injected += 1
+                is_entry_modified = True
+
+        # Save changes back to the entry
+        if is_entry_modified:
+            entry['arguments'] = new_args
+            entries_modified += 1
+
+    # Write the modified JSON back to disk
+    with open(JSON_FILE, 'w') as f:
+        json.dump(data, f, indent=2)
+
+    # Summary
+    print("-" * 50)
+    print(f"Processing Complete: {JSON_FILE}")
+    print(f"  - Files Processed:   {len(data)}")
+    print(f"  - Entries Modified:  {entries_modified}")
+    print(f"  - Sysroots Added:    {sysroot_injected}")
+    print(f"  - Paths Rewritten:   {paths_rewritten}")
+    print("-" * 50)
+    print("Next Step: Run ':LspRestart' in Neovim to apply changes.")
+
+if __name__ == "__main__":
+    process_compile_commands()
+

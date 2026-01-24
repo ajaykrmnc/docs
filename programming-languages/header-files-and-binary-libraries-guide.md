@@ -1,4 +1,5 @@
 # Comprehensive Guide: Header Files and Binary Libraries
+
 ## Introduction
 
 When working with hardware SDKs from vendors like Qualcomm, NVIDIA, Intel, or ARM, you'll typically receive:
@@ -9,6 +10,7 @@ When working with hardware SDKs from vendors like Qualcomm, NVIDIA, Intel, or AR
 This distribution model is fundamental to how compiled languages like C and C++ work, and serves multiple purposes from intellectual property protection to ensuring binary compatibility.
 
 This guide provides a comprehensive understanding of:
+
 - Why this distribution model exists
 - How header files define interfaces
 - How binary libraries contain implementations
@@ -55,6 +57,7 @@ The most significant reason vendors provide only headers and binaries is to prot
 ```
 
 **What's protected:**
+
 - Proprietary algorithms
 - Hardware-specific optimizations
 - Trade secrets and patented techniques
@@ -62,13 +65,14 @@ The most significant reason vendors provide only headers and binaries is to prot
 
 ### 2. Licensing and Business Model
 
-| Distribution Model | Control Level | Use Case |
-|-------------------|---------------|----------|
-| Source Code | Low | Open source projects |
-| Headers + Binary | High | Commercial SDKs |
-| Binary Only | Very High | Closed plugins |
+| Distribution Model | Control Level | Use Case             |
+| ------------------ | ------------- | -------------------- |
+| Source Code        | Low           | Open source projects |
+| Headers + Binary   | High          | Commercial SDKs      |
+| Binary Only        | Very High     | Closed plugins       |
 
 Vendors can:
+
 - License the same binary to multiple customers
 - Enforce usage restrictions through licensing
 - Provide different feature sets in different binary versions
@@ -101,6 +105,7 @@ Vendors can:
 ### 4. Reducing Build Complexity
 
 Pre-compiled binaries eliminate:
+
 - Complex build dependencies
 - Platform-specific build configurations
 - Compiler compatibility issues
@@ -225,7 +230,7 @@ typedef struct {
 
 /**
  * Initialize the Qualcomm SDK
- * 
+ *
  * @param config    Pointer to device configuration
  * @param context   Output pointer to created context
  * @return          QC_SUCCESS on success, error code otherwise
@@ -237,7 +242,7 @@ qc_status_t qc_initialize(
 
 /**
  * Shutdown and cleanup
- * 
+ *
  * @param context   Context to destroy
  * @return          QC_SUCCESS on success
  */
@@ -245,7 +250,7 @@ qc_status_t qc_shutdown(qc_context_t context);
 
 /**
  * Load a neural network model
- * 
+ *
  * @param context       Active context
  * @param model_path    Path to model file
  * @param handle        Output model handle
@@ -259,7 +264,7 @@ qc_status_t qc_load_model(
 
 /**
  * Run inference on loaded model
- * 
+ *
  * @param handle        Model handle
  * @param input_data    Input tensor data
  * @param input_desc    Input tensor descriptor
@@ -277,7 +282,7 @@ qc_status_t qc_run_inference(
 
 /**
  * Get performance metrics from last inference
- * 
+ *
  * @param handle    Model handle
  * @param metrics   Output metrics structure
  * @return          QC_SUCCESS on success
@@ -289,7 +294,7 @@ qc_status_t qc_get_metrics(
 
 /**
  * Get human-readable error string
- * 
+ *
  * @param status    Status code
  * @return          Error string (do not free)
  */
@@ -341,13 +346,13 @@ const char* qc_get_error_string(qc_status_t status);
 
 ### Why Each Component Matters
 
-| Component | What Compiler Learns | Why It's Needed |
-|-----------|---------------------|-----------------|
-| Include Guards | File boundaries | Prevents redefinition errors |
-| Macros/Constants | Literal values | Inline substitution, configuration |
-| Type Definitions | Size, layout, alignment | Memory allocation, access patterns |
-| Enumerations | Valid values, underlying type | Type safety, switch statements |
-| Struct Definitions | Member offsets, total size | Memory layout, member access |
+| Component             | What Compiler Learns          | Why It's Needed                    |
+| --------------------- | ----------------------------- | ---------------------------------- |
+| Include Guards        | File boundaries               | Prevents redefinition errors       |
+| Macros/Constants      | Literal values                | Inline substitution, configuration |
+| Type Definitions      | Size, layout, alignment       | Memory allocation, access patterns |
+| Enumerations          | Valid values, underlying type | Type safety, switch statements     |
+| Struct Definitions    | Member offsets, total size    | Memory layout, member access       |
 | Function Declarations | Signature, calling convention | Validate calls, generate call code |
 
 ---
@@ -425,7 +430,7 @@ nm -D libqualcomm.so
 
 # View library information
 file libqualcomm.so
-# Output: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), 
+# Output: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV),
 #         dynamically linked, stripped
 
 # List dependencies
@@ -796,15 +801,15 @@ Object File: main.o
 
 ### Comparison Table
 
-| Aspect | Static Library (.a) | Dynamic Library (.so) |
-|--------|--------------------|-----------------------|
-| **Linking Time** | Compile time | Runtime |
-| **Executable Size** | Larger | Smaller |
-| **Memory Usage** | Duplicated per process | Shared between processes |
-| **Updates** | Requires recompilation | Just replace library |
-| **Distribution** | Single file | Executable + libraries |
-| **Load Time** | Faster | Slightly slower |
-| **Flexibility** | Less | More (plugins, etc.) |
+| Aspect              | Static Library (.a)    | Dynamic Library (.so)    |
+| ------------------- | ---------------------- | ------------------------ |
+| **Linking Time**    | Compile time           | Runtime                  |
+| **Executable Size** | Larger                 | Smaller                  |
+| **Memory Usage**    | Duplicated per process | Shared between processes |
+| **Updates**         | Requires recompilation | Just replace library     |
+| **Distribution**    | Single file            | Executable + libraries   |
+| **Load Time**       | Faster                 | Slightly slower          |
+| **Flexibility**     | Less                   | More (plugins, etc.)     |
 
 ---
 
@@ -976,7 +981,7 @@ int main(int argc, char* argv[]) {
     qc_status_t status;
     qc_context_t ctx = NULL;
     qc_handle_t model = 0;
-    
+
     /* Configure for Hexagon DSP */
     qc_device_config_t config = {
         .device_type = QC_DEVICE_DSP,
@@ -985,14 +990,14 @@ int main(int argc, char* argv[]) {
         .priority = 1,
         .features = QC_FEATURE_FP16 | QC_FEATURE_INT8
     };
-    
+
     /* Initialize SDK */
     status = qc_initialize(&config, &ctx);
     if (status != QC_SUCCESS) {
         fprintf(stderr, "Init failed: %s\n", qc_get_error_string(status));
         return 1;
     }
-    
+
     /* Load model */
     status = qc_load_model(ctx, "model.dlc", &model);
     if (status != QC_SUCCESS) {
@@ -1000,29 +1005,29 @@ int main(int argc, char* argv[]) {
         qc_shutdown(ctx);
         return 1;
     }
-    
+
     /* Prepare input */
     float input_data[224 * 224 * 3];
     float output_data[1000];
-    
+
     qc_tensor_desc_t input_desc = {
         .dims = {1, 224, 224, 3},
         .num_dims = 4,
         .dtype = QC_DTYPE_FLOAT32,
         .layout = QC_LAYOUT_NHWC
     };
-    
+
     qc_tensor_desc_t output_desc = {0};
-    
+
     /* Run inference */
-    status = qc_run_inference(model, input_data, &input_desc, 
+    status = qc_run_inference(model, input_data, &input_desc,
                               output_data, &output_desc);
-    
+
     /* Get metrics */
     qc_perf_metrics_t metrics;
     qc_get_metrics(model, &metrics);
     printf("Inference time: %lu us\n", metrics.inference_time_us);
-    
+
     /* Cleanup */
     qc_shutdown(ctx);
     return 0;
@@ -1278,24 +1283,24 @@ my_project/
 
 ## Glossary
 
-| Term | Definition |
-|------|------------|
-| **Header File** | A file containing declarations, type definitions, and macros that define an interface |
-| **Binary Library** | Compiled machine code packaged for linking with other programs |
-| **Static Library** | Library code copied into executable at link time (.a, .lib) |
-| **Dynamic/Shared Library** | Library loaded at runtime, shared between processes (.so, .dll) |
-| **Symbol** | A name representing a function, variable, or other entity in code |
-| **Symbol Table** | Data structure mapping symbol names to addresses |
-| **Linker** | Tool that combines object files and libraries into executables |
-| **Object File** | Compiled code before linking, with unresolved symbols (.o, .obj) |
-| **PLT** | Procedure Linkage Table - enables lazy binding of dynamic symbols |
-| **GOT** | Global Offset Table - stores resolved addresses of dynamic symbols |
-| **ABI** | Application Binary Interface - low-level interface conventions |
-| **Calling Convention** | Rules for how functions pass arguments and return values |
-| **Name Mangling** | Encoding of C++ symbol names to include type information |
-| **RPATH** | Runtime search path embedded in executable for finding libraries |
-| **Relocation** | Process of adjusting addresses when code is loaded at different locations |
-| **Undefined Symbol** | Symbol referenced but not defined in current object file |
+| Term                       | Definition                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------- |
+| **Header File**            | A file containing declarations, type definitions, and macros that define an interface |
+| **Binary Library**         | Compiled machine code packaged for linking with other programs                        |
+| **Static Library**         | Library code copied into executable at link time (.a, .lib)                           |
+| **Dynamic/Shared Library** | Library loaded at runtime, shared between processes (.so, .dll)                       |
+| **Symbol**                 | A name representing a function, variable, or other entity in code                     |
+| **Symbol Table**           | Data structure mapping symbol names to addresses                                      |
+| **Linker**                 | Tool that combines object files and libraries into executables                        |
+| **Object File**            | Compiled code before linking, with unresolved symbols (.o, .obj)                      |
+| **PLT**                    | Procedure Linkage Table - enables lazy binding of dynamic symbols                     |
+| **GOT**                    | Global Offset Table - stores resolved addresses of dynamic symbols                    |
+| **ABI**                    | Application Binary Interface - low-level interface conventions                        |
+| **Calling Convention**     | Rules for how functions pass arguments and return values                              |
+| **Name Mangling**          | Encoding of C++ symbol names to include type information                              |
+| **RPATH**                  | Runtime search path embedded in executable for finding libraries                      |
+| **Relocation**             | Process of adjusting addresses when code is loaded at different locations             |
+| **Undefined Symbol**       | Symbol referenced but not defined in current object file                              |
 
 ---
 
@@ -1308,6 +1313,5 @@ my_project/
 
 ---
 
-*Document Version: 1.0*
-*Last Updated: 2024*
-
+_Document Version: 1.0_
+_Last Updated: 2024_

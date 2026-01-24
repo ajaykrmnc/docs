@@ -1,11 +1,13 @@
-
 # Hotspot Connection Pathway
 
-This document provides a comprehensive, step-by-step guide explaining the complete pathway when a wireless hotspot is enabled on an Access Point (AP) and how clients connect to it. It covers every layer of the connection process from RF discovery to application-level connectivity.
+This document provides a comprehensive, step-by-step guide explaining the complete pathway when a wireless
+hotspot is enabled on an Access Point (AP) and how clients connect to it. It covers every layer of the
+connection process from RF discovery to application-level connectivity.
 
 ## Overview
 
-[When](2026-01-08_when.md) you enable a WiFi hotspot on an Access Point, a complex series of events occurs at multiple layers of the network stack. The connection process involves:
+[When](2026-01-08_when.md) you enable a WiFi hotspot on an Access Point, a complex series of events occurs at
+multiple layers of the network stack. The connection process involves:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -111,10 +113,10 @@ This document provides a comprehensive, step-by-step guide explaining the comple
 When the hotspot is enabled on an Access Point, the following initialization sequence occurs:
 
 ### 1.1 System Initialization
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         AP INITIALIZATION SEQUENCE                           
-│
+│                         AP INITIALIZATION SEQUENCE                           │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  ┌───────────────┐     ┌───────────────┐     ┌───────────────────────────┐  │
@@ -135,14 +137,14 @@ When the hotspot is enabled on an Access Point, the following initialization seq
 
 The AP loads configuration from multiple sources:
 
-| Configuration Item | Description | Example |
-|-------------------|-------------|---------|
-| SSID | Network name | `MyHotspot` |
-| Security Mode | Authentication type | `WPA2-PSK`, `WPA3-SAE`, `Open` |
-| Channel | Operating frequency | `36` (5 GHz), `6` (2.4 GHz) |
-| Bandwidth | Channel width | `20`, `40`, `80`, `160` MHz |
-| VLAN | Network isolation | `100` |
-| Captive Portal | Guest authentication | `Enabled/Disabled` |
+| Configuration Item | Description          | Example                        |
+| ------------------ | -------------------- | ------------------------------ |
+| SSID               | Network name         | `MyHotspot`                    |
+| Security Mode      | Authentication type  | `WPA2-PSK`, `WPA3-SAE`, `Open` |
+| Channel            | Operating frequency  | `36` (5 GHz), `6` (2.4 GHz)    |
+| Bandwidth          | Channel width        | `20`, `40`, `80`, `160` MHz    |
+| VLAN               | Network isolation    | `100`                          |
+| Captive Portal     | Guest authentication | `Enabled/Disabled`             |
 
 ### 1.3 VAP (Virtual Access Point) Creation
 
@@ -152,12 +154,12 @@ The AP loads configuration from multiple sources:
 
 # Enable Hotspot 2.0 if configured
 if [ "$HS20_VAP_ENABLE" != "" ]; then
-    iwpriv ${APNAME} hs20_vap $HS20_VAP_ENABLE
+  iwpriv ${APNAME} hs20_vap $HS20_VAP_ENABLE
 fi
 
 # Enable OSEN (OSU Server-Only Authenticated L2 Encryption Network)
 if [ "$HS20_OSEN_ENABLED" != "" ]; then
-    iwpriv ${APNAME} hs20_osen $HS20_OSEN_ENABLED
+  iwpriv ${APNAME} hs20_osen $HS20_OSEN_ENABLED
 fi
 ```
 
@@ -222,16 +224,16 @@ The AP starts transmitting beacon frames at regular intervals (typically 100ms):
 // beacon.c - Beacon frame generation
 static u8 * hostapd_eid_bss_load(struct hostapd_data *hapd, u8 *eid, size_t len)
 {
-    if (hapd->conf->bss_load_update_period) {
-        *eid++ = WLAN_EID_BSS_LOAD;
-        *eid++ = 5;
-        WPA_PUT_LE16(eid, hapd->num_sta);  // Number of associated stations
-        eid += 2;
-        *eid++ = hapd->iface->channel_utilization;  // Channel utilization
-        WPA_PUT_LE16(eid, 0);  // Available admission capacity
-        eid += 2;
-    }
-    return eid;
+  if (hapd->conf->bss_load_update_period) {
+    *eid++ = WLAN_EID_BSS_LOAD;
+    *eid++ = 5;
+    WPA_PUT_LE16(eid, hapd->num_sta);  // Number of associated stations
+    eid += 2;
+    *eid++ = hapd->iface->channel_utilization;  // Channel utilization
+    WPA_PUT_LE16(eid, 0);  // Available admission capacity
+    eid += 2;
+  }
+  return eid;
 }
 ```
 
@@ -313,14 +315,14 @@ void handle_probe_req(struct hostapd_data *hapd,
                       const struct ieee80211_mgmt *mgmt, size_t len,
                       int ssi_signal)
 {
-    // 1. Check if SSID matches (or is wildcard)
-    // 2. Check if client supports required rates
-    // 3. Check MAC ACL (allow/deny lists)
-    // 4. Build and send probe response with:
-    //    - SSID, Supported Rates, Channel
-    //    - RSN IE (security capabilities)
-    //    - HT/VHT/HE capabilities
-    //    - Vendor extensions (WMM, WPS, HS2.0)
+  // 1. Check if SSID matches (or is wildcard)
+  // 2. Check if client supports required rates
+  // 3. Check MAC ACL (allow/deny lists)
+  // 4. Build and send probe response with:
+  //    - SSID, Supported Rates, Channel
+  //    - RSN IE (security capabilities)
+  //    - HT/VHT/HE capabilities
+  //    - Vendor extensions (WMM, WPS, HS2.0)
 }
 ```
 
@@ -328,13 +330,13 @@ void handle_probe_req(struct hostapd_data *hapd,
 
 The client selects a network based on:
 
-| Criteria | Priority | Description |
-|----------|----------|-------------|
-| SSID Match | Highest | Matches preferred/configured network |
-| Signal Strength (RSSI) | High | Stronger signal preferred |
-| Security Level | High | WPA3 > WPA2 > WPA > Open |
-| Band Preference | Medium | 5 GHz/6 GHz preferred for speed |
-| Load | Low | Less congested AP preferred |
+| Criteria               | Priority | Description                          |
+| ---------------------- | -------- | ------------------------------------ |
+| SSID Match             | Highest  | Matches preferred/configured network |
+| Signal Strength (RSSI) | High     | Stronger signal preferred            |
+| Security Level         | High     | WPA3 > WPA2 > WPA > Open             |
+| Band Preference        | Medium   | 5 GHz/6 GHz preferred for speed      |
+| Load                   | Low      | Less congested AP preferred          |
 
 ---
 
@@ -434,31 +436,31 @@ static void handle_auth(struct hostapd_data *hapd,
                         const struct ieee80211_mgmt *mgmt, size_t len,
                         int rssi, int from_queue)
 {
-    u16 auth_alg = le_to_host16(mgmt->u.auth.auth_alg);
-    u16 auth_transaction = le_to_host16(mgmt->u.auth.auth_transaction);
+  u16 auth_alg = le_to_host16(mgmt->u.auth.auth_alg);
+  u16 auth_transaction = le_to_host16(mgmt->u.auth.auth_transaction);
 
-    switch (auth_alg) {
+  switch (auth_alg) {
     case WLAN_AUTH_OPEN:
-        // Simple open system authentication
-        // Send success response
-        break;
+      // Simple open system authentication
+      // Send success response
+      break;
     case WLAN_AUTH_SHARED_KEY:
-        // WEP shared key (deprecated)
-        break;
+      // WEP shared key (deprecated)
+      break;
     case WLAN_AUTH_FT:
-        // 802.11r Fast Transition
-        handle_auth_ft_finish(ctx, dst, bssid, auth_transaction, status, ies, ies_len);
-        break;
+      // 802.11r Fast Transition
+      handle_auth_ft_finish(ctx, dst, bssid, auth_transaction, status, ies, ies_len);
+      break;
     case WLAN_AUTH_SAE:
-        // WPA3 SAE authentication
-        handle_auth_sae(hapd, sta, mgmt, len, auth_transaction, status_code);
-        break;
+      // WPA3 SAE authentication
+      handle_auth_sae(hapd, sta, mgmt, len, auth_transaction, status_code);
+      break;
     case WLAN_AUTH_FILS_SK:
     case WLAN_AUTH_FILS_SK_PFS:
-        // Fast Initial Link Setup
-        handle_auth_fils(hapd, sta, ...);
-        break;
-    }
+      // Fast Initial Link Setup
+      handle_auth_fils(hapd, sta, ...);
+      break;
+  }
 }
 ```
 
@@ -526,28 +528,28 @@ static void handle_assoc(struct hostapd_data *hapd,
                          const struct ieee80211_mgmt *mgmt, size_t len,
                          int reassoc, int rssi)
 {
-    struct sta_info *sta;
-    u16 capab_info, listen_interval;
+  struct sta_info *sta;
+  u16 capab_info, listen_interval;
 
-    // 1. Parse association request
-    capab_info = le_to_host16(mgmt->u.assoc_req.capab_info);
-    listen_interval = le_to_host16(mgmt->u.assoc_req.listen_interval);
+  // 1. Parse association request
+  capab_info = le_to_host16(mgmt->u.assoc_req.capab_info);
+  listen_interval = le_to_host16(mgmt->u.assoc_req.listen_interval);
 
-    // 2. Look up or create station entry
-    sta = ap_get_sta(hapd, mgmt->sa);
-    if (!sta) {
-        sta = ap_sta_add(hapd, mgmt->sa);
-    }
+  // 2. Look up or create station entry
+  sta = ap_get_sta(hapd, mgmt->sa);
+  if (!sta) {
+    sta = ap_sta_add(hapd, mgmt->sa);
+  }
 
-    // 3. Validate security parameters (RSN IE)
-    // 4. Check MAC ACL
-    // 5. Check association limits
-    // 6. Assign AID (Association ID)
-    // 7. Add station to driver
-    hostapd_sta_add(hapd, addr, sta->aid, sta->capability, ...);
+  // 3. Validate security parameters (RSN IE)
+  // 4. Check MAC ACL
+  // 5. Check association limits
+  // 6. Assign AID (Association ID)
+  // 7. Add station to driver
+  hostapd_sta_add(hapd, addr, sta->aid, sta->capability, ...);
 
-    // 8. Send association response
-    send_assoc_resp(hapd, sta, mgmt->sa, WLAN_STATUS_SUCCESS, reassoc, ...);
+  // 8. Send association response
+  send_assoc_resp(hapd, sta, mgmt->sa, WLAN_STATUS_SUCCESS, reassoc, ...);
 }
 ```
 
@@ -556,25 +558,25 @@ static void handle_assoc(struct hostapd_data *hapd,
 ```c
 // sta_info.c - Station information
 struct sta_info {
-    u8 addr[ETH_ALEN];           // Client MAC address
-    u16 aid;                      // Association ID
-    u32 flags;                    // WLAN_STA_* flags
+  u8 addr[ETH_ALEN];           // Client MAC address
+  u16 aid;                      // Association ID
+  u32 flags;                    // WLAN_STA_* flags
 
-    // Security
-    struct wpa_state_machine *wpa_sm;  // WPA state machine
-    int vlan_id;                  // Assigned VLAN
+  // Security
+  struct wpa_state_machine *wpa_sm;  // WPA state machine
+  int vlan_id;                  // Assigned VLAN
 
-    // Capabilities
-    u16 capability;               // Capability info
-    u8 supported_rates[WLAN_SUPP_RATES_MAX];
-    struct ieee80211_ht_capabilities *ht_capabilities;
-    struct ieee80211_vht_capabilities *vht_capabilities;
-    struct ieee80211_he_capabilities *he_capabilities;
+  // Capabilities
+  u16 capability;               // Capability info
+  u8 supported_rates[WLAN_SUPP_RATES_MAX];
+  struct ieee80211_ht_capabilities *ht_capabilities;
+  struct ieee80211_vht_capabilities *vht_capabilities;
+  struct ieee80211_he_capabilities *he_capabilities;
 
-    // Statistics
-    struct os_reltime connected_time;
-    unsigned long rx_packets, tx_packets;
-    unsigned long rx_bytes, tx_bytes;
+  // Statistics
+  struct os_reltime connected_time;
+  unsigned long rx_packets, tx_packets;
+  unsigned long rx_bytes, tx_bytes;
 };
 ```
 
@@ -779,71 +781,71 @@ After association, the 4-Way Handshake establishes encryption keys.
 // wpa_auth.c - WPA PTK state machine
 SM_STATE(WPA_PTK, INITIALIZE)
 {
-    SM_ENTRY_MA(WPA_PTK, INITIALIZE, wpa_ptk);
-    sm->keycount = 0;
-    sm->PTKRequest = FALSE;
-    sm->TimeoutEvt = FALSE;
-    sm->TimeoutCtr = 0;
-    sm->PInitAKeys = FALSE;
-    sm->Pair = TRUE;
+  SM_ENTRY_MA(WPA_PTK, INITIALIZE, wpa_ptk);
+  sm->keycount = 0;
+  sm->PTKRequest = FALSE;
+  sm->TimeoutEvt = FALSE;
+  sm->TimeoutCtr = 0;
+  sm->PInitAKeys = FALSE;
+  sm->Pair = TRUE;
 }
 
 SM_STATE(WPA_PTK, PTKSTART)
 {
-    SM_ENTRY_MA(WPA_PTK, PTKSTART, wpa_ptk);
-    sm->PTKRequest = FALSE;
-    sm->TimeoutEvt = FALSE;
-    sm->TimeoutCtr++;
+  SM_ENTRY_MA(WPA_PTK, PTKSTART, wpa_ptk);
+  sm->PTKRequest = FALSE;
+  sm->TimeoutEvt = FALSE;
+  sm->TimeoutCtr++;
 
-    // Generate ANonce
-    if (random_get_bytes(sm->ANonce, WPA_NONCE_LEN)) {
-        wpa_printf(MSG_ERROR, "WPA: Failed to get random data for ANonce");
-        sm->Disconnect = TRUE;
-        return;
-    }
+  // Generate ANonce
+  if (random_get_bytes(sm->ANonce, WPA_NONCE_LEN)) {
+    wpa_printf(MSG_ERROR, "WPA: Failed to get random data for ANonce");
+    sm->Disconnect = TRUE;
+    return;
+  }
 
-    // Send Message 1
-    wpa_send_eapol(sm->wpa_auth, sm, WPA_KEY_INFO_ACK | WPA_KEY_INFO_KEY_TYPE,
-                   NULL, sm->ANonce, NULL, 0, 0, 0);
+  // Send Message 1
+  wpa_send_eapol(sm->wpa_auth, sm, WPA_KEY_INFO_ACK | WPA_KEY_INFO_KEY_TYPE,
+                 NULL, sm->ANonce, NULL, 0, 0, 0);
 }
 
 SM_STATE(WPA_PTK, PTKCALCNEGOTIATING)
 {
-    SM_ENTRY_MA(WPA_PTK, PTKCALCNEGOTIATING, wpa_ptk);
+  SM_ENTRY_MA(WPA_PTK, PTKCALCNEGOTIATING, wpa_ptk);
 
-    // Derive PTK from PMK, ANonce, SNonce, AA, SPA
-    wpa_derive_ptk(sm, sm->SNonce, sm->PMK, sm->pmk_len, &PTK);
+  // Derive PTK from PMK, ANonce, SNonce, AA, SPA
+  wpa_derive_ptk(sm, sm->SNonce, sm->PMK, sm->pmk_len, &PTK);
 
-    // Verify MIC in Message 2
-    if (wpa_verify_key_mic(sm->wpa_key_mgmt, sm->pmk_len, &PTK.kck,
-                           sm->last_rx_eapol_key, sm->last_rx_eapol_key_len)) {
-        wpa_printf(MSG_DEBUG, "WPA: Invalid MIC in msg 2/4");
-        return;
-    }
+  // Verify MIC in Message 2
+  if (wpa_verify_key_mic(sm->wpa_key_mgmt, sm->pmk_len, &PTK.kck,
+                         sm->last_rx_eapol_key, sm->last_rx_eapol_key_len)) {
+    wpa_printf(MSG_DEBUG, "WPA: Invalid MIC in msg 2/4");
+    return;
+  }
 }
 
 SM_STATE(WPA_PTK, PTKINITNEGOTIATING)
 {
-    SM_ENTRY_MA(WPA_PTK, PTKINITNEGOTIATING, wpa_ptk);
+  SM_ENTRY_MA(WPA_PTK, PTKINITNEGOTIATING, wpa_ptk);
 
-    // Send Message 3 with GTK
-    wpa_send_eapol(sm->wpa_auth, sm,
-                   WPA_KEY_INFO_ACK | WPA_KEY_INFO_INSTALL |
-                   WPA_KEY_INFO_KEY_TYPE | WPA_KEY_INFO_MIC |
-                   WPA_KEY_INFO_SECURE | WPA_KEY_INFO_ENCR_KEY_DATA,
-                   kde, kde_len, sm->ANonce, keyidx, encr);
+  // Send Message 3 with GTK
+  wpa_send_eapol(sm->wpa_auth, sm,
+                 WPA_KEY_INFO_ACK | WPA_KEY_INFO_INSTALL |
+                 WPA_KEY_INFO_KEY_TYPE | WPA_KEY_INFO_MIC |
+                 WPA_KEY_INFO_SECURE | WPA_KEY_INFO_ENCR_KEY_DATA,
+                 kde, kde_len, sm->ANonce, keyidx, encr);
 }
 
 SM_STATE(WPA_PTK, PTKINITDONE)
 {
-    SM_ENTRY_MA(WPA_PTK, PTKINITDONE, wpa_ptk);
+  SM_ENTRY_MA(WPA_PTK, PTKINITDONE, wpa_ptk);
 
-    // Install PTK to driver
-    wpa_auth_set_key(sm->wpa_auth, 0, alg, sm->addr, 0, sm->PTK.tk, tk_len);
+  // Install PTK to driver
+  wpa_auth_set_key(sm->wpa_auth, 0, alg, sm->addr, 0, sm->PTK.tk, tk_len);
 
-    // Mark port as authorized
-    sm->pairwise_set = TRUE;
-    wpa_auth_set_eapol(sm->wpa_auth, sm->addr, WPA_EAPOL_authorized, 1);
+  // Mark port as authorized
+  sm->pairwise_set = TRUE;
+  wpa_auth_set_eapol(sm->wpa_auth, sm->addr, WPA_EAPOL_authorized, 1);
 }
 ```
 
@@ -969,13 +971,13 @@ After the 4-Way Handshake completes, the client needs an IP address.
 
 The AP can identify device types based on DHCP options:
 
-| Device Type | DHCP Fingerprint (Option 55) |
-|-------------|------------------------------|
-| Windows 10 | 1,3,6,15,31,33,43,44,46,47,119,121,249,252 |
-| macOS | 1,121,3,6,15,119,252,95,44,46 |
-| iOS | 1,121,3,6,15,119,252,95,44,46 |
-| Android | 1,3,6,15,26,28,51,58,59,43 |
-| Linux | 1,28,2,3,15,6,119,12,44,47,26,121,42 |
+| Device Type | DHCP Fingerprint (Option 55)               |
+| ----------- | ------------------------------------------ |
+| Windows 10  | 1,3,6,15,31,33,43,44,46,47,119,121,249,252 |
+| macOS       | 1,121,3,6,15,119,252,95,44,46              |
+| iOS         | 1,121,3,6,15,119,252,95,44,46              |
+| Android     | 1,3,6,15,26,28,51,58,59,43                 |
+| Linux       | 1,28,2,3,15,6,119,12,44,47,26,121,42       |
 
 ### 6.3 IPv6 Address Assignment
 
@@ -1000,3 +1002,4 @@ For IPv6, clients can use SLAAC or DHCPv6:
 │  │ 1. Client sends DHCPv6 Solicit                                      │    │
 │  │ 2. Server sends DHCPv6 Advertise                                    │    │
 │  │ 3. Client sends DHCPv6 Request                                      │    │
+```

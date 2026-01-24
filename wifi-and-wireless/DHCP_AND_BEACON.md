@@ -1,13 +1,14 @@
 # DHCP and WiFi Beacon Documentation
 
-
 ## Overview
 
 This document covers two fundamental aspects of WiFi networking:
 
-1. **DHCP (Dynamic Host Configuration Protocol)** - Automatically assigns IP addresses and network configuration to clients after they associate with an AP.
+1. **DHCP (Dynamic Host Configuration Protocol)** - Automatically assigns IP addresses and network
+   configuration to clients after they associate with an AP.
 
-2. **WiFi Beacon Frames** - Periodic management frames broadcast by APs to announce their presence and capabilities.
+2. **WiFi Beacon Frames** - Periodic management frames broadcast by APs to announce their presence and
+   capabilities.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -45,12 +46,15 @@ This document covers two fundamental aspects of WiFi networking:
 ```
 
 ---
+
 [](2026-01-08_.md)
+
 ## DHCP Protocol
 
 ### DHCP Basics
 
-DHCP (Dynamic Host Configuration Protocol) is defined in RFC 2131 and operates on UDP ports 67 (server) and 68 (client).
+DHCP (Dynamic Host Configuration Protocol) is defined in RFC 2131 and operates on UDP ports 67 (server) and 68
+(client).
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -2070,6 +2074,7 @@ DHCP Fingerprinting is a technique to identify device types based on the DHCP op
 This document provides comprehensive coverage of two essential WiFi networking components:
 
 **DHCP (Dynamic Host Configuration Protocol)**:
+
 - Protocol overview and DORA process
 - Message types and packet structure
 - DHCP options including fingerprinting (Option 55) and relay (Option 82)
@@ -2077,6 +2082,7 @@ This document provides comprehensive coverage of two essential WiFi networking c
 - Server configuration with udhcpd
 
 **Beacon Frames**:
+
 - Frame structure and timing
 - Information Elements (SSID, TIM, RSN, HT/VHT/HE/EHT capabilities)
 - Power save operation with DTIM
@@ -2086,12 +2092,12 @@ This document provides comprehensive coverage of two essential WiFi networking c
 - Vendor-specific elements (WPA, WMM, WPS)
 
 **Relationship**:
+
 - Complete connection flow from beacon discovery to IP assignment
 - VLAN-based DHCP scope selection
 - Option 82 integration with SSID information
 
 ---
 
-*Document generated for Arista Access Point WiFi firmware documentation.*
-*Last updated: 2026-01-08*
-
+_Document generated for Arista Access Point WiFi firmware documentation._
+_Last updated: 2026-01-08_

@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document explains why certain `sk_buff` fields have dependencies declared for eBPF offset resolution, while others do not. It also covers the parameter fetching and caching mechanism for BTF (BPF Type Format) offsets from kernel binaries.
+This document explains why certain `sk_buff` fields have dependencies declared for eBPF offset resolution,
+while others do not. It also covers the parameter fetching and caching mechanism for BTF (BPF Type Format)
+offsets from kernel binaries.
 
 ---
 
@@ -11,6 +13,7 @@ This document explains why certain `sk_buff` fields have dependencies declared f
 ### Document Purpose
 
 This document serves as a comprehensive technical reference for understanding:
+
 - How the QCA WiFi driver fetches packets from hardware into Linux `sk_buff` structures
 - Why certain sk_buff fields require BTF offset dependencies for eBPF access
 - The complete RX/TX data paths from hardware to network stack
@@ -27,33 +30,35 @@ This document serves as a comprehensive technical reference for understanding:
 
 ### Glossary of Terms
 
-| Term | Full Form | Description |
-|------|-----------|-------------|
-| **sk_buff** | Socket Buffer | Linux kernel's fundamental network buffer structure for packet data |
-| **qdf_nbuf** | QCA Driver Framework Network Buffer | QCA's wrapper around sk_buff for cross-platform compatibility |
-| **BTF** | BPF Type Format | Type information embedded in kernel/modules for eBPF program access |
-| **eBPF** | Extended Berkeley Packet Filter | In-kernel virtual machine for safe, efficient packet/event processing |
-| **SRNG** | Scatter-Gather Ring | Hardware ring buffer for DMA operations between host and WiFi hardware |
-| **REO** | Reorder Engine | WiFi hardware component for packet reordering and block-ack window management |
-| **RXDMA** | Receive DMA | Hardware DMA engine that fetches buffers and writes received packet data |
-| **TCL** | Transmit Command and Status | Hardware ring for TX packet submission |
-| **WBM** | Wireless Buffer Manager | Hardware component managing buffer allocation/deallocation |
-| **HAL** | Hardware Abstraction Layer | Software layer abstracting hardware ring details |
-| **TLV** | Type-Length-Value | Metadata format used by hardware to describe packet attributes |
-| **MSDU** | MAC Service Data Unit | Individual data frame (can be aggregated into A-MSDU) |
-| **MPDU** | MAC Protocol Data Unit | 802.11 frame including MAC header (can be aggregated into A-MPDU) |
-| **A-MPDU** | Aggregated MPDU | Multiple MPDUs aggregated for efficient transmission |
-| **BA** | Block Acknowledgment | Mechanism for acknowledging multiple frames at once |
-| **NAPI** | New API | Linux kernel interface for efficient network polling |
-| **GRO** | Generic Receive Offload | Kernel feature to merge packets before stack processing |
-| **DMA** | Direct Memory Access | Hardware-to-memory transfer without CPU involvement |
-| **Cookie** | SW Buffer Cookie | 21-bit identifier for HW-to-SW descriptor lookup |
-| **cb** | Control Block | 48-byte private data area in sk_buff for driver use |
-| **ar_meta** | Arista Metadata | Custom 16-bit field added to sk_buff via kernel patches |
-| **VDEV** | Virtual Device | Virtual AP or STA interface |
-| **PDEV** | Physical Device | Physical radio interface |
-| **SOC** | System on Chip | Top-level driver structure representing the WiFi chipset |
-| **CO-RE** | Compile Once, Run Everywhere | eBPF feature for portable programs across kernel versions |
+| Term          | Full Form                           | Description                                                                   |
+| ------------- | ----------------------------------- | ----------------------------------------------------------------------------- |
+| **sk_buff**   | Socket Buffer                       | Linux kernel's fundamental network buffer structure for packet data           |
+| **qdf_nbuf**  | QCA Driver Framework Network Buffer | QCA's wrapper around sk_buff for cross-platform                               |
+| compatibility |
+| **BTF**       | BPF Type Format                     | Type information embedded in kernel/modules for eBPF program access           |
+| **eBPF**      | Extended Berkeley Packet Filter     | In-kernel virtual machine for safe, efficient packet/event                    |
+| processing    |
+| **SRNG**      | Scatter-Gather Ring                 | Hardware ring buffer for DMA operations between host and WiFi hardware        |
+| **REO**       | Reorder Engine                      | WiFi hardware component for packet reordering and block-ack window management |
+| **RXDMA**     | Receive DMA                         | Hardware DMA engine that fetches buffers and writes received packet data      |
+| **TCL**       | Transmit Command and Status         | Hardware ring for TX packet submission                                        |
+| **WBM**       | Wireless Buffer Manager             | Hardware component managing buffer allocation/deallocation                    |
+| **HAL**       | Hardware Abstraction Layer          | Software layer abstracting hardware ring details                              |
+| **TLV**       | Type-Length-Value                   | Metadata format used by hardware to describe packet attributes                |
+| **MSDU**      | MAC Service Data Unit               | Individual data frame (can be aggregated into A-MSDU)                         |
+| **MPDU**      | MAC Protocol Data Unit              | 802.11 frame including MAC header (can be aggregated into A-MPDU)             |
+| **A-MPDU**    | Aggregated MPDU                     | Multiple MPDUs aggregated for efficient transmission                          |
+| **BA**        | Block Acknowledgment                | Mechanism for acknowledging multiple frames at once                           |
+| **NAPI**      | New API                             | Linux kernel interface for efficient network polling                          |
+| **GRO**       | Generic Receive Offload             | Kernel feature to merge packets before stack processing                       |
+| **DMA**       | Direct Memory Access                | Hardware-to-memory transfer without CPU involvement                           |
+| **Cookie**    | SW Buffer Cookie                    | 21-bit identifier for HW-to-SW descriptor lookup                              |
+| **cb**        | Control Block                       | 48-byte private data area in sk_buff for driver use                           |
+| **ar_meta**   | Arista Metadata                     | Custom 16-bit field added to sk_buff via kernel patches                       |
+| **VDEV**      | Virtual Device                      | Virtual AP or STA interface                                                   |
+| **PDEV**      | Physical Device                     | Physical radio interface                                                      |
+| **SOC**       | System on Chip                      | Top-level driver structure representing the WiFi chipset                      |
+| **CO-RE**     | Compile Once, Run Everywhere        | eBPF feature for portable programs across kernel versions                     |
 
 ---
 
@@ -302,19 +307,19 @@ The WiFi driver adds custom fields to `sk_buff` via kernel patches:
 
 This document is organized into the following sections:
 
-| Section | Description |
-|---------|-------------|
-| **General Information** | Background on driver architecture, eBPF/BTF, glossary |
-| **1. Why skb->cb Dependencies** | Explains dangling pointer problem and ar_meta solution |
-| **2. Why ar_pkt_trace Has No Dependencies** | Simple pointer field, no subfield access |
-| **3. Parameters from Binaries and Caching** | BTF offset resolution and caching |
-| **4. Summary Table** | Quick reference for field dependencies |
-| **5. How sk_buff is Fetched from Hardware** | Complete RX path (5.1-5.16) |
-| **6. TX Path** | How sk_buff is transmitted to hardware |
-| **7. Error Handling** | REO errors, RXDMA errors, buffer sanity |
-| **8. NAPI and Interrupt Handling** | Interrupt architecture, polling |
-| **9. Performance Considerations** | Optimizations, alignment, ring management |
-| **10. Complete Packet Lifecycle** | Combined RX/TX summary |
+| Section                                     | Description                                            |
+| ------------------------------------------- | ------------------------------------------------------ |
+| **General Information**                     | Background on driver architecture, eBPF/BTF, glossary  |
+| **1. Why skb->cb Dependencies**             | Explains dangling pointer problem and ar_meta solution |
+| **2. Why ar_pkt_trace Has No Dependencies** | Simple pointer field, no subfield access               |
+| **3. Parameters from Binaries and Caching** | BTF offset resolution and caching                      |
+| **4. Summary Table**                        | Quick reference for field dependencies                 |
+| **5. How sk_buff is Fetched from Hardware** | Complete RX path (5.1-5.16)                            |
+| **6. TX Path**                              | How sk_buff is transmitted to hardware                 |
+| **7. Error Handling**                       | REO errors, RXDMA errors, buffer sanity                |
+| **8. NAPI and Interrupt Handling**          | Interrupt architecture, polling                        |
+| **9. Performance Considerations**           | Optimizations, alignment, ring management              |
+| **10. Complete Packet Lifecycle**           | Combined RX/TX summary                                 |
 
 ---
 
@@ -322,9 +327,11 @@ This document is organized into the following sections:
 
 ### The Problem: Dangling Pointers in TX Completion
 
-The `skb->cb` (control block) is a 48-byte region in `struct sk_buff` that different layers of the network stack can use to pass private data. However, when accessing `skb->cb` during TX completion:
+The `skb->cb` (control block) is a 48-byte region in `struct sk_buff` that different layers of the network
+stack can use to pass private data. However, when accessing `skb->cb` during TX completion:
 
-1. **Dangling Pointer Risk**: The control block may contain pointers that become invalid (dangling) after the packet is transmitted
+1. **Dangling Pointer Risk**: The control block may contain pointers that become invalid (dangling) after the
+   packet is transmitted
 2. **Layer Ownership**: Different network layers may have already overwritten `cb` contents
 3. **Race Conditions**: In TX completion handlers, the original `cb` data may no longer be valid
 
@@ -342,6 +349,7 @@ __u16 ar_meta;
 ```
 
 **Layout (16 bits total):**
+
 - **Bits 0-7**: TID value (8 bits)
 - **Bit 8**: EAPOL flag (1 bit)
 - **Bit 9**: DHCP flag (1 bit)
@@ -351,18 +359,22 @@ __u16 ar_meta;
 
 When eBPF programs need to access DHCP-related values that were previously stored in `skb->cb`, they must:
 
-1. **Resolve the `ar_meta` offset**: Since `ar_meta` was added via kernel patches, its offset within `sk_buff` varies by kernel version
+1. **Resolve the `ar_meta` offset**: Since `ar_meta` was added via kernel patches, its offset within `sk_buff`
+   varies by kernel version
 2. **Depend on parent struct**: To access `ar_meta`, eBPF must first know the base offset of `sk_buff`
-3. **Handle nested structures**: The `qdf_nbuf_cb` structure (used for WLAN driver private data) has complex nested unions that require BTF dependency resolution
+3. **Handle nested structures**: The `qdf_nbuf_cb` structure (used for WLAN driver private data) has complex
+   nested unions that require BTF dependency resolution
 
 **Dependency Chain for DHCP values:**
+
 ```
 sk_buff
-  └── ar_meta (offset varies by kernel version)
-        └── DHCP flag (bit 9)
+└── ar_meta (offset varies by kernel version)
+└── DHCP flag (bit 9)
 ```
 
 The dependency ensures that:
+
 - The BTF offset for `ar_meta` is correctly resolved before accessing DHCP flags
 - eBPF programs can safely access the cached DHCP status without touching the potentially-invalid `skb->cb`
 
@@ -384,15 +396,16 @@ void *pkt_trace;
 
 1. **Simple Type**: It's a void pointer, not a nested structure
 2. **No Subfield Access**: eBPF programs access the entire pointer, not subfields within it
-3. **Conditional Compilation**: The field exists only when `CONFIG_AR_PKT_TRACE_ENABLE` is defined; BTF handles this at compile time
+3. **Conditional Compilation**: The field exists only when `CONFIG_AR_PKT_TRACE_ENABLE` is defined; BTF
+   handles this at compile time
 4. **No Semantic Dependencies**: The value doesn't require interpreting other `sk_buff` fields first
 
 ### Access Pattern Difference
 
-| Field | Access Pattern | Dependencies |
-|-------|---------------|--------------|
+| Field            | Access Pattern                   | Dependencies                     |
+| ---------------- | -------------------------------- | -------------------------------- |
 | `ar_meta` (DHCP) | Bit-level access to cached flags | Requires offset of parent struct |
-| `pkt_trace` | Direct pointer dereference | No dependencies needed |
+| `pkt_trace`      | Direct pointer dereference       | No dependencies needed           |
 
 ---
 
@@ -400,18 +413,19 @@ void *pkt_trace;
 
 ### BTF Offset Resolution Process
 
-When eBPF programs need kernel structure offsets, the following parameters are fetched from the kernel binary (vmlinux):
+When eBPF programs need kernel structure offsets, the following parameters are fetched from the kernel binary
+(vmlinux):
 
 #### Fetched Parameters:
 
-| Parameter | Source | Purpose |
-|-----------|--------|---------|
-| `sk_buff` base offset | vmlinux BTF | Base for all skb field accesses |
-| `ar_meta` offset | Patched kernel BTF | Access TID/EAPOL/DHCP cache |
-| `pkt_trace` offset | Patched kernel BTF | Packet tracing pointer |
-| `cb` offset | vmlinux BTF | Control block access (legacy) |
-| `data` offset | vmlinux BTF | Packet data pointer |
-| `len` offset | vmlinux BTF | Packet length |
+| Parameter             | Source             | Purpose                         |
+| --------------------- | ------------------ | ------------------------------- |
+| `sk_buff` base offset | vmlinux BTF        | Base for all skb field accesses |
+| `ar_meta` offset      | Patched kernel BTF | Access TID/EAPOL/DHCP cache     |
+| `pkt_trace` offset    | Patched kernel BTF | Packet tracing pointer          |
+| `cb` offset           | vmlinux BTF        | Control block access (legacy)   |
+| `data` offset         | vmlinux BTF        | Packet data pointer             |
+| `len` offset          | vmlinux BTF        | Packet length                   |
 
 #### Offset Extraction Methods:
 
@@ -437,6 +451,7 @@ Offsets are cached to avoid repeated BTF lookups:
 ```
 
 **Benefits of Caching:**
+
 - Avoids repeated BTF traversal
 - Reduces eBPF program load time
 - Enables kernel version portability
@@ -445,20 +460,22 @@ Offsets are cached to avoid repeated BTF lookups:
 
 ## 4. Summary
 
-| Field Type | Has Dependencies | Reason |
-|------------|-----------------|--------|
-| `skb->cb` DHCP values | ✅ Yes | Nested in `qdf_nbuf_cb`, requires `ar_meta` for safe access |
-| `ar_meta` cache | ✅ Yes | Patched field, offset varies by kernel |
-| `pkt_trace` | ❌ No | Simple pointer, no subfield access |
-| `data`, `len` | ❌ No | Standard kernel fields with stable BTF |
+| Field Type            | Has Dependencies | Reason                                                      |
+| --------------------- | ---------------- | ----------------------------------------------------------- |
+| `skb->cb` DHCP values | ✅ Yes           | Nested in `qdf_nbuf_cb`, requires `ar_meta` for safe access |
+| `ar_meta` cache       | ✅ Yes           | Patched field, offset varies by kernel                      |
+| `pkt_trace`           | ❌ No            | Simple pointer, no subfield access                          |
+| `data`, `len`         | ❌ No            | Standard kernel fields with stable BTF                      |
 
-The dependency mechanism ensures eBPF programs correctly resolve offsets for patched kernel fields while avoiding unsafe access to potentially stale `skb->cb` data.
+The dependency mechanism ensures eBPF programs correctly resolve offsets for patched kernel fields while
+avoiding unsafe access to potentially stale `skb->cb` data.
 
 ---
 
 ## 5. How sk_buff is Fetched from Hardware (Detailed Process)
 
-This section explains the complete data path of how packets are received from WiFi hardware and converted into `sk_buff` structures.
+This section explains the complete data path of how packets are received from WiFi hardware and converted into
+`sk_buff` structures.
 
 ### 5.1 Hardware Architecture Overview
 
@@ -509,9 +526,9 @@ This section explains the complete data path of how packets are received from Wi
 │  │       │            │            │            │            │                     ││
 │  └───────┼────────────┼────────────┼────────────┼────────────┼─────────────────────┘│
 └──────────┼────────────┼────────────┼────────────┼────────────┼──────────────────────┘
-           │            │            │            │            │
-           │            │            │            │            │  DMA Write to Host
-           ▼            ▼            ▼            ▼            ▼
+│            │            │            │            │
+│            │            │            │            │  DMA Write to Host
+▼            ▼            ▼            ▼            ▼
 ┌─────────────────────────────────────────────────────────────────────────────────────┐
 │                              Host Memory (DDR)                                       │
 │  ┌─────────────────────────────────────────────────────────────────────────────────┐│
@@ -531,43 +548,46 @@ This section explains the complete data path of how packets are received from Wi
 
 #### 5.1.1 Hardware Component Details
 
-| Component | Description | Key Functions |
-|-----------|-------------|---------------|
-| **RF/PHY** | Radio Frequency and Physical Layer | Signal reception, modulation/demodulation, MIMO processing, channel estimation |
-| **MAC HW** | Medium Access Control Hardware | 802.11 frame decoding, decryption, FCS validation, address filtering |
-| **RXDMA** | Receive DMA Engine | Buffer management, TLV generation, DMA transfers to host memory |
-| **REO** | Reorder Engine | Sequence reordering, BA window, duplicate detection, ring routing |
-| **WBM** | Wireless Buffer Manager | Buffer allocation/deallocation, idle buffer management |
+| Component                      | Description                        | Key Functions                                                     |
+| ------------------------------ | ---------------------------------- | ----------------------------------------------------------------- |
+| **RF/PHY**                     | Radio Frequency and Physical Layer | Signal reception, modulation/demodulation, MIMO                   |
+| processing, channel estimation |
+| **MAC HW**                     | Medium Access Control Hardware     | 802.11 frame decoding, decryption, FCS validation, address        |
+| filtering                      |
+| **RXDMA**                      | Receive DMA Engine                 | Buffer management, TLV generation, DMA transfers to host memory   |
+| **REO**                        | Reorder Engine                     | Sequence reordering, BA window, duplicate detection, ring routing |
+| **WBM**                        | Wireless Buffer Manager            | Buffer allocation/deallocation, idle buffer management            |
 
 #### 5.1.2 Ring Types in RX Path
 
 ```c
 // From hal_internal.h - Ring type enumeration
 enum hal_ring_type {
-    REO_DST = 0,           // REO destination rings (REO2SW1-8) - main RX path
-    REO_EXCEPTION = 1,     // Exception packets (errors, fragments)
-    REO_REINJECT = 2,      // Packets reinjected for reprocessing
-    REO_CMD = 3,           // REO command ring (SW to HW commands)
-    REO_STATUS = 4,        // REO status ring (HW to SW responses)
-    // ... TX rings ...
-    RXDMA_BUF = 14,        // SW2RXDMA buffer ring (empty buffers for HW)
-    RXDMA_DST = 15,        // RXDMA destination ring (LMAC completions)
-    // ... monitor rings ...
+  REO_DST = 0,           // REO destination rings (REO2SW1-8) - main RX path
+  REO_EXCEPTION = 1,     // Exception packets (errors, fragments)
+  REO_REINJECT = 2,      // Packets reinjected for reprocessing
+  REO_CMD = 3,           // REO command ring (SW to HW commands)
+  REO_STATUS = 4,        // REO status ring (HW to SW responses)
+  // ... TX rings ...
+  RXDMA_BUF = 14,        // SW2RXDMA buffer ring (empty buffers for HW)
+  RXDMA_DST = 15,        // RXDMA destination ring (LMAC completions)
+  // ... monitor rings ...
 };
 ```
 
 ### 5.2 Ring Buffer Architecture (SRNG)
 
-The driver uses **Scatter-Gather Ring (SRNG)** for DMA transfers. SRNG is a circular buffer mechanism that enables efficient zero-copy data transfer between hardware and software.
+The driver uses **Scatter-Gather Ring (SRNG)** for DMA transfers. SRNG is a circular buffer mechanism that
+enables efficient zero-copy data transfer between hardware and software.
 
 #### 5.2.1 SRNG Ring Types
 
 There are two fundamental ring types:
 
-| Ring Type | Direction | Producer | Consumer | Example |
-|-----------|-----------|----------|----------|---------|
-| **Source Ring (SRC)** | SW → HW | Software | Hardware | RXDMA_BUF (empty buffers), TCL_DATA (TX packets) |
-| **Destination Ring (DST)** | HW → SW | Hardware | Software | REO_DST (RX completions), WBM2SW_RELEASE |
+| Ring Type                  | Direction | Producer | Consumer | Example                                          |
+| -------------------------- | --------- | -------- | -------- | ------------------------------------------------ |
+| **Source Ring (SRC)**      | SW → HW   | Software | Hardware | RXDMA_BUF (empty buffers), TCL_DATA (TX packets) |
+| **Destination Ring (DST)** | HW → SW   | Hardware | Software | REO_DST (RX completions), WBM2SW_RELEASE         |
 
 #### 5.2.2 Ring Structure and Pointers
 
@@ -604,43 +624,43 @@ There are two fundamental ring types:
 ```c
 // Common SRNG ring structure for source and destination rings
 struct hal_srng {
-    uint8_t ring_id;                    // Unique SRNG ring ID
-    uint8_t initialized;                // Ring initialization done
-    int irq;                            // Interrupt/MSI value assigned
+  uint8_t ring_id;                    // Unique SRNG ring ID
+  uint8_t initialized;                // Ring initialization done
+  int irq;                            // Interrupt/MSI value assigned
 
-    qdf_dma_addr_t ring_base_paddr;     // Physical base address of the ring
-    uint32_t *ring_base_vaddr;          // Virtual base address of the ring
-    uint32_t *ring_vaddr_end;           // Virtual address end
+  qdf_dma_addr_t ring_base_paddr;     // Physical base address of the ring
+  uint32_t *ring_base_vaddr;          // Virtual base address of the ring
+  uint32_t *ring_vaddr_end;           // Virtual address end
 
-    uint32_t num_entries;               // Number of entries in ring
-    uint32_t ring_size;                 // Ring size in bytes
-    uint32_t ring_size_mask;            // Ring size mask for wrap-around
-    uint32_t entry_size;                // Size of each ring entry (DWORDs)
+  uint32_t num_entries;               // Number of entries in ring
+  uint32_t ring_size;                 // Ring size in bytes
+  uint32_t ring_size_mask;            // Ring size mask for wrap-around
+  uint32_t entry_size;                // Size of each ring entry (DWORDs)
 
-    uint32_t intr_timer_thres_us;       // Interrupt timer threshold (microseconds)
-    uint32_t intr_batch_cntr_thres_entries; // Interrupt batch counter threshold
+  uint32_t intr_timer_thres_us;       // Interrupt timer threshold (microseconds)
+  uint32_t intr_batch_cntr_thres_entries; // Interrupt batch counter threshold
 
-    uint32_t flags;                     // Ring flags (HAL_SRNG_LMAC_RING, etc.)
-    enum hal_srng_dir ring_dir;         // HAL_SRNG_SRC_RING or HAL_SRNG_DST_RING
+  uint32_t flags;                     // Ring flags (HAL_SRNG_LMAC_RING, etc.)
+  enum hal_srng_dir ring_dir;         // HAL_SRNG_SRC_RING or HAL_SRNG_DST_RING
 
-    union {
-        struct {
-            uint32_t hp;                // Head pointer (SW maintained)
-            uint32_t reap_hp;           // Reap head pointer
-            uint32_t *tp_addr;          // Tail pointer address (HW updated)
-            uint32_t *hp_addr;          // Head pointer address (for LMAC rings)
-            uint32_t low_threshold;     // Low threshold for near-empty IRQ
-        } src_ring;                     // Source ring specific fields
+  union {
+    struct {
+      uint32_t hp;                // Head pointer (SW maintained)
+      uint32_t reap_hp;           // Reap head pointer
+      uint32_t *tp_addr;          // Tail pointer address (HW updated)
+      uint32_t *hp_addr;          // Head pointer address (for LMAC rings)
+      uint32_t low_threshold;     // Low threshold for near-empty IRQ
+    } src_ring;                     // Source ring specific fields
 
-        struct {
-            uint32_t tp;                // Tail pointer (SW maintained)
-            uint32_t *hp_addr;          // Head pointer address (HW updated)
-            uint32_t *tp_addr;          // Tail pointer address (for LMAC rings)
-            uint32_t cached_hp;         // Cached head pointer value
-        } dst_ring;                     // Destination ring specific fields
-    } u;
+    struct {
+      uint32_t tp;                // Tail pointer (SW maintained)
+      uint32_t *hp_addr;          // Head pointer address (HW updated)
+      uint32_t *tp_addr;          // Tail pointer address (for LMAC rings)
+      uint32_t cached_hp;         // Cached head pointer value
+    } dst_ring;                     // Destination ring specific fields
+  } u;
 
-    qdf_spinlock_t lock;                // Ring access lock
+  qdf_spinlock_t lock;                // Ring access lock
 };
 ```
 
@@ -649,21 +669,21 @@ struct hal_srng {
 ```c
 // Data path ring wrapper structure
 struct dp_srng {
-    hal_ring_handle_t hal_srng;         // HAL SRNG handle
-    void *base_vaddr_unaligned;         // Unaligned virtual base address
-    void *base_vaddr_aligned;           // Aligned virtual base address
-    qdf_dma_addr_t base_paddr_unaligned; // Unaligned physical base address
-    qdf_dma_addr_t base_paddr_aligned;  // Aligned physical base address
-    uint32_t alloc_size;                // Total allocated size
-    uint8_t cached;                     // Whether ring is cached
-    int irq;                            // Interrupt number
-    uint32_t num_entries;               // Number of ring entries
-    struct ring_util_stats stats;       // Ring utilization statistics
+  hal_ring_handle_t hal_srng;         // HAL SRNG handle
+  void *base_vaddr_unaligned;         // Unaligned virtual base address
+  void *base_vaddr_aligned;           // Aligned virtual base address
+  qdf_dma_addr_t base_paddr_unaligned; // Unaligned physical base address
+  qdf_dma_addr_t base_paddr_aligned;  // Aligned physical base address
+  uint32_t alloc_size;                // Total allocated size
+  uint8_t cached;                     // Whether ring is cached
+  int irq;                            // Interrupt number
+  uint32_t num_entries;               // Number of ring entries
+  struct ring_util_stats stats;       // Ring utilization statistics
 
 #ifdef WLAN_FEATURE_NEAR_FULL_IRQ
-    uint16_t crit_thresh;               // Critical threshold for near-full
-    uint16_t safe_thresh;               // Safe threshold for near-full
-    qdf_atomic_t near_full;             // Near-full flag
+  uint16_t crit_thresh;               // Critical threshold for near-full
+  uint16_t safe_thresh;               // Safe threshold for near-full
+  qdf_atomic_t near_full;             // Near-full flag
 #endif
 };
 ```
@@ -761,7 +781,8 @@ uint32_t hal_srng_dst_num_valid(void *hal_soc, hal_ring_handle_t hal_ring_hdl);
 
 #### Step 1: Buffer Pre-allocation and Ring Replenishment
 
-This step occurs during initialization (`dp_rx_pdev_buffers_alloc()`) and after processing packets (`dp_rx_buffers_replenish()`).
+This step occurs during initialization (`dp_rx_pdev_buffers_alloc()`) and after processing packets
+(`dp_rx_buffers_replenish()`).
 
 ##### 5.3.1.1 Buffer Allocation Flow
 
@@ -840,65 +861,65 @@ QDF_STATUS __dp_rx_buffers_replenish(struct dp_soc *dp_soc, uint32_t mac_id,
                                      bool req_only, bool force_replenish,
                                      const char *func_name)
 {
-    // ... initialization ...
+  // ... initialization ...
 
-    // Allocate required number of nbufs
-    for (count = 0; count < num_req_buffers; count++) {
-        nbuf = dp_rx_nbuf_alloc(soc, rx_desc_pool);
-        if (qdf_unlikely(!nbuf)) {
-            DP_STATS_INC(dp_pdev, replenish.nbuf_alloc_fail, 1);
-            num_req_buffers = count;
-            break;
-        }
-
-        // Map and get physical address
-        paddr = dp_rx_nbuf_sync_no_dsb(soc, nbuf, rx_desc_pool->buf_size);
-        QDF_NBUF_CB_PADDR(nbuf) = paddr;
-
-        // Add to list for batch processing
-        DP_RX_LIST_APPEND(nbuf_head, nbuf_tail, nbuf);
-    }
-    qdf_dsb();  // Data synchronization barrier
-
-    // Post buffers to ring
-    nbuf = nbuf_head;
-    hal_srng_access_start(soc->hal_soc, rxdma_srng);
-
-    while (nbuf) {
-        // Get next ring entry
-        rxdma_ring_entry = hal_srng_src_get_next(soc->hal_soc, rxdma_srng);
-        if (!rxdma_ring_entry)
-            break;
-
-        // Get descriptor from freelist
-        next = (*desc_list)->next;
-        rx_desc = &(*desc_list)->rx_desc;
-        rx_desc->nbuf = nbuf;
-        rx_desc->in_use = 1;
-
-        // Set buffer address in ring entry
-        hal_rxdma_buff_addr_info_set(rxdma_ring_entry,
-                                     QDF_NBUF_CB_PADDR(nbuf),
-                                     rx_desc->cookie,
-                                     rx_desc_pool->owner);
-
-        nbuf = qdf_nbuf_next(nbuf);
-        *desc_list = next;
+  // Allocate required number of nbufs
+  for (count = 0; count < num_req_buffers; count++) {
+    nbuf = dp_rx_nbuf_alloc(soc, rx_desc_pool);
+    if (qdf_unlikely(!nbuf)) {
+      DP_STATS_INC(dp_pdev, replenish.nbuf_alloc_fail, 1);
+      num_req_buffers = count;
+      break;
     }
 
-    hal_srng_access_end(soc->hal_soc, rxdma_srng);
+    // Map and get physical address
+    paddr = dp_rx_nbuf_sync_no_dsb(soc, nbuf, rx_desc_pool->buf_size);
+    QDF_NBUF_CB_PADDR(nbuf) = paddr;
+
+    // Add to list for batch processing
+    DP_RX_LIST_APPEND(nbuf_head, nbuf_tail, nbuf);
+  }
+  qdf_dsb();  // Data synchronization barrier
+
+  // Post buffers to ring
+  nbuf = nbuf_head;
+  hal_srng_access_start(soc->hal_soc, rxdma_srng);
+
+  while (nbuf) {
+    // Get next ring entry
+    rxdma_ring_entry = hal_srng_src_get_next(soc->hal_soc, rxdma_srng);
+    if (!rxdma_ring_entry)
+      break;
+
+    // Get descriptor from freelist
+    next = (*desc_list)->next;
+    rx_desc = &(*desc_list)->rx_desc;
+    rx_desc->nbuf = nbuf;
+    rx_desc->in_use = 1;
+
+    // Set buffer address in ring entry
+    hal_rxdma_buff_addr_info_set(rxdma_ring_entry,
+                                 QDF_NBUF_CB_PADDR(nbuf),
+                                 rx_desc->cookie,
+                                 rx_desc_pool->owner);
+
+    nbuf = qdf_nbuf_next(nbuf);
+    *desc_list = next;
+  }
+
+  hal_srng_access_end(soc->hal_soc, rxdma_srng);
 }
 ```
 
 ##### 5.3.1.3 Key Constants and Structures
 
-| Constant/Structure | Value/Description |
-|-------------------|-------------------|
-| `RX_DATA_BUFFER_SIZE` | 2048 bytes (typical) |
-| `RX_BUFFER_RESERVATION` | Headroom bytes reserved |
-| `rx_desc_pool->buf_alignment` | 128 bytes (cache line) |
-| `rx_desc_pool->owner` | Buffer manager ID (WBM) |
-| `rx_desc->cookie` | 21-bit identifier for HW→SW lookup |
+| Constant/Structure            | Value/Description                  |
+| ----------------------------- | ---------------------------------- |
+| `RX_DATA_BUFFER_SIZE`         | 2048 bytes (typical)               |
+| `RX_BUFFER_RESERVATION`       | Headroom bytes reserved            |
+| `rx_desc_pool->buf_alignment` | 128 bytes (cache line)             |
+| `rx_desc_pool->owner`         | Buffer manager ID (WBM)            |
+| `rx_desc->cookie`             | 21-bit identifier for HW→SW lookup |
 
 #### Step 2: Hardware Receives Packet and Writes to Buffer
 
@@ -1034,7 +1055,8 @@ When WiFi hardware receives a packet, it goes through multiple processing stages
 
 #### Step 3: Interrupt and Ring Reaping
 
-This step is triggered by hardware interrupts and involves reading completed packets from the REO destination ring.
+This step is triggered by hardware interrupts and involves reading completed packets from the REO destination
+ring.
 
 ##### 5.3.3.1 Interrupt to Ring Reaping Flow
 
@@ -1089,119 +1111,119 @@ uint32_t dp_rx_process(struct dp_intr *int_ctx,
                        hal_ring_handle_t hal_ring_hdl,
                        uint8_t reo_ring_num, uint32_t quota)
 {
-    struct dp_soc *soc = int_ctx->soc;
-    hal_soc_handle_t hal_soc = soc->hal_soc;
-    void *ring_desc;
-    uint32_t rx_bufs_reaped = 0;
+  struct dp_soc *soc = int_ctx->soc;
+  hal_soc_handle_t hal_soc = soc->hal_soc;
+  void *ring_desc;
+  uint32_t rx_bufs_reaped = 0;
 
-    // Start ring access (acquire lock, sync cached pointers)
-    if (qdf_unlikely(hal_srng_access_start(hal_soc, hal_ring_hdl))) {
-        // Ring access failed
-        return 0;
+  // Start ring access (acquire lock, sync cached pointers)
+  if (qdf_unlikely(hal_srng_access_start(hal_soc, hal_ring_hdl))) {
+    // Ring access failed
+    return 0;
+  }
+
+  // Main reaping loop
+  while (quota && (ring_desc = hal_srng_dst_peek(hal_soc, hal_ring_hdl))) {
+
+    // ┌─────────────────────────────────────────────────────────────────┐
+    // │ Step 3a: Extract buffer info from ring descriptor               │
+    // └─────────────────────────────────────────────────────────────────┘
+
+    // Get buffer physical address (for validation)
+    buf_paddr = HAL_RX_REO_BUFFER_ADDR_31_0_GET(ring_desc) |
+      ((uint64_t)HAL_RX_REO_BUFFER_ADDR_39_32_GET(ring_desc) << 32);
+
+    // Get cookie for SW descriptor lookup
+    rx_buf_cookie = HAL_RX_REO_BUF_COOKIE_GET(ring_desc);
+
+    // Get push reason (normal, error, etc.)
+    push_reason = HAL_RX_REO_PUSH_REASON_GET(ring_desc);
+
+    // ┌─────────────────────────────────────────────────────────────────┐
+    // │ Step 3b: Cookie to Virtual Address lookup                       │
+    // └─────────────────────────────────────────────────────────────────┘
+
+    // Extract pool_id and index from cookie
+    pool_id = DP_RX_DESC_COOKIE_POOL_ID_GET(rx_buf_cookie);
+
+    // Get software descriptor
+    rx_desc = dp_rx_cookie_2_va_rxdma_buf(soc, rx_buf_cookie);
+    if (qdf_unlikely(!rx_desc)) {
+      // Invalid cookie - skip this entry
+      hal_srng_dst_get_next(hal_soc, hal_ring_hdl);
+      continue;
     }
 
-    // Main reaping loop
-    while (quota && (ring_desc = hal_srng_dst_peek(hal_soc, hal_ring_hdl))) {
+    // ┌─────────────────────────────────────────────────────────────────┐
+    // │ Step 3c: Validate and get sk_buff                               │
+    // └─────────────────────────────────────────────────────────────────┘
 
-        // ┌─────────────────────────────────────────────────────────────────┐
-        // │ Step 3a: Extract buffer info from ring descriptor               │
-        // └─────────────────────────────────────────────────────────────────┘
-
-        // Get buffer physical address (for validation)
-        buf_paddr = HAL_RX_REO_BUFFER_ADDR_31_0_GET(ring_desc) |
-                    ((uint64_t)HAL_RX_REO_BUFFER_ADDR_39_32_GET(ring_desc) << 32);
-
-        // Get cookie for SW descriptor lookup
-        rx_buf_cookie = HAL_RX_REO_BUF_COOKIE_GET(ring_desc);
-
-        // Get push reason (normal, error, etc.)
-        push_reason = HAL_RX_REO_PUSH_REASON_GET(ring_desc);
-
-        // ┌─────────────────────────────────────────────────────────────────┐
-        // │ Step 3b: Cookie to Virtual Address lookup                       │
-        // └─────────────────────────────────────────────────────────────────┘
-
-        // Extract pool_id and index from cookie
-        pool_id = DP_RX_DESC_COOKIE_POOL_ID_GET(rx_buf_cookie);
-
-        // Get software descriptor
-        rx_desc = dp_rx_cookie_2_va_rxdma_buf(soc, rx_buf_cookie);
-        if (qdf_unlikely(!rx_desc)) {
-            // Invalid cookie - skip this entry
-            hal_srng_dst_get_next(hal_soc, hal_ring_hdl);
-            continue;
-        }
-
-        // ┌─────────────────────────────────────────────────────────────────┐
-        // │ Step 3c: Validate and get sk_buff                               │
-        // └─────────────────────────────────────────────────────────────────┘
-
-        // Sanity check: verify physical address matches
-        if (qdf_unlikely(rx_desc->paddr_buf_start != buf_paddr)) {
-            // Address mismatch - corruption detected
-            DP_STATS_INC(soc, rx.err.paddr_mismatch, 1);
-            hal_srng_dst_get_next(hal_soc, hal_ring_hdl);
-            continue;
-        }
-
-        // Get the sk_buff (qdf_nbuf)
-        nbuf = rx_desc->nbuf;
-
-        // ┌─────────────────────────────────────────────────────────────────┐
-        // │ Step 3d: Unmap DMA and sync cache                               │
-        // └─────────────────────────────────────────────────────────────────┘
-
-        // Unmap DMA - invalidates CPU cache, makes data visible to CPU
-        qdf_nbuf_unmap_nbytes_single(soc->osdev, nbuf,
-                                     QDF_DMA_FROM_DEVICE,
-                                     rx_desc_pool->buf_size);
-        rx_desc->unmapped = 1;
-
-        // ┌─────────────────────────────────────────────────────────────────┐
-        // │ Step 3e: Prefetch for performance                               │
-        // └─────────────────────────────────────────────────────────────────┘
-
-        // Prefetch TLV data for faster processing
-        qdf_prefetch(qdf_nbuf_data(nbuf));
-
-        // Prefetch next ring descriptor
-        qdf_prefetch(hal_srng_dst_peek_next(hal_soc, hal_ring_hdl));
-
-        // ┌─────────────────────────────────────────────────────────────────┐
-        // │ Step 3f: Add to processing list and advance ring                │
-        // └─────────────────────────────────────────────────────────────────┘
-
-        // Chain nbuf to processing list
-        DP_RX_LIST_APPEND(nbuf_head, nbuf_tail, nbuf);
-
-        // Pop descriptor from ring (advance tail pointer)
-        hal_srng_dst_get_next(hal_soc, hal_ring_hdl);
-
-        rx_bufs_reaped++;
-        quota--;
+    // Sanity check: verify physical address matches
+    if (qdf_unlikely(rx_desc->paddr_buf_start != buf_paddr)) {
+      // Address mismatch - corruption detected
+      DP_STATS_INC(soc, rx.err.paddr_mismatch, 1);
+      hal_srng_dst_get_next(hal_soc, hal_ring_hdl);
+      continue;
     }
 
-    // End ring access (release lock, update HW tail pointer)
-    hal_srng_access_end(hal_soc, hal_ring_hdl);
+    // Get the sk_buff (qdf_nbuf)
+    nbuf = rx_desc->nbuf;
 
-    // Return descriptors to freelist for replenishment
-    dp_rx_add_to_free_desc_list(&head, &tail, rx_desc);
+    // ┌─────────────────────────────────────────────────────────────────┐
+    // │ Step 3d: Unmap DMA and sync cache                               │
+    // └─────────────────────────────────────────────────────────────────┘
 
-    return rx_bufs_reaped;
+    // Unmap DMA - invalidates CPU cache, makes data visible to CPU
+    qdf_nbuf_unmap_nbytes_single(soc->osdev, nbuf,
+                                 QDF_DMA_FROM_DEVICE,
+                                 rx_desc_pool->buf_size);
+    rx_desc->unmapped = 1;
+
+    // ┌─────────────────────────────────────────────────────────────────┐
+    // │ Step 3e: Prefetch for performance                               │
+    // └─────────────────────────────────────────────────────────────────┘
+
+    // Prefetch TLV data for faster processing
+    qdf_prefetch(qdf_nbuf_data(nbuf));
+
+    // Prefetch next ring descriptor
+    qdf_prefetch(hal_srng_dst_peek_next(hal_soc, hal_ring_hdl));
+
+    // ┌─────────────────────────────────────────────────────────────────┐
+    // │ Step 3f: Add to processing list and advance ring                │
+    // └─────────────────────────────────────────────────────────────────┘
+
+    // Chain nbuf to processing list
+    DP_RX_LIST_APPEND(nbuf_head, nbuf_tail, nbuf);
+
+    // Pop descriptor from ring (advance tail pointer)
+    hal_srng_dst_get_next(hal_soc, hal_ring_hdl);
+
+    rx_bufs_reaped++;
+    quota--;
+  }
+
+  // End ring access (release lock, update HW tail pointer)
+  hal_srng_access_end(hal_soc, hal_ring_hdl);
+
+  // Return descriptors to freelist for replenishment
+  dp_rx_add_to_free_desc_list(&head, &tail, rx_desc);
+
+  return rx_bufs_reaped;
 }
 ```
 
 ##### 5.3.3.3 HAL Ring Access Macros
 
-| Macro | Description |
-|-------|-------------|
-| `HAL_RX_REO_BUF_COOKIE_GET(ring_desc)` | Extract 21-bit cookie from ring entry |
-| `HAL_RX_REO_BUFFER_ADDR_31_0_GET(ring_desc)` | Get lower 32 bits of buffer paddr |
-| `HAL_RX_REO_BUFFER_ADDR_39_32_GET(ring_desc)` | Get upper 8 bits of buffer paddr |
-| `HAL_RX_REO_PUSH_REASON_GET(ring_desc)` | Get push reason (0=normal, 1=error) |
-| `HAL_RX_REO_ERROR_CODE_GET(ring_desc)` | Get error code if push_reason=error |
-| `hal_srng_dst_peek()` | Peek at next entry without consuming |
-| `hal_srng_dst_get_next()` | Get next entry and advance tail |
+| Macro                                         | Description                           |
+| --------------------------------------------- | ------------------------------------- |
+| `HAL_RX_REO_BUF_COOKIE_GET(ring_desc)`        | Extract 21-bit cookie from ring entry |
+| `HAL_RX_REO_BUFFER_ADDR_31_0_GET(ring_desc)`  | Get lower 32 bits of buffer paddr     |
+| `HAL_RX_REO_BUFFER_ADDR_39_32_GET(ring_desc)` | Get upper 8 bits of buffer paddr      |
+| `HAL_RX_REO_PUSH_REASON_GET(ring_desc)`       | Get push reason (0=normal, 1=error)   |
+| `HAL_RX_REO_ERROR_CODE_GET(ring_desc)`        | Get error code if push_reason=error   |
+| `hal_srng_dst_peek()`                         | Peek at next entry without consuming  |
+| `hal_srng_dst_get_next()`                     | Get next entry and advance tail       |
 
 #### Step 4: TLV Parsing and Metadata Extraction
 
@@ -1278,30 +1300,30 @@ After reaping the buffer from the ring, the driver parses the TLV metadata writt
 
 // Get MSDU length from msdu_end TLV
 #define HAL_RX_MSDU_END_MSDU_LEN_GET(rx_tlv) \
-    (HAL_RX_MSDU_END(rx_tlv).msdu_length)
+(HAL_RX_MSDU_END(rx_tlv).msdu_length)
 
 // Get peer ID from mpdu_start TLV
 #define HAL_RX_MPDU_PEER_META_DATA_GET(rx_tlv) \
-    (HAL_RX_MPDU_START(rx_tlv).peer_meta_data)
+(HAL_RX_MPDU_START(rx_tlv).peer_meta_data)
 
 // Get L3 header padding
 #define HAL_RX_MSDU_END_L3_HDR_PADDING_GET(rx_tlv) \
-    (HAL_RX_MSDU_END(rx_tlv).l3_header_padding)
+(HAL_RX_MSDU_END(rx_tlv).l3_header_padding)
 
 // Get decapsulation format
 #define HAL_RX_MSDU_END_DECAP_FORMAT_GET(rx_tlv) \
-    (HAL_RX_MSDU_END(rx_tlv).decap_format)
+(HAL_RX_MSDU_END(rx_tlv).decap_format)
 
 // Check if MSDU processing is done
 #define HAL_RX_TLV_MSDU_DONE_GET(rx_tlv) \
-    (HAL_RX_MSDU_END(rx_tlv).msdu_done)
+(HAL_RX_MSDU_END(rx_tlv).msdu_done)
 
 // Helper macros to access TLV structures
 #define HAL_RX_MSDU_END(rx_tlv) \
-    (((struct rx_pkt_tlvs *)(rx_tlv))->msdu_end_tlv.rx_msdu_end)
+(((struct rx_pkt_tlvs *)(rx_tlv))->msdu_end_tlv.rx_msdu_end)
 
 #define HAL_RX_MPDU_START(rx_tlv) \
-    (((struct rx_pkt_tlvs *)(rx_tlv))->mpdu_start_tlv.rx_mpdu_start)
+(((struct rx_pkt_tlvs *)(rx_tlv))->mpdu_start_tlv.rx_mpdu_start)
 ```
 
 ##### 5.3.4.3 MSDU Done Check
@@ -1309,18 +1331,18 @@ After reaping the buffer from the ring, the driver parses the TLV metadata writt
 ```c
 // Critical validation: Ensure hardware has finished writing
 if (qdf_unlikely(!HAL_RX_TLV_MSDU_DONE_GET(rx_tlv_hdr))) {
-    // Hardware hasn't finished writing - this is a serious error
-    // Can happen due to:
-    // 1. DMA not complete
-    // 2. Ring corruption
-    // 3. Hardware bug
+  // Hardware hasn't finished writing - this is a serious error
+  // Can happen due to:
+  // 1. DMA not complete
+  // 2. Ring corruption
+  // 3. Hardware bug
 
-    DP_STATS_INC(soc, rx.err.msdu_done_fail, 1);
-    rx_desc->msdu_done_fail = 1;
+  DP_STATS_INC(soc, rx.err.msdu_done_fail, 1);
+  rx_desc->msdu_done_fail = 1;
 
-    // Drop this packet
-    qdf_nbuf_free(nbuf);
-    continue;
+  // Drop this packet
+  qdf_nbuf_free(nbuf);
+  continue;
 }
 ```
 
@@ -1396,9 +1418,9 @@ nbuf->dev = netdev;
 
 // Set checksum offload status (if hardware verified checksum)
 if (rx_tlv_hdr->tcp_udp_chksum_valid) {
-    nbuf->ip_summed = CHECKSUM_UNNECESSARY;
+  nbuf->ip_summed = CHECKSUM_UNNECESSARY;
 } else {
-    nbuf->ip_summed = CHECKSUM_NONE;
+  nbuf->ip_summed = CHECKSUM_NONE;
 }
 
 // Set priority from TID
@@ -1425,28 +1447,30 @@ void dp_rx_deliver_to_stack(struct dp_soc *soc,
                             qdf_nbuf_t nbuf_head,
                             qdf_nbuf_t nbuf_tail)
 {
-    qdf_nbuf_t nbuf, next;
+  qdf_nbuf_t nbuf, next;
 
-    nbuf = nbuf_head;
-    while (nbuf) {
-        next = qdf_nbuf_next(nbuf);
-        qdf_nbuf_set_next(nbuf, NULL);
+  nbuf = nbuf_head;
+  while (nbuf) {
+    next = qdf_nbuf_next(nbuf);
+    qdf_nbuf_set_next(nbuf, NULL);
 
-        // Set device and protocol
-        qdf_nbuf_set_dev(nbuf, osif_vdev->netdev);
-        nbuf->protocol = eth_type_trans(nbuf, osif_vdev->netdev);
+    // Set device and protocol
+    qdf_nbuf_set_dev(nbuf, osif_vdev->netdev);
+    nbuf->protocol = eth_type_trans(nbuf, osif_vdev->netdev);
 
-        // Deliver to kernel
-        napi_gro_receive(&osif_vdev->napi, nbuf);
+    // Deliver to kernel
+    napi_gro_receive(&osif_vdev->napi, nbuf);
 
-        nbuf = next;
-    }
+    nbuf = next;
+  }
 }
 ```
 
 ### 5.4 Cookie-Based Buffer Lookup
 
-The **cookie** mechanism enables fast O(1) lookup from hardware descriptor to software state. This is critical because hardware only knows physical addresses and cookies, while software needs to access the sk_buff and associated metadata.
+The **cookie** mechanism enables fast O(1) lookup from hardware descriptor to software state. This is critical
+because hardware only knows physical addresses and cookies, while software needs to access the sk_buff and
+associated metadata.
 
 #### 5.4.1 Cookie Structure and Encoding
 
@@ -1484,16 +1508,16 @@ The **cookie** mechanism enables fast O(1) lookup from hardware descriptor to so
 
 // Extract pool_id from cookie
 #define DP_RX_DESC_COOKIE_POOL_ID_GET(cookie) \
-    (((cookie) >> DP_RX_DESC_COOKIE_POOL_ID_SHIFT) & DP_RX_DESC_COOKIE_POOL_ID_MASK)
+(((cookie) >> DP_RX_DESC_COOKIE_POOL_ID_SHIFT) & DP_RX_DESC_COOKIE_POOL_ID_MASK)
 
 // Extract index from cookie
 #define DP_RX_DESC_COOKIE_INDEX_GET(cookie) \
-    (((cookie) >> DP_RX_DESC_COOKIE_INDEX_SHIFT) & DP_RX_DESC_COOKIE_INDEX_MASK)
+(((cookie) >> DP_RX_DESC_COOKIE_INDEX_SHIFT) & DP_RX_DESC_COOKIE_INDEX_MASK)
 
 // Create cookie from pool_id and index
 #define DP_RX_DESC_COOKIE_SET(pool_id, index) \
-    (((pool_id) << DP_RX_DESC_COOKIE_POOL_ID_SHIFT) | \
-     ((index) << DP_RX_DESC_COOKIE_INDEX_SHIFT))
+(((pool_id) << DP_RX_DESC_COOKIE_POOL_ID_SHIFT) | \
+  ((index) << DP_RX_DESC_COOKIE_INDEX_SHIFT))
 ```
 
 #### 5.4.3 Cookie to Virtual Address Lookup
@@ -1505,31 +1529,31 @@ The **cookie** mechanism enables fast O(1) lookup from hardware descriptor to so
 static inline struct dp_rx_desc *
 dp_rx_cookie_2_va_rxdma_buf(struct dp_soc *soc, uint32_t cookie)
 {
-    uint8_t pool_id;
-    uint16_t index;
-    struct rx_desc_pool *rx_desc_pool;
+  uint8_t pool_id;
+  uint16_t index;
+  struct rx_desc_pool *rx_desc_pool;
 
-    // Extract pool_id and index from cookie
-    pool_id = DP_RX_DESC_COOKIE_POOL_ID_GET(cookie);
-    index = DP_RX_DESC_COOKIE_INDEX_GET(cookie);
+  // Extract pool_id and index from cookie
+  pool_id = DP_RX_DESC_COOKIE_POOL_ID_GET(cookie);
+  index = DP_RX_DESC_COOKIE_INDEX_GET(cookie);
 
-    // Validate pool_id
-    if (qdf_unlikely(pool_id >= MAX_RXDESC_POOLS)) {
-        dp_rx_err("Invalid pool_id %d", pool_id);
-        return NULL;
-    }
+  // Validate pool_id
+  if (qdf_unlikely(pool_id >= MAX_RXDESC_POOLS)) {
+    dp_rx_err("Invalid pool_id %d", pool_id);
+    return NULL;
+  }
 
-    // Get the descriptor pool
-    rx_desc_pool = &soc->rx_desc_buf[pool_id];
+  // Get the descriptor pool
+  rx_desc_pool = &soc->rx_desc_buf[pool_id];
 
-    // Validate index
-    if (qdf_unlikely(index >= rx_desc_pool->pool_size)) {
-        dp_rx_err("Invalid index %d, pool_size %d", index, rx_desc_pool->pool_size);
-        return NULL;
-    }
+  // Validate index
+  if (qdf_unlikely(index >= rx_desc_pool->pool_size)) {
+    dp_rx_err("Invalid index %d, pool_size %d", index, rx_desc_pool->pool_size);
+    return NULL;
+  }
 
-    // Direct array access - O(1) lookup
-    return &rx_desc_pool->array[index].rx_desc;
+  // Direct array access - O(1) lookup
+  return &rx_desc_pool->array[index].rx_desc;
 }
 ```
 
@@ -1574,17 +1598,18 @@ dp_rx_cookie_2_va_rxdma_buf(struct dp_soc *soc, uint32_t cookie)
 
 #### 5.4.5 Why Cookie-Based Lookup?
 
-| Aspect | Explanation |
-|--------|-------------|
-| **O(1) Performance** | Direct array indexing, no searching or hashing |
-| **Hardware Simplicity** | HW only needs to store 21-bit cookie, not full pointer |
-| **Memory Efficiency** | Cookie fits in ring entry alongside buffer address |
-| **Multi-Pool Support** | Pool ID allows multiple descriptor pools (per-MAC, per-ring) |
-| **Validation** | Pool ID and index bounds checking prevents corruption |
+| Aspect                  | Explanation                                                  |
+| ----------------------- | ------------------------------------------------------------ |
+| **O(1) Performance**    | Direct array indexing, no searching or hashing               |
+| **Hardware Simplicity** | HW only needs to store 21-bit cookie, not full pointer       |
+| **Memory Efficiency**   | Cookie fits in ring entry alongside buffer address           |
+| **Multi-Pool Support**  | Pool ID allows multiple descriptor pools (per-MAC, per-ring) |
+| **Validation**          | Pool ID and index bounds checking prevents corruption        |
 
 ### 5.5 Buffer Pool Management
 
-Buffer pool management is critical for efficient RX processing. The driver pre-allocates a pool of descriptors and sk_buffs to avoid allocation overhead in the hot path.
+Buffer pool management is critical for efficient RX processing. The driver pre-allocates a pool of descriptors
+and sk_buffs to avoid allocation overhead in the hot path.
 
 #### 5.5.1 Pool Architecture Overview
 
@@ -1623,30 +1648,30 @@ Buffer pool management is critical for efficient RX processing. The driver pre-a
 ```c
 // From dp_types.h - RX descriptor pool structure
 struct rx_desc_pool {
-    // Contiguous array of descriptors (for O(1) cookie lookup)
-    union dp_rx_desc_list_elem_t *array;
+  // Contiguous array of descriptors (for O(1) cookie lookup)
+  union dp_rx_desc_list_elem_t *array;
 
-    // Freelist head (linked list of available descriptors)
-    union dp_rx_desc_list_elem_t *freelist;
+  // Freelist head (linked list of available descriptors)
+  union dp_rx_desc_list_elem_t *freelist;
 
-    // Freelist tail (for efficient append)
-    union dp_rx_desc_list_elem_t *freelist_tail;
+  // Freelist tail (for efficient append)
+  union dp_rx_desc_list_elem_t *freelist_tail;
 
-    // Lock for freelist operations
-    qdf_spinlock_t lock;
+  // Lock for freelist operations
+  qdf_spinlock_t lock;
 
-    // Pool configuration
-    uint32_t pool_size;         // Total number of descriptors
-    uint16_t buf_size;          // Size of each buffer (typically 2048)
-    uint8_t  buf_alignment;     // Alignment requirement (typically 128)
-    uint8_t  pool_id;           // Pool identifier (0-7)
+  // Pool configuration
+  uint32_t pool_size;         // Total number of descriptors
+  uint16_t buf_size;          // Size of each buffer (typically 2048)
+  uint8_t  buf_alignment;     // Alignment requirement (typically 128)
+  uint8_t  pool_id;           // Pool identifier (0-7)
 
-    // Owner information
-    uint8_t  owner;             // HAL_RX_BUF_RBM_SW0_BM, etc.
+  // Owner information
+  uint8_t  owner;             // HAL_RX_BUF_RBM_SW0_BM, etc.
 
-    // Statistics
-    uint32_t num_allocated;     // Currently allocated descriptors
-    uint32_t num_free;          // Currently free descriptors
+  // Statistics
+  uint32_t num_allocated;     // Currently allocated descriptors
+  uint32_t num_free;          // Currently free descriptors
 };
 ```
 
@@ -1655,32 +1680,32 @@ struct rx_desc_pool {
 ```c
 // From dp_rx.h - Individual RX descriptor
 struct dp_rx_desc {
-    // sk_buff pointer - the actual network buffer
-    qdf_nbuf_t nbuf;
+  // sk_buff pointer - the actual network buffer
+  qdf_nbuf_t nbuf;
 
-    // Physical address of buffer start (for DMA)
-    qdf_dma_addr_t paddr_buf_start;
+  // Physical address of buffer start (for DMA)
+  qdf_dma_addr_t paddr_buf_start;
 
-    // Cookie for HW→SW lookup
-    uint32_t cookie;
+  // Cookie for HW→SW lookup
+  uint32_t cookie;
 
-    // Pool this descriptor belongs to
-    uint8_t pool_id;
+  // Pool this descriptor belongs to
+  uint8_t pool_id;
 
-    // Status flags
-    uint8_t in_use:1;           // 1 = in use by HW, 0 = free
-    uint8_t unmapped:1;         // 1 = DMA unmapped, 0 = still mapped
-    uint8_t msdu_done_fail:1;   // 1 = MSDU done check failed
-    uint8_t in_err_state:1;     // 1 = error state
+  // Status flags
+  uint8_t in_use:1;           // 1 = in use by HW, 0 = free
+  uint8_t unmapped:1;         // 1 = DMA unmapped, 0 = still mapped
+  uint8_t msdu_done_fail:1;   // 1 = MSDU done check failed
+  uint8_t in_err_state:1;     // 1 = error state
 
-    // For freelist linking
-    struct dp_rx_desc *next;
+  // For freelist linking
+  struct dp_rx_desc *next;
 };
 
 // Union for array/freelist dual use
 union dp_rx_desc_list_elem_t {
-    struct dp_rx_desc rx_desc;
-    union dp_rx_desc_list_elem_t *next;
+  struct dp_rx_desc rx_desc;
+  union dp_rx_desc_list_elem_t *next;
 };
 ```
 
@@ -1690,67 +1715,67 @@ union dp_rx_desc_list_elem_t {
 // dp_rx_pdev_desc_pool_alloc() - Allocate descriptor pool
 QDF_STATUS dp_rx_pdev_desc_pool_alloc(struct dp_pdev *pdev)
 {
-    struct dp_soc *soc = pdev->soc;
-    uint32_t pool_id = pdev->lmac_id;
-    struct rx_desc_pool *rx_desc_pool = &soc->rx_desc_buf[pool_id];
-    uint32_t num_entries;
+  struct dp_soc *soc = pdev->soc;
+  uint32_t pool_id = pdev->lmac_id;
+  struct rx_desc_pool *rx_desc_pool = &soc->rx_desc_buf[pool_id];
+  uint32_t num_entries;
 
-    // Calculate pool size based on ring size
-    num_entries = wlan_cfg_get_dp_soc_rxdma_refill_ring_size(soc->wlan_cfg_ctx);
+  // Calculate pool size based on ring size
+  num_entries = wlan_cfg_get_dp_soc_rxdma_refill_ring_size(soc->wlan_cfg_ctx);
 
-    // Allocate contiguous array of descriptors
-    rx_desc_pool->array = qdf_mem_malloc(
-        num_entries * sizeof(union dp_rx_desc_list_elem_t));
+  // Allocate contiguous array of descriptors
+  rx_desc_pool->array = qdf_mem_malloc(
+    num_entries * sizeof(union dp_rx_desc_list_elem_t));
 
-    if (!rx_desc_pool->array)
-        return QDF_STATUS_E_NOMEM;
+  if (!rx_desc_pool->array)
+    return QDF_STATUS_E_NOMEM;
 
-    // Initialize pool metadata
-    rx_desc_pool->pool_size = num_entries;
-    rx_desc_pool->pool_id = pool_id;
-    rx_desc_pool->buf_size = RX_DATA_BUFFER_SIZE;  // 2048
-    rx_desc_pool->buf_alignment = RX_DATA_BUFFER_ALIGNMENT;  // 128
-    rx_desc_pool->owner = HAL_RX_BUF_RBM_SW0_BM + pool_id;
+  // Initialize pool metadata
+  rx_desc_pool->pool_size = num_entries;
+  rx_desc_pool->pool_id = pool_id;
+  rx_desc_pool->buf_size = RX_DATA_BUFFER_SIZE;  // 2048
+  rx_desc_pool->buf_alignment = RX_DATA_BUFFER_ALIGNMENT;  // 128
+  rx_desc_pool->owner = HAL_RX_BUF_RBM_SW0_BM + pool_id;
 
-    // Initialize spinlock
-    qdf_spinlock_create(&rx_desc_pool->lock);
+  // Initialize spinlock
+  qdf_spinlock_create(&rx_desc_pool->lock);
 
-    // Build freelist - link all descriptors
-    dp_rx_desc_pool_init(soc, pool_id, num_entries, rx_desc_pool);
+  // Build freelist - link all descriptors
+  dp_rx_desc_pool_init(soc, pool_id, num_entries, rx_desc_pool);
 
-    return QDF_STATUS_SUCCESS;
+  return QDF_STATUS_SUCCESS;
 }
 
 // dp_rx_desc_pool_init() - Initialize freelist
 void dp_rx_desc_pool_init(struct dp_soc *soc, uint32_t pool_id,
                           uint32_t num_entries, struct rx_desc_pool *rx_desc_pool)
 {
-    uint32_t i;
-    union dp_rx_desc_list_elem_t *desc;
+  uint32_t i;
+  union dp_rx_desc_list_elem_t *desc;
 
-    // Initialize each descriptor and link to freelist
-    for (i = 0; i < num_entries; i++) {
-        desc = &rx_desc_pool->array[i];
+  // Initialize each descriptor and link to freelist
+  for (i = 0; i < num_entries; i++) {
+    desc = &rx_desc_pool->array[i];
 
-        // Set cookie (pool_id + index)
-        desc->rx_desc.cookie = DP_RX_DESC_COOKIE_SET(pool_id, i);
-        desc->rx_desc.pool_id = pool_id;
-        desc->rx_desc.in_use = 0;
-        desc->rx_desc.nbuf = NULL;
+    // Set cookie (pool_id + index)
+    desc->rx_desc.cookie = DP_RX_DESC_COOKIE_SET(pool_id, i);
+    desc->rx_desc.pool_id = pool_id;
+    desc->rx_desc.in_use = 0;
+    desc->rx_desc.nbuf = NULL;
 
-        // Link to freelist
-        if (i < num_entries - 1) {
-            desc->next = &rx_desc_pool->array[i + 1];
-        } else {
-            desc->next = NULL;  // Last entry
-        }
+    // Link to freelist
+    if (i < num_entries - 1) {
+      desc->next = &rx_desc_pool->array[i + 1];
+    } else {
+      desc->next = NULL;  // Last entry
     }
+  }
 
-    // Set freelist head and tail
-    rx_desc_pool->freelist = &rx_desc_pool->array[0];
-    rx_desc_pool->freelist_tail = &rx_desc_pool->array[num_entries - 1];
-    rx_desc_pool->num_free = num_entries;
-    rx_desc_pool->num_allocated = 0;
+  // Set freelist head and tail
+  rx_desc_pool->freelist = &rx_desc_pool->array[0];
+  rx_desc_pool->freelist_tail = &rx_desc_pool->array[num_entries - 1];
+  rx_desc_pool->num_free = num_entries;
+  rx_desc_pool->num_allocated = 0;
 }
 ```
 
@@ -1761,53 +1786,53 @@ void dp_rx_desc_pool_init(struct dp_soc *soc, uint32_t pool_id,
 static inline struct dp_rx_desc *
 dp_rx_desc_alloc(struct dp_soc *soc, struct rx_desc_pool *rx_desc_pool)
 {
-    struct dp_rx_desc *rx_desc;
+  struct dp_rx_desc *rx_desc;
 
-    qdf_spin_lock_bh(&rx_desc_pool->lock);
+  qdf_spin_lock_bh(&rx_desc_pool->lock);
 
-    if (qdf_unlikely(!rx_desc_pool->freelist)) {
-        qdf_spin_unlock_bh(&rx_desc_pool->lock);
-        return NULL;  // Pool exhausted
-    }
-
-    // Pop from freelist head
-    rx_desc = &rx_desc_pool->freelist->rx_desc;
-    rx_desc_pool->freelist = rx_desc_pool->freelist->next;
-
-    rx_desc->in_use = 1;
-    rx_desc_pool->num_free--;
-    rx_desc_pool->num_allocated++;
-
+  if (qdf_unlikely(!rx_desc_pool->freelist)) {
     qdf_spin_unlock_bh(&rx_desc_pool->lock);
+    return NULL;  // Pool exhausted
+  }
 
-    return rx_desc;
+  // Pop from freelist head
+  rx_desc = &rx_desc_pool->freelist->rx_desc;
+  rx_desc_pool->freelist = rx_desc_pool->freelist->next;
+
+  rx_desc->in_use = 1;
+  rx_desc_pool->num_free--;
+  rx_desc_pool->num_allocated++;
+
+  qdf_spin_unlock_bh(&rx_desc_pool->lock);
+
+  return rx_desc;
 }
 
 // Return descriptor to freelist (called after packet delivery)
 static inline void
 dp_rx_desc_free(struct dp_soc *soc, struct dp_rx_desc *rx_desc)
 {
-    uint8_t pool_id = rx_desc->pool_id;
-    struct rx_desc_pool *rx_desc_pool = &soc->rx_desc_buf[pool_id];
-    union dp_rx_desc_list_elem_t *desc_elem;
+  uint8_t pool_id = rx_desc->pool_id;
+  struct rx_desc_pool *rx_desc_pool = &soc->rx_desc_buf[pool_id];
+  union dp_rx_desc_list_elem_t *desc_elem;
 
-    // Clear descriptor state
-    rx_desc->in_use = 0;
-    rx_desc->nbuf = NULL;
-    rx_desc->unmapped = 0;
+  // Clear descriptor state
+  rx_desc->in_use = 0;
+  rx_desc->nbuf = NULL;
+  rx_desc->unmapped = 0;
 
-    desc_elem = (union dp_rx_desc_list_elem_t *)rx_desc;
+  desc_elem = (union dp_rx_desc_list_elem_t *)rx_desc;
 
-    qdf_spin_lock_bh(&rx_desc_pool->lock);
+  qdf_spin_lock_bh(&rx_desc_pool->lock);
 
-    // Push to freelist head
-    desc_elem->next = rx_desc_pool->freelist;
-    rx_desc_pool->freelist = desc_elem;
+  // Push to freelist head
+  desc_elem->next = rx_desc_pool->freelist;
+  rx_desc_pool->freelist = desc_elem;
 
-    rx_desc_pool->num_free++;
-    rx_desc_pool->num_allocated--;
+  rx_desc_pool->num_free++;
+  rx_desc_pool->num_allocated--;
 
-    qdf_spin_unlock_bh(&rx_desc_pool->lock);
+  qdf_spin_unlock_bh(&rx_desc_pool->lock);
 }
 ```
 
@@ -1866,7 +1891,8 @@ dp_rx_desc_free(struct dp_soc *soc, struct dp_rx_desc *rx_desc)
 
 ### 5.6 Complete Data Flow Summary
 
-This section provides a comprehensive view of the entire RX data flow with function names, timing, and key operations at each step.
+This section provides a comprehensive view of the entire RX data flow with function names, timing, and key
+operations at each step.
 
 #### 5.6.1 High-Level Flow Diagram
 
@@ -1959,18 +1985,18 @@ This section provides a comprehensive view of the entire RX data flow with funct
 
 #### 5.6.2 Timing Breakdown
 
-| Phase | Step | Function | Typical Time |
-|-------|------|----------|--------------|
-| Init | Pool alloc | `dp_rx_pdev_desc_pool_alloc()` | 1-5ms |
-| Init | Buffer alloc | `dp_rx_pdev_buffers_alloc()` | 50-100ms |
-| HW | RF/PHY | Hardware | 5-20μs |
-| HW | MAC processing | Hardware | 2-10μs |
-| HW | RXDMA + REO | Hardware | 1-5μs |
-| SW | Interrupt → NAPI | `hif_ahb_interrupt_handler()` | 1-3μs |
-| SW | Ring reap | `dp_rx_process()` | 0.5-2μs/pkt |
-| SW | TLV parse | `HAL_RX_*_GET()` | 0.1-0.5μs/pkt |
-| SW | Deliver | `napi_gro_receive()` | 1-5μs/pkt |
-| SW | Replenish | `dp_rx_buffers_replenish()` | 0.5-2μs/pkt |
+| Phase | Step             | Function                       | Typical Time  |
+| ----- | ---------------- | ------------------------------ | ------------- |
+| Init  | Pool alloc       | `dp_rx_pdev_desc_pool_alloc()` | 1-5ms         |
+| Init  | Buffer alloc     | `dp_rx_pdev_buffers_alloc()`   | 50-100ms      |
+| HW    | RF/PHY           | Hardware                       | 5-20μs        |
+| HW    | MAC processing   | Hardware                       | 2-10μs        |
+| HW    | RXDMA + REO      | Hardware                       | 1-5μs         |
+| SW    | Interrupt → NAPI | `hif_ahb_interrupt_handler()`  | 1-3μs         |
+| SW    | Ring reap        | `dp_rx_process()`              | 0.5-2μs/pkt   |
+| SW    | TLV parse        | `HAL_RX_*_GET()`               | 0.1-0.5μs/pkt |
+| SW    | Deliver          | `napi_gro_receive()`           | 1-5μs/pkt     |
+| SW    | Replenish        | `dp_rx_buffers_replenish()`    | 0.5-2μs/pkt   |
 
 #### 5.6.3 Function Call Graph
 
@@ -1999,9 +2025,9 @@ dp_rx_process()
 │   │   └── napi_gro_receive()
 │   └── dp_rx_add_to_free_desc_list()
 └── dp_rx_buffers_replenish()
-    ├── qdf_nbuf_alloc()
-    ├── qdf_nbuf_map_single()
-    └── hal_rxdma_buff_addr_info_set()
+├── qdf_nbuf_alloc()
+├── qdf_nbuf_map_single()
+└── hal_rxdma_buff_addr_info_set()
 ```
 
 ### 5.7 Key Data Structures
@@ -2015,49 +2041,49 @@ The Linux kernel's fundamental network buffer structure:
 ```c
 // From linux/skbuff.h (simplified)
 struct sk_buff {
-    // ┌─────────────────────────────────────────────────────────────────┐
-    // │ Buffer Pointers                                                  │
-    // └─────────────────────────────────────────────────────────────────┘
-    unsigned char *head;        // Start of allocated buffer
-    unsigned char *data;        // Start of packet data
-    unsigned char *tail;        // End of packet data
-    unsigned char *end;         // End of allocated buffer
+  // ┌─────────────────────────────────────────────────────────────────┐
+  // │ Buffer Pointers                                                  │
+  // └─────────────────────────────────────────────────────────────────┘
+  unsigned char *head;        // Start of allocated buffer
+  unsigned char *data;        // Start of packet data
+  unsigned char *tail;        // End of packet data
+  unsigned char *end;         // End of allocated buffer
 
-    // ┌─────────────────────────────────────────────────────────────────┐
-    // │ Length Information                                               │
-    // └─────────────────────────────────────────────────────────────────┘
-    unsigned int len;           // Length of data (tail - data)
-    unsigned int data_len;      // Length in fragments (for SG)
-    unsigned int truesize;      // Total allocated size
+  // ┌─────────────────────────────────────────────────────────────────┐
+  // │ Length Information                                               │
+  // └─────────────────────────────────────────────────────────────────┘
+  unsigned int len;           // Length of data (tail - data)
+  unsigned int data_len;      // Length in fragments (for SG)
+  unsigned int truesize;      // Total allocated size
 
-    // ┌─────────────────────────────────────────────────────────────────┐
-    // │ Device and Protocol                                              │
-    // └─────────────────────────────────────────────────────────────────┘
-    struct net_device *dev;     // Device we arrived on/are leaving by
-    __be16 protocol;            // Packet protocol (ETH_P_IP, etc.)
+  // ┌─────────────────────────────────────────────────────────────────┐
+  // │ Device and Protocol                                              │
+  // └─────────────────────────────────────────────────────────────────┘
+  struct net_device *dev;     // Device we arrived on/are leaving by
+  __be16 protocol;            // Packet protocol (ETH_P_IP, etc.)
 
-    // ┌─────────────────────────────────────────────────────────────────┐
-    // │ Control Block (48 bytes for driver private data)                 │
-    // └─────────────────────────────────────────────────────────────────┘
-    char cb[48] __aligned(8);   // Driver-specific metadata
+  // ┌─────────────────────────────────────────────────────────────────┐
+  // │ Control Block (48 bytes for driver private data)                 │
+  // └─────────────────────────────────────────────────────────────────┘
+  char cb[48] __aligned(8);   // Driver-specific metadata
 
-    // ┌─────────────────────────────────────────────────────────────────┐
-    // │ Checksum and Priority                                            │
-    // └─────────────────────────────────────────────────────────────────┘
-    __u8 ip_summed:2;           // Checksum status
-    __u8 priority;              // Packet priority (from TID)
+  // ┌─────────────────────────────────────────────────────────────────┐
+  // │ Checksum and Priority                                            │
+  // └─────────────────────────────────────────────────────────────────┘
+  __u8 ip_summed:2;           // Checksum status
+  __u8 priority;              // Packet priority (from TID)
 
-    // ┌─────────────────────────────────────────────────────────────────┐
-    // │ Linked List                                                      │
-    // └─────────────────────────────────────────────────────────────────┘
-    struct sk_buff *next;       // Next buffer in list
-    struct sk_buff *prev;       // Previous buffer in list
+  // ┌─────────────────────────────────────────────────────────────────┐
+  // │ Linked List                                                      │
+  // └─────────────────────────────────────────────────────────────────┘
+  struct sk_buff *next;       // Next buffer in list
+  struct sk_buff *prev;       // Previous buffer in list
 
-    // ┌─────────────────────────────────────────────────────────────────┐
-    // │ Custom Fields (added via kernel patches)                         │
-    // └─────────────────────────────────────────────────────────────────┘
-    void *ar_pkt_trace;         // Packet tracing pointer
-    uint16_t ar_meta;           // Cached metadata (TID, EAPOL, DHCP flags)
+  // ┌─────────────────────────────────────────────────────────────────┐
+  // │ Custom Fields (added via kernel patches)                         │
+  // └─────────────────────────────────────────────────────────────────┘
+  void *ar_pkt_trace;         // Packet tracing pointer
+  uint16_t ar_meta;           // Cached metadata (TID, EAPOL, DHCP flags)
 };
 ```
 
@@ -2116,65 +2142,65 @@ Hardware-written TLVs at the start of each received buffer:
 ```c
 // From hal_be_rx_tlv.h
 struct rx_pkt_tlvs {
-    // ┌─────────────────────────────────────────────────────────────────┐
-    // │ MSDU End TLV - Per-MSDU information                              │
-    // └─────────────────────────────────────────────────────────────────┘
-    struct rx_msdu_end_tlv {
-        uint32_t tlv_tag;           // TLV type identifier
-        struct rx_msdu_end {
-            uint32_t msdu_length;       // MSDU length in bytes
-            uint32_t l3_header_padding; // Padding before L3 header
-            uint32_t decap_format;      // Decapsulation format
-            uint32_t msdu_done;         // Processing complete flag
-            uint32_t tcp_udp_chksum;    // TCP/UDP checksum
-            uint32_t sa_idx;            // Source address index
-            uint32_t da_idx;            // Destination address index
-            uint32_t flow_idx;          // Flow index for steering
-            // ... more fields
-        } rx_msdu_end;
-    } msdu_end_tlv;
+  // ┌─────────────────────────────────────────────────────────────────┐
+  // │ MSDU End TLV - Per-MSDU information                              │
+  // └─────────────────────────────────────────────────────────────────┘
+  struct rx_msdu_end_tlv {
+    uint32_t tlv_tag;           // TLV type identifier
+    struct rx_msdu_end {
+      uint32_t msdu_length;       // MSDU length in bytes
+      uint32_t l3_header_padding; // Padding before L3 header
+      uint32_t decap_format;      // Decapsulation format
+      uint32_t msdu_done;         // Processing complete flag
+      uint32_t tcp_udp_chksum;    // TCP/UDP checksum
+      uint32_t sa_idx;            // Source address index
+      uint32_t da_idx;            // Destination address index
+      uint32_t flow_idx;          // Flow index for steering
+      // ... more fields
+    } rx_msdu_end;
+  } msdu_end_tlv;
 
-    // ┌─────────────────────────────────────────────────────────────────┐
-    // │ MPDU Start TLV - Per-MPDU information                            │
-    // └─────────────────────────────────────────────────────────────────┘
-    struct rx_mpdu_start_tlv {
-        uint32_t tlv_tag;
-        struct rx_mpdu_start {
-            uint32_t peer_meta_data;    // Peer ID from AST lookup
-            uint32_t sequence_number;   // 802.11 sequence number
-            uint32_t tid;               // Traffic Identifier
-            uint32_t encrypt_type;      // Encryption type
-            uint64_t pn;                // Packet Number (for replay)
-            uint32_t ampdu_flag;        // Part of A-MPDU
-            uint32_t bssid_hit;         // BSSID matched
-            // ... more fields
-        } rx_mpdu_start;
-    } mpdu_start_tlv;
+  // ┌─────────────────────────────────────────────────────────────────┐
+  // │ MPDU Start TLV - Per-MPDU information                            │
+  // └─────────────────────────────────────────────────────────────────┘
+  struct rx_mpdu_start_tlv {
+    uint32_t tlv_tag;
+    struct rx_mpdu_start {
+      uint32_t peer_meta_data;    // Peer ID from AST lookup
+      uint32_t sequence_number;   // 802.11 sequence number
+      uint32_t tid;               // Traffic Identifier
+      uint32_t encrypt_type;      // Encryption type
+      uint64_t pn;                // Packet Number (for replay)
+      uint32_t ampdu_flag;        // Part of A-MPDU
+      uint32_t bssid_hit;         // BSSID matched
+      // ... more fields
+    } rx_mpdu_start;
+  } mpdu_start_tlv;
 
-    // ┌─────────────────────────────────────────────────────────────────┐
-    // │ Attention TLV - Error and status flags                           │
-    // └─────────────────────────────────────────────────────────────────┘
-    struct rx_attention_tlv {
-        uint32_t tlv_tag;
-        struct rx_attention {
-            uint32_t fcs_err:1;         // FCS error
-            uint32_t decrypt_err:1;     // Decryption error
-            uint32_t tkip_mic_err:1;    // TKIP MIC error
-            uint32_t fragment_flag:1;   // Fragmented MPDU
-            uint32_t first_mpdu:1;      // First MPDU of A-MPDU
-            uint32_t last_mpdu:1;       // Last MPDU of A-MPDU
-            uint32_t msdu_limit_error:1;// Too many MSDUs
-            // ... more flags
-        } rx_attention;
-    } attn_tlv;
+  // ┌─────────────────────────────────────────────────────────────────┐
+  // │ Attention TLV - Error and status flags                           │
+  // └─────────────────────────────────────────────────────────────────┘
+  struct rx_attention_tlv {
+    uint32_t tlv_tag;
+    struct rx_attention {
+      uint32_t fcs_err:1;         // FCS error
+      uint32_t decrypt_err:1;     // Decryption error
+      uint32_t tkip_mic_err:1;    // TKIP MIC error
+      uint32_t fragment_flag:1;   // Fragmented MPDU
+      uint32_t first_mpdu:1;      // First MPDU of A-MPDU
+      uint32_t last_mpdu:1;       // Last MPDU of A-MPDU
+      uint32_t msdu_limit_error:1;// Too many MSDUs
+      // ... more flags
+    } rx_attention;
+  } attn_tlv;
 
-    // ┌─────────────────────────────────────────────────────────────────┐
-    // │ Packet Header TLV - 802.11 header copy                           │
-    // └─────────────────────────────────────────────────────────────────┘
-    struct rx_pkt_hdr_tlv {
-        uint32_t tlv_tag;
-        uint8_t rx_pkt_hdr[128];    // Copy of 802.11 header
-    } pkt_hdr_tlv;
+  // ┌─────────────────────────────────────────────────────────────────┐
+  // │ Packet Header TLV - 802.11 header copy                           │
+  // └─────────────────────────────────────────────────────────────────┘
+  struct rx_pkt_hdr_tlv {
+    uint32_t tlv_tag;
+    uint8_t rx_pkt_hdr[128];    // Copy of 802.11 header
+  } pkt_hdr_tlv;
 };
 
 // Total size: RX_PKT_TLVS_LEN (typically 384-512 bytes depending on chip)
@@ -2238,15 +2264,15 @@ struct rx_pkt_tlvs {
 
 #### 5.7.5 Structure Size Summary
 
-| Structure | Typical Size | Notes |
-|-----------|--------------|-------|
-| `sk_buff` | 232-256 bytes | Varies by kernel version |
-| `sk_buff->cb` | 48 bytes | Fixed, for driver private data |
-| `dp_rx_desc` | 32-48 bytes | Per-buffer descriptor |
-| `rx_pkt_tlvs` | 384-512 bytes | Hardware TLVs, chip-dependent |
-| `hal_srng` | 256-384 bytes | Ring management structure |
-| `rx_desc_pool` | 64-96 bytes | Pool management structure |
-| Ring entry | 32-64 bytes | Per-entry in hardware ring |
+| Structure      | Typical Size  | Notes                          |
+| -------------- | ------------- | ------------------------------ |
+| `sk_buff`      | 232-256 bytes | Varies by kernel version       |
+| `sk_buff->cb`  | 48 bytes      | Fixed, for driver private data |
+| `dp_rx_desc`   | 32-48 bytes   | Per-buffer descriptor          |
+| `rx_pkt_tlvs`  | 384-512 bytes | Hardware TLVs, chip-dependent  |
+| `hal_srng`     | 256-384 bytes | Ring management structure      |
+| `rx_desc_pool` | 64-96 bytes   | Pool management structure      |
+| Ring entry     | 32-64 bytes   | Per-entry in hardware ring     |
 
 ### 5.8 QDF_NBUF_CB Metadata Population
 
@@ -2277,6 +2303,7 @@ During RX processing, metadata from hardware TLVs is stored in `skb->cb` for eff
 ```
 
 **Metadata population in dp_rx_process():**
+
 ```c
 // From REO ring descriptor
 peer_mdata = mpdu_desc_info.peer_meta_data;
@@ -2285,13 +2312,13 @@ QDF_NBUF_CB_RX_VDEV_ID(rx_desc->nbuf) = DP_PEER_METADATA_VDEV_ID_GET(peer_mdata)
 
 // From MSDU descriptor
 if (msdu_desc_info.msdu_flags & HAL_MSDU_F_FIRST_MSDU_IN_MPDU)
-    qdf_nbuf_set_rx_chfrag_start(rx_desc->nbuf, 1);
+  qdf_nbuf_set_rx_chfrag_start(rx_desc->nbuf, 1);
 
 if (msdu_desc_info.msdu_flags & HAL_MSDU_F_DA_IS_VALID)
-    qdf_nbuf_set_da_valid(rx_desc->nbuf, 1);
+  qdf_nbuf_set_da_valid(rx_desc->nbuf, 1);
 
 if (msdu_desc_info.msdu_flags & HAL_MSDU_F_SA_IS_VALID)
-    qdf_nbuf_set_sa_valid(rx_desc->nbuf, 1);
+  qdf_nbuf_set_sa_valid(rx_desc->nbuf, 1);
 
 // TID from REO queue number
 qdf_nbuf_set_tid_val(rx_desc->nbuf, HAL_RX_REO_QUEUE_NUMBER_GET(ring_desc));
@@ -2339,43 +2366,44 @@ Large MSDUs that span multiple buffers are handled via scatter-gather:
 ```
 
 **dp_rx_sg_create() implementation:**
+
 ```c
 qdf_nbuf_t dp_rx_sg_create(struct dp_soc *soc, qdf_nbuf_t nbuf)
 {
-    qdf_nbuf_t parent, frag_list, frag_tail, next = NULL;
-    uint16_t frag_list_len = 0;
-    uint16_t mpdu_len;
+  qdf_nbuf_t parent, frag_list, frag_tail, next = NULL;
+  uint16_t frag_list_len = 0;
+  uint16_t mpdu_len;
 
-    // Use MSDU length from REO descriptor (more reliable than TLV)
-    mpdu_len = QDF_NBUF_CB_RX_PKT_LEN(nbuf);
+  // Use MSDU length from REO descriptor (more reliable than TLV)
+  mpdu_len = QDF_NBUF_CB_RX_PKT_LEN(nbuf);
 
-    // Handle case where first fragment has zero length
-    if (!mpdu_len) {
-        frag_tail = nbuf;
-        while (frag_tail && qdf_nbuf_is_rx_chfrag_cont(frag_tail))
-            frag_tail = frag_tail->next;
+  // Handle case where first fragment has zero length
+  if (!mpdu_len) {
+    frag_tail = nbuf;
+    while (frag_tail && qdf_nbuf_is_rx_chfrag_cont(frag_tail))
+      frag_tail = frag_tail->next;
 
-        if (frag_tail)
-            QDF_NBUF_CB_RX_PKT_LEN(nbuf) = QDF_NBUF_CB_RX_PKT_LEN(frag_tail);
-    }
+    if (frag_tail)
+      QDF_NBUF_CB_RX_PKT_LEN(nbuf) = QDF_NBUF_CB_RX_PKT_LEN(frag_tail);
+  }
 
-    // Build frag_list from continuation fragments
-    parent = nbuf;
-    frag_list = nbuf->next;
-    parent->next = NULL;
+  // Build frag_list from continuation fragments
+  parent = nbuf;
+  frag_list = nbuf->next;
+  parent->next = NULL;
 
-    // Accumulate total length
-    while (frag_list) {
-        frag_list_len += qdf_nbuf_len(frag_list);
-        frag_list = frag_list->next;
-    }
+  // Accumulate total length
+  while (frag_list) {
+    frag_list_len += qdf_nbuf_len(frag_list);
+    frag_list = frag_list->next;
+  }
 
-    // Attach frag_list to parent
-    skb_shinfo(parent)->frag_list = nbuf->next;
-    parent->data_len = frag_list_len;
-    parent->len += frag_list_len;
+  // Attach frag_list to parent
+  skb_shinfo(parent)->frag_list = nbuf->next;
+  parent->data_len = frag_list_len;
+  parent->len += frag_list_len;
 
-    return parent;
+  return parent;
 }
 ```
 
@@ -2411,48 +2439,49 @@ Hardware can deliver packets in different encapsulation formats:
 ```
 
 **Native WiFi to Ethernet conversion:**
+
 ```c
 void ol_rx_defrag_nwifi_to_8023(qdf_nbuf_t msdu)
 {
-    struct ieee80211_frame_addr4 wh;
-    struct llc_snap_hdr_t llchdr;
-    struct ethernet_hdr_t *eth_hdr;
-    uint32_t hdrsize;
+  struct ieee80211_frame_addr4 wh;
+  struct llc_snap_hdr_t llchdr;
+  struct ethernet_hdr_t *eth_hdr;
+  uint32_t hdrsize;
 
-    // Copy 802.11 header
-    qdf_mem_copy(&wh, qdf_nbuf_data(msdu), sizeof(wh));
+  // Copy 802.11 header
+  qdf_mem_copy(&wh, qdf_nbuf_data(msdu), sizeof(wh));
 
-    // Calculate 802.11 header size (varies by frame type)
-    hdrsize = sizeof(struct ieee80211_frame);  // 24 bytes
-    if ((wh.i_fc[1] & IEEE80211_FC1_DIR_MASK) == IEEE80211_FC1_DIR_DSTODS)
-        hdrsize += 6;  // Add 4th address for WDS
+  // Calculate 802.11 header size (varies by frame type)
+  hdrsize = sizeof(struct ieee80211_frame);  // 24 bytes
+  if ((wh.i_fc[1] & IEEE80211_FC1_DIR_MASK) == IEEE80211_FC1_DIR_DSTODS)
+    hdrsize += 6;  // Add 4th address for WDS
 
-    // Extract LLC/SNAP header following 802.11 header
-    qdf_mem_copy(&llchdr, qdf_nbuf_data(msdu) + hdrsize,
-                 sizeof(struct llc_snap_hdr_t));
+  // Extract LLC/SNAP header following 802.11 header
+  qdf_mem_copy(&llchdr, qdf_nbuf_data(msdu) + hdrsize,
+               sizeof(struct llc_snap_hdr_t));
 
-    // Remove 802.11 + LLC/SNAP headers
-    qdf_nbuf_pull_head(msdu, hdrsize + sizeof(llchdr));
+  // Remove 802.11 + LLC/SNAP headers
+  qdf_nbuf_pull_head(msdu, hdrsize + sizeof(llchdr));
 
-    // Prepend Ethernet II header
-    eth_hdr = (struct ethernet_hdr_t *)qdf_nbuf_push_head(msdu,
-               sizeof(struct ethernet_hdr_t));
+  // Prepend Ethernet II header
+  eth_hdr = (struct ethernet_hdr_t *)qdf_nbuf_push_head(msdu,
+                                                        sizeof(struct ethernet_hdr_t));
 
-    // Set DA/SA based on To DS / From DS bits
-    switch (wh.i_fc[1] & IEEE80211_FC1_DIR_MASK) {
+  // Set DA/SA based on To DS / From DS bits
+  switch (wh.i_fc[1] & IEEE80211_FC1_DIR_MASK) {
     case IEEE80211_FC1_DIR_FROMDS:  // AP to STA
-        qdf_mem_copy(eth_hdr->dest_addr, wh.i_addr1, 6);  // DA
-        qdf_mem_copy(eth_hdr->src_addr, wh.i_addr3, 6);   // SA
-        break;
+      qdf_mem_copy(eth_hdr->dest_addr, wh.i_addr1, 6);  // DA
+      qdf_mem_copy(eth_hdr->src_addr, wh.i_addr3, 6);   // SA
+      break;
     case IEEE80211_FC1_DIR_TODS:    // STA to AP
-        qdf_mem_copy(eth_hdr->dest_addr, wh.i_addr3, 6);  // DA
-        qdf_mem_copy(eth_hdr->src_addr, wh.i_addr2, 6);   // SA
-        break;
+      qdf_mem_copy(eth_hdr->dest_addr, wh.i_addr3, 6);  // DA
+      qdf_mem_copy(eth_hdr->src_addr, wh.i_addr2, 6);   // SA
+      break;
     // ... handle other cases
-    }
+  }
 
-    // Copy EtherType from LLC/SNAP
-    eth_hdr->ethertype = llchdr.ethertype;
+  // Copy EtherType from LLC/SNAP
+  eth_hdr->ethertype = llchdr.ethertype;
 }
 ```
 
@@ -2493,71 +2522,73 @@ WiFi MPDUs can be fragmented at the MAC layer. The driver reassembles them:
 ```
 
 **PN (Packet Number) validation for replay protection:**
+
 ```c
 static int dp_rx_defrag_pn_check(struct dp_soc *soc, qdf_nbuf_t msdu,
-                                  uint64_t *cur_pn128, uint64_t *prev_pn128)
+                                 uint64_t *cur_pn128, uint64_t *prev_pn128)
 {
-    int out_of_order = 0;
+  int out_of_order = 0;
 
-    // Extract 128-bit PN from TLV
-    hal_rx_tlv_get_pn_num(soc->hal_soc, qdf_nbuf_data(msdu), cur_pn128);
+  // Extract 128-bit PN from TLV
+  hal_rx_tlv_get_pn_num(soc->hal_soc, qdf_nbuf_data(msdu), cur_pn128);
 
-    // PN must increment by exactly 1 for each fragment
-    if (cur_pn128[1] == prev_pn128[1])
-        out_of_order = (cur_pn128[0] - prev_pn128[0] != 1);
-    else
-        out_of_order = (cur_pn128[1] - prev_pn128[1] != 1);
+  // PN must increment by exactly 1 for each fragment
+  if (cur_pn128[1] == prev_pn128[1])
+    out_of_order = (cur_pn128[0] - prev_pn128[0] != 1);
+  else
+    out_of_order = (cur_pn128[1] - prev_pn128[1] != 1);
 
-    return out_of_order;  // 0 = OK, non-zero = replay detected
+  return out_of_order;  // 0 = OK, non-zero = replay detected
 }
 ```
 
 **Security type handling in defragmentation:**
+
 ```c
 QDF_STATUS dp_rx_defrag(struct dp_txrx_peer *txrx_peer, unsigned int tid,
-                         qdf_nbuf_t frag_list_head, qdf_nbuf_t frag_list_tail)
+                        qdf_nbuf_t frag_list_head, qdf_nbuf_t frag_list_tail)
 {
-    // Determine security type
-    index = hal_rx_msdu_is_wlan_mcast(soc->hal_soc, cur) ?
-            dp_sec_mcast : dp_sec_ucast;
+  // Determine security type
+  index = hal_rx_msdu_is_wlan_mcast(soc->hal_soc, cur) ?
+    dp_sec_mcast : dp_sec_ucast;
 
-    switch (txrx_peer->security[index].sec_type) {
+  switch (txrx_peer->security[index].sec_type) {
     case cdp_sec_type_tkip:
-        tkip_demic = 1;
-        // fallthrough
+      tkip_demic = 1;
+    // fallthrough
     case cdp_sec_type_tkip_nomic:
-        // Strip TKIP header (8 bytes) and MIC (8 bytes)
-        while (cur) {
-            if (dp_rx_defrag_tkip_decap(soc, cur, hdr_space))
-                return QDF_STATUS_E_DEFRAG_ERROR;
-            cur = qdf_nbuf_next(cur);
-        }
-        break;
+      // Strip TKIP header (8 bytes) and MIC (8 bytes)
+      while (cur) {
+        if (dp_rx_defrag_tkip_decap(soc, cur, hdr_space))
+          return QDF_STATUS_E_DEFRAG_ERROR;
+        cur = qdf_nbuf_next(cur);
+      }
+      break;
 
     case cdp_sec_type_aes_ccmp:
     case cdp_sec_type_aes_ccmp_256:
-        // Strip CCMP header (8 bytes) and MIC (8/16 bytes)
-        while (cur) {
-            if (dp_rx_defrag_ccmp_decap(soc, cur, hdr_space))
-                return QDF_STATUS_E_DEFRAG_ERROR;
-            cur = qdf_nbuf_next(cur);
-        }
-        break;
+      // Strip CCMP header (8 bytes) and MIC (8/16 bytes)
+      while (cur) {
+        if (dp_rx_defrag_ccmp_decap(soc, cur, hdr_space))
+          return QDF_STATUS_E_DEFRAG_ERROR;
+        cur = qdf_nbuf_next(cur);
+      }
+      break;
 
     case cdp_sec_type_aes_gcmp:
     case cdp_sec_type_aes_gcmp_256:
-        // Handle GCMP decryption
-        // ...
-        break;
-    }
+      // Handle GCMP decryption
+      // ...
+      break;
+  }
 
-    // Verify MIC if TKIP
-    if (tkip_demic) {
-        if (!dp_rx_defrag_tkip_demic(soc, frag_list_head, key))
-            return QDF_STATUS_E_DEFRAG_ERROR;
-    }
+  // Verify MIC if TKIP
+  if (tkip_demic) {
+    if (!dp_rx_defrag_tkip_demic(soc, frag_list_head, key))
+      return QDF_STATUS_E_DEFRAG_ERROR;
+  }
 
-    return QDF_STATUS_SUCCESS;
+  return QDF_STATUS_SUCCESS;
 }
 ```
 
@@ -2601,46 +2632,48 @@ Multicast and broadcast packets require special handling:
 ```
 
 **Multicast Echo Check (MEC):**
+
 ```c
 bool dp_rx_mcast_echo_check(struct dp_soc *soc,
-                             struct dp_txrx_peer *txrx_peer,
-                             uint8_t *rx_tlv_hdr,
-                             qdf_nbuf_t nbuf)
+                            struct dp_txrx_peer *txrx_peer,
+                            uint8_t *rx_tlv_hdr,
+                            qdf_nbuf_t nbuf)
 {
-    struct dp_vdev *vdev = txrx_peer->vdev;
+  struct dp_vdev *vdev = txrx_peer->vdev;
 
-    // Only check for STA mode with MC/BC packets
-    if (vdev->opmode != wlan_op_mode_sta)
-        return false;
-    if (!hal_rx_msdu_end_da_is_mcbc_get(soc->hal_soc, rx_tlv_hdr))
-        return false;
-
-    // Get source address from packet
-    data = qdf_nbuf_data(nbuf);
-
-    // Check if SA is in our MEC table (packets we transmitted)
-    qdf_spin_lock_bh(&soc->mec_lock);
-    mecentry = dp_mec_hash_find(soc, data + QDF_MAC_ADDR_SIZE);
-    qdf_spin_unlock_bh(&soc->mec_lock);
-
-    if (mecentry) {
-        // This is a looped-back packet - drop it
-        return true;
-    }
-
+  // Only check for STA mode with MC/BC packets
+  if (vdev->opmode != wlan_op_mode_sta)
     return false;
+  if (!hal_rx_msdu_end_da_is_mcbc_get(soc->hal_soc, rx_tlv_hdr))
+    return false;
+
+  // Get source address from packet
+  data = qdf_nbuf_data(nbuf);
+
+  // Check if SA is in our MEC table (packets we transmitted)
+  qdf_spin_lock_bh(&soc->mec_lock);
+  mecentry = dp_mec_hash_find(soc, data + QDF_MAC_ADDR_SIZE);
+  qdf_spin_unlock_bh(&soc->mec_lock);
+
+  if (mecentry) {
+    // This is a looped-back packet - drop it
+    return true;
+  }
+
+  return false;
 }
 ```
 
 **NAWDS (Native Wireless Distribution System) multicast handling:**
+
 ```c
 if (qdf_unlikely(txrx_peer->nawds_enabled &&
                  hal_rx_msdu_end_da_is_mcbc_get(soc->hal_soc, rx_tlv_hdr) &&
                  (hal_rx_get_mpdu_mac_ad4_valid(soc->hal_soc, rx_tlv_hdr) == false))) {
-    // Drop MC/BC packets without valid Address 4 in NAWDS mode
-    DP_PEER_PER_PKT_STATS_INC(txrx_peer, rx.nawds_mcast_drop, 1);
-    dp_rx_nbuf_free(nbuf);
-    continue;
+  // Drop MC/BC packets without valid Address 4 in NAWDS mode
+  DP_PEER_PER_PKT_STATS_INC(txrx_peer, rx.nawds_mcast_drop, 1);
+  dp_rx_nbuf_free(nbuf);
+  continue;
 }
 ```
 
@@ -2652,20 +2685,20 @@ The RX path includes several optimizations for throughput:
 // Batch processing - chain packets for same VDEV
 nbuf = nbuf_head;
 while (nbuf) {
-    next = nbuf->next;
-    vdev_id = QDF_NBUF_CB_RX_VDEV_ID(nbuf);
+  next = nbuf->next;
+  vdev_id = QDF_NBUF_CB_RX_VDEV_ID(nbuf);
 
-    // Deliver batch when VDEV changes
-    if (deliver_list_head && vdev && (vdev->vdev_id != vdev_id)) {
-        dp_rx_deliver_to_stack(soc, vdev, peer,
-                               deliver_list_head, deliver_list_tail);
-        deliver_list_head = NULL;
-        deliver_list_tail = NULL;
-    }
+  // Deliver batch when VDEV changes
+  if (deliver_list_head && vdev && (vdev->vdev_id != vdev_id)) {
+    dp_rx_deliver_to_stack(soc, vdev, peer,
+                           deliver_list_head, deliver_list_tail);
+    deliver_list_head = NULL;
+    deliver_list_tail = NULL;
+  }
 
-    // Add to current batch
-    DP_RX_LIST_APPEND(deliver_list_head, deliver_list_tail, nbuf);
-    nbuf = next;
+  // Add to current batch
+  DP_RX_LIST_APPEND(deliver_list_head, deliver_list_tail, nbuf);
+  nbuf = next;
 }
 
 // Checksum offload
@@ -2685,31 +2718,32 @@ Final delivery uses the OSIF callback registered during VDEV creation:
 
 ```c
 QDF_STATUS dp_rx_deliver_to_stack(struct dp_soc *soc,
-                                   struct dp_vdev *vdev,
-                                   struct dp_txrx_peer *txrx_peer,
-                                   qdf_nbuf_t nbuf_head,
-                                   qdf_nbuf_t nbuf_tail)
+                                  struct dp_vdev *vdev,
+                                  struct dp_txrx_peer *txrx_peer,
+                                  qdf_nbuf_t nbuf_head,
+                                  qdf_nbuf_t nbuf_tail)
 {
-    // Validate callbacks exist
-    if (dp_rx_validate_rx_callbacks(soc, vdev, txrx_peer, nbuf_head)
-        != QDF_STATUS_SUCCESS)
-        return QDF_STATUS_E_FAILURE;
+  // Validate callbacks exist
+  if (dp_rx_validate_rx_callbacks(soc, vdev, txrx_peer, nbuf_head)
+    != QDF_STATUS_SUCCESS)
+    return QDF_STATUS_E_FAILURE;
 
-    // Handle raw/native WiFi decapsulation if needed
-    if (qdf_unlikely(vdev->rx_decap_type == htt_cmn_pkt_type_raw) ||
-        (vdev->rx_decap_type == htt_cmn_pkt_type_native_wifi)) {
-        dp_rx_raw_pkt_mld_addr_conv(soc, vdev, txrx_peer, nbuf_head);
-        vdev->osif_rsim_rx_decap(vdev->osif_vdev, &nbuf_head, &nbuf_tail);
-    }
+  // Handle raw/native WiFi decapsulation if needed
+  if (qdf_unlikely(vdev->rx_decap_type == htt_cmn_pkt_type_raw) ||
+    (vdev->rx_decap_type == htt_cmn_pkt_type_native_wifi)) {
+    dp_rx_raw_pkt_mld_addr_conv(soc, vdev, txrx_peer, nbuf_head);
+    vdev->osif_rsim_rx_decap(vdev->osif_vdev, &nbuf_head, &nbuf_tail);
+  }
 
-    // Call OSIF callback (leads to netif_receive_skb / napi_gro_receive)
-    dp_rx_check_delivery_to_stack(soc, vdev, txrx_peer, nbuf_head);
+  // Call OSIF callback (leads to netif_receive_skb / napi_gro_receive)
+  dp_rx_check_delivery_to_stack(soc, vdev, txrx_peer, nbuf_head);
 
-    return QDF_STATUS_SUCCESS;
+  return QDF_STATUS_SUCCESS;
 }
 ```
 
 **OSIF layer delivery to Linux:**
+
 ```c
 // In osif_nss_vdev.c or osif_rawmode.c
 skb->dev = netdev;
@@ -2806,6 +2840,7 @@ When eBPF programs need to access `sk_buff` fields:
 4. **At network stack**: `ar_meta` field may be populated with cached DHCP/EAPOL flags
 
 eBPF programs hook at various points and need correct BTF offsets for:
+
 - `sk_buff->data` - Points to packet data
 - `sk_buff->cb` - Control block with driver metadata
 - `sk_buff->ar_meta` - Cached TID/DHCP/EAPOL flags (patched field)
@@ -2895,9 +2930,9 @@ tx_desc->length = qdf_nbuf_len(nbuf);
 hal_tx_desc = hal_srng_src_get_next(soc->hal_soc, hal_ring_hdl);
 
 if (!hal_tx_desc) {
-    // Ring is full - return nbuf to caller
-    DP_STATS_INC(soc, tx.tcl_ring_full[ring_id], 1);
-    return QDF_STATUS_E_RESOURCES;
+  // Ring is full - return nbuf to caller
+  DP_STATS_INC(soc, tx.tcl_ring_full[ring_id], 1);
+  return QDF_STATUS_E_RESOURCES;
 }
 
 // Populate HAL TX descriptor
@@ -2920,23 +2955,23 @@ uint32_t dp_tx_comp_handler(struct dp_intr *int_ctx, struct dp_soc *soc,
                             hal_ring_handle_t hal_ring_hdl, uint8_t ring_id,
                             uint32_t quota)
 {
-    while (quota-- && (tx_comp_hal_desc = hal_srng_dst_get_next(...))) {
-        // Extract tx_desc_id from completion descriptor
-        tx_desc_id = hal_tx_comp_get_desc_id(tx_comp_hal_desc);
+  while (quota-- && (tx_comp_hal_desc = hal_srng_dst_get_next(...))) {
+    // Extract tx_desc_id from completion descriptor
+    tx_desc_id = hal_tx_comp_get_desc_id(tx_comp_hal_desc);
 
-        // Lookup software TX descriptor
-        tx_desc = dp_tx_desc_find(soc, pool_id, tx_desc_id);
+    // Lookup software TX descriptor
+    tx_desc = dp_tx_desc_find(soc, pool_id, tx_desc_id);
 
-        // Unmap DMA buffer
-        qdf_nbuf_unmap_single(soc->osdev, tx_desc->nbuf, QDF_DMA_TO_DEVICE);
+    // Unmap DMA buffer
+    qdf_nbuf_unmap_single(soc->osdev, tx_desc->nbuf, QDF_DMA_TO_DEVICE);
 
-        // Free the sk_buff
-        // ⚠️ WARNING: skb->cb may contain dangling pointers at this point!
-        qdf_nbuf_free(tx_desc->nbuf);
+    // Free the sk_buff
+    // ⚠️ WARNING: skb->cb may contain dangling pointers at this point!
+    qdf_nbuf_free(tx_desc->nbuf);
 
-        // Return descriptor to free pool
-        dp_tx_desc_free(soc, tx_desc, pool_id);
-    }
+    // Return descriptor to free pool
+    dp_tx_desc_free(soc, tx_desc, pool_id);
+  }
 }
 ```
 
@@ -2973,38 +3008,38 @@ uint32_t dp_tx_comp_handler(struct dp_intr *int_ctx, struct dp_soc *soc,
 
 ### 7.1 Error Categories
 
-| Error Type | Source | Handler Function |
-|------------|--------|------------------|
-| REO Errors | Reorder Engine | `dp_rx_err_process()` |
-| RXDMA Errors | DMA Engine | `dp_rx_err_handler_rh()` |
-| WBM Release Errors | Buffer Manager | `dp_rx_wbm_err_process()` |
-| MSDU Done Failure | DMA Incomplete | Inline in `dp_rx_process()` |
+| Error Type         | Source         | Handler Function            |
+| ------------------ | -------------- | --------------------------- |
+| REO Errors         | Reorder Engine | `dp_rx_err_process()`       |
+| RXDMA Errors       | DMA Engine     | `dp_rx_err_handler_rh()`    |
+| WBM Release Errors | Buffer Manager | `dp_rx_wbm_err_process()`   |
+| MSDU Done Failure  | DMA Incomplete | Inline in `dp_rx_process()` |
 
 ### 7.2 REO Error Codes and Handling
 
 ```c
 // REO Error codes from hal_rx_get_reo_error_code()
 switch (error_code) {
-    case HAL_REO_ERR_REGULAR_FRAME_2K_JUMP:
-    case HAL_REO_ERR_BAR_FRAME_2K_JUMP:
-        // Sequence number jumped by more than 2K - indicates reorder issue
-        dp_2k_jump_handle(soc, nbuf, rx_tlv_hdr, peer_id, tid);
-        break;
+  case HAL_REO_ERR_REGULAR_FRAME_2K_JUMP:
+  case HAL_REO_ERR_BAR_FRAME_2K_JUMP:
+    // Sequence number jumped by more than 2K - indicates reorder issue
+    dp_2k_jump_handle(soc, nbuf, rx_tlv_hdr, peer_id, tid);
+    break;
 
-    case HAL_REO_ERR_REGULAR_FRAME_OOR:
-    case HAL_REO_ERR_BAR_FRAME_OOR:
-        // Out of Order - packet arrived too late
-        dp_rx_oor_handle(soc, nbuf, peer_id, rx_tlv_hdr);
-        break;
+  case HAL_REO_ERR_REGULAR_FRAME_OOR:
+  case HAL_REO_ERR_BAR_FRAME_OOR:
+    // Out of Order - packet arrived too late
+    dp_rx_oor_handle(soc, nbuf, peer_id, rx_tlv_hdr);
+    break;
 
-    case HAL_REO_ERR_QUEUE_DESC_ADDR_0:
-        // NULL queue descriptor - unknown peer
-        dp_rx_null_q_desc_handle(soc, nbuf, rx_tlv_hdr, ...);
-        break;
+  case HAL_REO_ERR_QUEUE_DESC_ADDR_0:
+    // NULL queue descriptor - unknown peer
+    dp_rx_null_q_desc_handle(soc, nbuf, rx_tlv_hdr, ...);
+    break;
 
-    default:
-        dp_err_rl("Non-support error code %d", error_code);
-        dp_rx_nbuf_free(nbuf);
+  default:
+    dp_err_rl("Non-support error code %d", error_code);
+    dp_rx_nbuf_free(nbuf);
 }
 ```
 
@@ -3016,25 +3051,25 @@ static QDF_STATUS dp_rx_err_handler_rh(struct dp_soc *soc,
                                        struct dp_rx_desc *rx_desc,
                                        uint32_t error_code)
 {
-    switch (error_code) {
-        case HTT_RXDATA_ERR_MSDU_LIMIT:
-        case HTT_RXDATA_ERR_FLUSH_REQUEST:
-        case HTT_RXDATA_ERR_ZERO_LEN_MSDU:
-            // Invalid MSDU - just free the buffer
-            dp_rx_nbuf_free(rx_desc->nbuf);
-            break;
+  switch (error_code) {
+    case HTT_RXDATA_ERR_MSDU_LIMIT:
+    case HTT_RXDATA_ERR_FLUSH_REQUEST:
+    case HTT_RXDATA_ERR_ZERO_LEN_MSDU:
+      // Invalid MSDU - just free the buffer
+      dp_rx_nbuf_free(rx_desc->nbuf);
+      break;
 
-        case HTT_RXDATA_ERR_TKIP_MIC:
-            // TKIP MIC failure - security error
-            dp_rx_mic_err_handler_rh(soc, rx_desc->nbuf);
-            break;
+    case HTT_RXDATA_ERR_TKIP_MIC:
+      // TKIP MIC failure - security error
+      dp_rx_mic_err_handler_rh(soc, rx_desc->nbuf);
+      break;
 
-        case HTT_RXDATA_ERR_DECRYPT:
-        case HTT_RXDATA_ERR_UNENCRYPTED:
-            // Decryption failure
-            dp_rx_decrypt_unecrypt_err_handler_rh(soc, rx_desc->nbuf, ...);
-            break;
-    }
+    case HTT_RXDATA_ERR_DECRYPT:
+    case HTT_RXDATA_ERR_UNENCRYPTED:
+      // Decryption failure
+      dp_rx_decrypt_unecrypt_err_handler_rh(soc, rx_desc->nbuf, ...);
+      break;
+  }
 }
 ```
 
@@ -3043,20 +3078,20 @@ static QDF_STATUS dp_rx_err_handler_rh(struct dp_soc *soc,
 ```c
 // In dp_rx_process() - Critical check for DMA completion
 if (qdf_unlikely(!hal_rx_attn_msdu_done_get(rx_tlv_hdr))) {
-    // DMA did not complete writing this buffer!
-    dp_err("MSDU DONE failure");
-    DP_STATS_INC(soc, rx.err.msdu_done_fail, 1);
+  // DMA did not complete writing this buffer!
+  dp_err("MSDU DONE failure");
+  DP_STATS_INC(soc, rx.err.msdu_done_fail, 1);
 
-    // Dump TLVs for debugging
-    hal_rx_dump_pkt_tlvs(hal_soc, rx_tlv_hdr, QDF_TRACE_LEVEL_INFO);
+  // Dump TLVs for debugging
+  hal_rx_dump_pkt_tlvs(hal_soc, rx_tlv_hdr, QDF_TRACE_LEVEL_INFO);
 
-    // Mark descriptor as error state
-    rx_desc->msdu_done_fail = 1;
+  // Mark descriptor as error state
+  rx_desc->msdu_done_fail = 1;
 
-    // Free buffer and continue to next
-    qdf_nbuf_free(nbuf);
-    qdf_assert(0);  // Trigger assert in debug builds
-    continue;
+  // Free buffer and continue to next
+  qdf_nbuf_free(nbuf);
+  qdf_assert(0);  // Trigger assert in debug builds
+  continue;
 }
 ```
 
@@ -3066,15 +3101,15 @@ if (qdf_unlikely(!hal_rx_attn_msdu_done_get(rx_tlv_hdr))) {
 // dp_rx_desc_paddr_sanity_check() - Verify buffer paddr hasn't been corrupted
 #ifdef RX_DESC_DEBUG_CHECK
 static inline bool dp_rx_desc_paddr_sanity_check(struct dp_rx_desc *rx_desc,
-                                                  qdf_dma_addr_t paddr)
+                                                 qdf_dma_addr_t paddr)
 {
-    // Compare physical address from HW descriptor with stored value
-    if (rx_desc->paddr_buf_start != paddr) {
-        DP_STATS_INC(soc, rx.err.nbuf_sanity_fail, 1);
-        rx_desc->in_err_state = 1;
-        return false;
-    }
-    return true;
+  // Compare physical address from HW descriptor with stored value
+  if (rx_desc->paddr_buf_start != paddr) {
+    DP_STATS_INC(soc, rx.err.nbuf_sanity_fail, 1);
+    rx_desc->in_err_state = 1;
+    return false;
+  }
+  return true;
 }
 #endif
 ```
@@ -3084,13 +3119,13 @@ static inline bool dp_rx_desc_paddr_sanity_check(struct dp_rx_desc *rx_desc,
 ```c
 // Key error counters tracked
 struct dp_soc_stats {
-    struct {
-        uint32_t msdu_done_fail;      // DMA completion failed
-        uint32_t nbuf_sanity_fail;    // Buffer address mismatch
-        uint32_t rx_invalid_peer_id;  // Unknown peer
-        uint32_t hal_reo_dest_dup;    // Duplicate descriptor
-        uint32_t reo_error[HAL_REO_ERR_MAX];  // Per-error-code counts
-    } err;
+  struct {
+    uint32_t msdu_done_fail;      // DMA completion failed
+    uint32_t nbuf_sanity_fail;    // Buffer address mismatch
+    uint32_t rx_invalid_peer_id;  // Unknown peer
+    uint32_t hal_reo_dest_dup;    // Duplicate descriptor
+    uint32_t reo_error[HAL_REO_ERR_MAX];  // Per-error-code counts
+  } err;
 };
 ```
 
@@ -3140,20 +3175,20 @@ int hif_napi_poll(struct hif_opaque_softc *hif_ctx,
                   struct napi_struct *napi,
                   int budget)
 {
-    int rc = 0;
-    int cpu = smp_processor_id();
+  int rc = 0;
+  int cpu = smp_processor_id();
 
-    // Call data path service routine
-    rc = dp_service_srngs(dp_ctx, budget, cpu);
+  // Call data path service routine
+  rc = dp_service_srngs(dp_ctx, budget, cpu);
 
-    if (rc < budget) {
-        // All work done - exit NAPI polling
-        napi_complete(napi);
-        // Re-enable interrupts
-        hif_napi_enable_irq(hif_ctx, napi_info->id);
-    }
+  if (rc < budget) {
+    // All work done - exit NAPI polling
+    napi_complete(napi);
+    // Re-enable interrupts
+    hif_napi_enable_irq(hif_ctx, napi_info->id);
+  }
 
-    return rc;  // Return work done
+  return rc;  // Return work done
 }
 ```
 
@@ -3163,50 +3198,50 @@ int hif_napi_poll(struct hif_opaque_softc *hif_ctx,
 // dp_service_srngs() - Service all rings for an interrupt context
 uint32_t dp_service_srngs(void *dp_ctx, uint32_t dp_budget, int cpu)
 {
-    struct dp_intr *int_ctx = (struct dp_intr *)dp_ctx;
-    uint32_t remaining_quota = dp_budget;
-    uint32_t work_done = 0;
+  struct dp_intr *int_ctx = (struct dp_intr *)dp_ctx;
+  uint32_t remaining_quota = dp_budget;
+  uint32_t work_done = 0;
 
-    // Get ring masks for this interrupt context
-    uint8_t tx_mask = int_ctx->tx_ring_mask;
-    uint8_t rx_mask = int_ctx->rx_ring_mask;
-    uint8_t rx_err_mask = int_ctx->rx_err_ring_mask;
+  // Get ring masks for this interrupt context
+  uint8_t tx_mask = int_ctx->tx_ring_mask;
+  uint8_t rx_mask = int_ctx->rx_ring_mask;
+  uint8_t rx_err_mask = int_ctx->rx_err_ring_mask;
 
-    // Process TX completion rings
-    if (tx_mask) {
-        for (ring = 0; ring < MAX_TCL_DATA_RINGS; ring++) {
-            if (!(tx_mask & (1 << ring)))
-                continue;
-            work_done = dp_tx_comp_handler(int_ctx, soc,
-                                           soc->tx_comp_ring[ring].hal_srng,
-                                           ring, remaining_quota);
-            budget -= work_done;
-            if (budget <= 0) goto budget_done;
-        }
+  // Process TX completion rings
+  if (tx_mask) {
+    for (ring = 0; ring < MAX_TCL_DATA_RINGS; ring++) {
+      if (!(tx_mask & (1 << ring)))
+        continue;
+      work_done = dp_tx_comp_handler(int_ctx, soc,
+                                     soc->tx_comp_ring[ring].hal_srng,
+                                     ring, remaining_quota);
+      budget -= work_done;
+      if (budget <= 0) goto budget_done;
     }
+  }
 
-    // Process RX rings (REO destination rings)
-    if (rx_mask) {
-        for (ring = 0; ring < soc->num_reo_dest_rings; ring++) {
-            if (!(rx_mask & (1 << ring)))
-                continue;
-            work_done = dp_rx_process(int_ctx,
-                                      soc->reo_dest_ring[ring].hal_srng,
-                                      ring, remaining_quota);
-            budget -= work_done;
-            if (budget <= 0) goto budget_done;
-        }
+  // Process RX rings (REO destination rings)
+  if (rx_mask) {
+    for (ring = 0; ring < soc->num_reo_dest_rings; ring++) {
+      if (!(rx_mask & (1 << ring)))
+        continue;
+      work_done = dp_rx_process(int_ctx,
+                                soc->reo_dest_ring[ring].hal_srng,
+                                ring, remaining_quota);
+      budget -= work_done;
+      if (budget <= 0) goto budget_done;
     }
+  }
 
-    // Process RX error ring
-    if (rx_err_mask) {
-        work_done = dp_rx_err_process(int_ctx, soc,
-                                      soc->reo_exception_ring.hal_srng,
-                                      remaining_quota);
-    }
+  // Process RX error ring
+  if (rx_err_mask) {
+    work_done = dp_rx_err_process(int_ctx, soc,
+                                  soc->reo_exception_ring.hal_srng,
+                                  remaining_quota);
+  }
 
 budget_done:
-    return dp_budget - budget;  // Return total work done
+  return dp_budget - budget;  // Return total work done
 }
 ```
 
@@ -3219,20 +3254,20 @@ budget_done:
 ├──────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  NAPI Budget (e.g., 64)                                         │
-│        │                                                        │
-│        ├──▶ TX Comp Ring 0: Process up to remaining_quota       │
-│        │         │                                              │
-│        │         └── work_done = 20, remaining = 44             │
-│        │                                                        │
-│        ├──▶ RX Ring 0: Process up to remaining_quota            │
-│        │         │                                              │
-│        │         └── work_done = 30, remaining = 14             │
-│        │                                                        │
-│        ├──▶ RX Ring 1: Process up to remaining_quota            │
-│        │         │                                              │
-│        │         └── work_done = 14, remaining = 0              │
-│        │                                                        │
-│        └──▶ Budget exhausted - return to NAPI                   │
+  │        │                                                        │
+  │        ├──▶ TX Comp Ring 0: Process up to remaining_quota       │
+  │        │         │                                              │
+  │        │         └── work_done = 20, remaining = 44             │
+  │        │                                                        │
+  │        ├──▶ RX Ring 0: Process up to remaining_quota            │
+  │        │         │                                              │
+  │        │         └── work_done = 30, remaining = 14             │
+  │        │                                                        │
+  │        ├──▶ RX Ring 1: Process up to remaining_quota            │
+  │        │         │                                              │
+  │        │         └── work_done = 14, remaining = 0              │
+  │        │                                                        │
+  │        └──▶ Budget exhausted - return to NAPI                   │
 │             (will be re-scheduled for more processing)          │
 │                                                                  │
 └──────────────────────────────────────────────────────────────────┘
@@ -3250,23 +3285,23 @@ static bool dp_rx_intrabss_fwd(struct dp_soc *soc,
                                qdf_nbuf_t nbuf,
                                struct hal_rx_msdu_metadata msdu_metadata)
 {
-    // Lookup destination peer from AST table
-    ast_entry = dp_peer_ast_hash_find_soc(soc, &eh->ether_dhost);
+  // Lookup destination peer from AST table
+  ast_entry = dp_peer_ast_hash_find_soc(soc, &eh->ether_dhost);
 
-    if (ast_entry && ast_entry->peer == ta_peer->vdev) {
-        // Same VAP - clone and transmit
-        nbuf_copy = qdf_nbuf_copy(nbuf);
+  if (ast_entry && ast_entry->peer == ta_peer->vdev) {
+    // Same VAP - clone and transmit
+    nbuf_copy = qdf_nbuf_copy(nbuf);
 
-        // Send via TX path (dp_tx_send)
-        if (dp_tx_send(soc, ta_peer->vdev->vdev_id, nbuf_copy)) {
-            // TX failed - free the copy
-            qdf_nbuf_free(nbuf_copy);
-        }
-
-        tid_stats->intrabss_cnt++;
-        return true;  // Forwarded
+    // Send via TX path (dp_tx_send)
+    if (dp_tx_send(soc, ta_peer->vdev->vdev_id, nbuf_copy)) {
+      // TX failed - free the copy
+      qdf_nbuf_free(nbuf_copy);
     }
-    return false;  // Not intra-BSS
+
+    tid_stats->intrabss_cnt++;
+    return true;  // Forwarded
+  }
+  return false;  // Not intra-BSS
 }
 ```
 
@@ -3276,14 +3311,14 @@ static bool dp_rx_intrabss_fwd(struct dp_soc *soc,
 
 ### 9.1 Key Optimizations
 
-| Optimization | Description |
-|--------------|-------------|
-| **Prefetching** | `qdf_prefetch()` used to prefetch next descriptor while processing current |
-| **Batch Processing** | Multiple packets processed per ring access to reduce lock overhead |
-| **NAPI** | Polling mode reduces interrupt overhead for high traffic |
-| **Buffer Pooling** | Pre-allocated buffer pools avoid per-packet allocation |
-| **Cookie Lookup** | O(1) descriptor lookup via cookie index |
-| **TLV Parsing** | Inline functions and macros for fast metadata extraction |
+| Optimization         | Description                                                                |
+| -------------------- | -------------------------------------------------------------------------- |
+| **Prefetching**      | `qdf_prefetch()` used to prefetch next descriptor while processing current |
+| **Batch Processing** | Multiple packets processed per ring access to reduce lock overhead         |
+| **NAPI**             | Polling mode reduces interrupt overhead for high traffic                   |
+| **Buffer Pooling**   | Pre-allocated buffer pools avoid per-packet allocation                     |
+| **Cookie Lookup**    | O(1) descriptor lookup via cookie index                                    |
+| **TLV Parsing**      | Inline functions and macros for fast metadata extraction                   |
 
 ### 9.2 Memory Alignment
 
@@ -3302,7 +3337,7 @@ static bool dp_rx_intrabss_fwd(struct dp_soc *soc,
 ```c
 // Monitor ring fill level to prevent overflow
 if (dp_srng_get_near_full_level(soc, rx_ring) < DP_SRNG_THRESH_NEAR_FULL)
-    return 0;
+  return 0;
 
 // Set flag to indicate ring is getting full
 qdf_atomic_set(&rx_ring->near_full, 1);
@@ -3364,4 +3399,3 @@ qdf_atomic_set(&rx_ring->near_full, 1);
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
-
