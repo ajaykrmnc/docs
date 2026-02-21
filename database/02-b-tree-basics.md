@@ -1,0 +1,1077 @@
+# Chapter 2: B-Tree Basics - The Backbone of Database Indexes
+
+## Table of Contents
+
+1. [Why B-Trees?](#why-b-trees)
+2. [From Binary Search Trees to B-Trees](#from-binary-search-trees-to-b-trees)
+3. [B-Tree Properties and Invariants](#b-tree-properties-and-invariants)
+4. [B+Tree: The Database Variant](#btree-the-database-variant)
+5. [Node Structure and Layout](#node-structure-and-layout)
+6. [Lookup Operations](#lookup-operations)
+7. [Insertion Operations](#insertion-operations)
+8. [Deletion Operations](#deletion-operations)
+9. [Balancing Mechanics](#balancing-mechanics)
+10. [Disk I/O Optimization](#disk-io-optimization)
+
+---
+
+## Why B-Trees?
+
+B-Trees are the **dominant data structure** for database indexes. Understanding why requires examining the fundamental problem: efficient disk access.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    THE DISK ACCESS PROBLEM                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  SCENARIO: Search for key 42 among 1 million records                        │
+│                                                                             │
+│  APPROACH 1: Linear Scan                                                    │
+│  ────────────────────────                                                   │
+│  [1][2][3][4]...[42]...[1000000]                                            │
+│                                                                             │
+│  Average: 500,000 disk reads                                                │
+│  If each read = 10ms → 5000 seconds = 83 minutes!                           │
+│                                                                             │
+│  APPROACH 2: Binary Search (sorted array)                                   │
+│  ────────────────────────────────────────                                   │
+│  log₂(1,000,000) ≈ 20 comparisons                                           │
+│                                                                             │
+│  BUT: Each comparison = 1 disk seek                                         │
+│  20 seeks × 10ms = 200ms                                                    │
+│                                                                             │
+│  APPROACH 3: B-Tree (branching factor = 100)                                │
+│  ────────────────────────────────────────────                               │
+│  log₁₀₀(1,000,000) ≈ 3 levels                                               │
+│                                                                             │
+│  Only 3 disk reads!                                                         │
+│  3 reads × 10ms = 30ms                                                      │
+│                                                                             │
+│  ═══════════════════════════════════════════════════════════════════════   │
+│  KEY INSIGHT: Maximize data read per disk access                            │
+│  ═══════════════════════════════════════════════════════════════════════   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### The High Branching Factor Advantage
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    TREE HEIGHT COMPARISON                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  For N = 1,000,000,000 (1 billion) records:                                 │
+│                                                                             │
+│  BINARY TREE (branching factor = 2)                                         │
+│  ──────────────────────────────────                                         │
+│  Height = log₂(10⁹) ≈ 30 levels                                             │
+│  → 30 disk I/O operations per lookup                                        │
+│                                                                             │
+│  B-TREE (branching factor = 200)                                            │
+│  ────────────────────────────────                                           │
+│  Height = log₂₀₀(10⁹) ≈ 4 levels                                            │
+│  → 4 disk I/O operations per lookup                                         │
+│                                                                             │
+│  VISUAL COMPARISON                                                          │
+│  ─────────────────                                                          │
+│                                                                             │
+│  Binary Tree:  [root]                                                       │
+│                 / \                                                         │
+│               [2] [3]           Height grows quickly                        │
+│              /\    /\           (30 levels for 1B records)                  │
+│            ... ... ... ...                                                  │
+│                                                                             │
+│  B-Tree:     [root: contains 200 keys and 201 pointers]                     │
+│              /    |    |    |    \                                          │
+│          [200][200][200]...[200]  Level 1: 201 children                     │
+│          / | \                    Level 2: 40,401 children                  │
+│        [....]                     Level 3: 8,120,601 children               │
+│                                   Level 4: 1.6 billion entries!             │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## From Binary Search Trees to B-Trees
+
+### Binary Search Tree (BST) Review
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    BINARY SEARCH TREE                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  PROPERTIES                                                                 │
+│  ──────────                                                                 │
+│  • Each node contains ONE key                                               │
+│  • Left subtree: all keys < node key                                        │
+│  • Right subtree: all keys > node key                                       │
+│                                                                             │
+│  EXAMPLE BST                                                                │
+│  ───────────                                                                │
+│                    [50]                                                     │
+│                   /    \                                                    │
+│                [30]    [70]                                                 │
+│               /   \    /   \                                                │
+│            [20] [40] [60]  [80]                                             │
+│            /                  \                                             │
+│          [10]                 [90]                                          │
+│                                                                             │
+│  PROBLEM: Unbalanced trees                                                  │
+│  ─────────────────────────                                                  │
+│  Insert: 1, 2, 3, 4, 5 (sorted order)                                       │
+│                                                                             │
+│  [1]                                                                        │
+│    \                                                                        │
+│     [2]                                                                     │
+│       \       → Degenerates to linked list!                                 │
+│        [3]      Height = N (worst case)                                     │
+│          \      O(N) operations instead of O(log N)                         │
+│           [4]                                                               │
+│             \                                                               │
+│              [5]                                                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Self-Balancing BSTs (AVL, Red-Black)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    SELF-BALANCING BSTs                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  AVL TREE                                                                   │
+│  ────────                                                                   │
+│  • Balance factor = height(left) - height(right)                            │
+│  • Invariant: |balance factor| ≤ 1 for every node                           │
+│  • Rotations to rebalance after insert/delete                               │
+│                                                                             │
+│  RED-BLACK TREE                                                             │
+│  ──────────────                                                             │
+│  • Each node is Red or Black                                                │
+│  • Root is always Black                                                     │
+│  • No two Red nodes in a row (parent-child)                                 │
+│  • Every path from root to NULL has same # of Black nodes                   │
+│                                                                             │
+│  WHY NOT USE THESE FOR DATABASES?                                           │
+│  ────────────────────────────────                                           │
+│                                                                             │
+│  Problem 1: Low branching factor                                            │
+│  • Still binary (2 children per node)                                       │
+│  • log₂(N) height → too many disk reads                                     │
+│                                                                             │
+│  Problem 2: Each node = 1 disk page?                                        │
+│  • If page = 4KB and key = 8 bytes                                          │
+│  • Utilization = 8 / 4096 = 0.2% (horrible!)                                │
+│                                                                             │
+│  Problem 3: Rebalancing locality                                            │
+│  • Rotations may access distant nodes                                       │
+│  • Many disk seeks for single operation                                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## B-Tree Properties and Invariants
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    B-TREE FORMAL DEFINITION                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  A B-Tree of order M (or degree M) satisfies:                               │
+│                                                                             │
+│  INVARIANT 1: Node Key Limits                                               │
+│  ───────────────────────────────                                            │
+│  • Root: 1 to M-1 keys                                                      │
+│  • Internal nodes: ⌈M/2⌉-1 to M-1 keys                                      │
+│  • Leaf nodes: ⌈M/2⌉-1 to M-1 keys                                          │
+│                                                                             │
+│  INVARIANT 2: Child Pointer Count                                           │
+│  ─────────────────────────────────                                          │
+│  • If a node has K keys, it has K+1 children (for internal nodes)           │
+│  • Leaf nodes have no children                                              │
+│                                                                             │
+│  INVARIANT 3: All Leaves at Same Depth                                      │
+│  ───────────────────────────────────────                                    │
+│  • Tree is perfectly balanced                                               │
+│  • Every path from root to leaf has same length                             │
+│                                                                             │
+│  INVARIANT 4: Keys are Sorted Within Node                                   │
+│  ──────────────────────────────────────────                                 │
+│  • K₁ < K₂ < K₃ < ... < Kₙ                                                  │
+│                                                                             │
+│  INVARIANT 5: Subtree Ordering                                              │
+│  ─────────────────────────────                                              │
+│  • All keys in subtree pointed by Pᵢ are:                                   │
+│    - Greater than Kᵢ₋₁ (if i > 0)                                           │
+│    - Less than Kᵢ (if i < number of keys)                                   │
+│                                                                             │
+│  EXAMPLE: B-Tree of Order 5 (M=5)                                           │
+│  ─────────────────────────────────                                          │
+│  • Each node: 2 to 4 keys (⌈5/2⌉-1 = 2, M-1 = 4)                            │
+│  • Each internal node: 3 to 5 children                                      │
+│                                                                             │
+│         ┌───────────────────────────────────┐                               │
+│         │     [30 | 60 | -- | --]           │                               │
+│         │      /      |       \             │                               │
+│         └──────┼──────┼────────┼────────────┘                               │
+│                │      │        │                                            │
+│       ┌────────┘      │        └────────┐                                   │
+│       ▼               ▼                 ▼                                   │
+│  [10|20|--|--]   [40|50|--|--]    [70|80|90|--]                              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Why These Invariants Matter
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    INVARIANT BENEFITS                                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  BENEFIT 1: Guaranteed Balance (Invariant 3)                                │
+│  ───────────────────────────────────────────                                │
+│  • Height = O(log_M N)                                                      │
+│  • Predictable performance                                                  │
+│  • No worst-case linear degredation                                         │
+│                                                                             │
+│  BENEFIT 2: High Fanout (Invariants 1, 2)                                   │
+│  ─────────────────────────────────────────                                  │
+│  • Each node holds many keys → low height                                   │
+│  • Each disk read yields many comparisons                                   │
+│  • Fewer I/O operations per lookup                                          │
+│                                                                             │
+│  BENEFIT 3: Space Efficiency (Invariant 1)                                  │
+│  ──────────────────────────────────────────                                 │
+│  • Minimum fill factor: 50%                                                 │
+│  • Nodes always at least half full                                          │
+│  • Prevents sparse trees wasting disk space                                 │
+│                                                                             │
+│  BENEFIT 4: Sorted Access (Invariants 4, 5)                                 │
+│  ───────────────────────────────────────────                                │
+│  • In-order traversal yields sorted data                                    │
+│  • Efficient range queries                                                  │
+│  • Binary search within nodes                                               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## B+Tree: The Database Variant
+
+Most databases use B+Trees rather than classic B-Trees. Here's why:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    B-TREE vs B+TREE                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  CLASSIC B-TREE                                                             │
+│  ══════════════                                                             │
+│                                                                             │
+│         ┌─────────────────────────────────────┐                             │
+│         │  [30* | 60* | 90*]                  │  * = has associated data    │
+│         │   /      |      |     \             │                             │
+│         └───┼──────┼──────┼──────┼────────────┘                             │
+│             │      │      │      │                                          │
+│        ┌────┘   ┌──┘   ┌──┘      └────┐                                     │
+│        ▼        ▼      ▼              ▼                                     │
+│    [10*|20*] [40*|50*] [70*|80*] [100*|110*]                                │
+│                                                                             │
+│  • Data stored in ALL nodes (internal + leaf)                               │
+│  • Keys may appear only once in entire tree                                 │
+│  • Less efficient for range scans                                           │
+│                                                                             │
+│  ═══════════════════════════════════════════════════════════════════════    │
+│                                                                             │
+│  B+TREE (DATABASE STANDARD)                                                 │
+│  ══════════════════════════                                                 │
+│                                                                             │
+│         ┌─────────────────────────────────────┐                             │
+│         │  [30 | 60 | 90]                     │  Internal: keys only        │
+│         │   /      |      |     \             │  (no data)                  │
+│         └───┼──────┼──────┼──────┼────────────┘                             │
+│             │      │      │      │                                          │
+│        ┌────┘   ┌──┘   ┌──┘      └────┐                                     │
+│        ▼        ▼      ▼              ▼                                     │
+│    [10|20|30]→[40|50|60]→[70|80|90]→[100|110]                               │
+│        ↑                                                                    │
+│    Leaf: keys + data + sibling pointers                                     │
+│                                                                             │
+│  • Data stored ONLY in leaf nodes                                           │
+│  • Internal nodes contain only keys (separator/guide keys)                  │
+│  • Leaf nodes linked for sequential access                                  │
+│  • Keys may be duplicated (in internal nodes)                               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### B+Tree Advantages for Databases
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    WHY DATABASES USE B+TREES                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ADVANTAGE 1: Higher Fanout in Internal Nodes                               │
+│  ────────────────────────────────────────────                               │
+│                                                                             │
+│  B-Tree internal node:    [Key₁|Data₁|Ptr₁|Key₂|Data₂|Ptr₂|...]             │
+│  B+Tree internal node:    [Key₁|Ptr₁|Key₂|Ptr₂|Key₃|Ptr₃|...]               │
+│                                                                             │
+│  If page = 8KB, key = 8 bytes, data = 100 bytes, pointer = 8 bytes:         │
+│  • B-Tree: 8192 / (8 + 100 + 8) ≈ 70 keys per node                          │
+│  • B+Tree: 8192 / (8 + 8) ≈ 500 keys per node                               │
+│                                                                             │
+│  → B+Tree has 7x higher fanout → fewer levels → fewer disk reads            │
+│                                                                             │
+│  ADVANTAGE 2: Efficient Range Scans                                         │
+│  ────────────────────────────────────                                       │
+│                                                                             │
+│  Query: SELECT * FROM users WHERE age BETWEEN 25 AND 35                     │
+│                                                                             │
+│  B+Tree approach:                                                           │
+│  1. Find leaf with age=25 (log N lookups)                                   │
+│  2. Follow sibling pointers: [25]→[26]→[27]→...→[35]                        │
+│  3. Sequential scan through linked leaves                                   │
+│                                                                             │
+│  ┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐   ┌─────┐                            │
+│  │ 20  │──▶│ 25  │──▶│ 28  │──▶│ 32  │──▶│ 40  │                            │
+│  │ 22  │   │ 26  │   │ 30  │   │ 35  │   │ 45  │                            │
+│  │ 24  │   │ 27  │   │ 31  │   │ 38  │   │ 50  │                            │
+│  └─────┘   └─────┘   └─────┘   └─────┘   └─────┘                            │
+│              ▲                    ▲                                         │
+│              │                    │                                         │
+│           start=25             end=35                                       │
+│              └────────────────────┘                                         │
+│                 Sequential scan                                             │
+│                                                                             │
+│  ADVANTAGE 3: Consistent Performance                                        │
+│  ─────────────────────────────────────                                      │
+│  • All data at same depth (leaf level)                                      │
+│  • Every lookup traverses same number of levels                             │
+│  • Predictable latency                                                      │
+│                                                                             │
+│  ADVANTAGE 4: Simpler Caching Strategy                                      │
+│  ──────────────────────────────────────                                     │
+│  • Internal nodes are smaller → more fit in cache                           │
+│  • Cache internal nodes (hot), fetch leaves on demand                       │
+│  • Better memory utilization                                                │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+
+---
+
+## Node Structure and Layout
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    B+TREE NODE STRUCTURE                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  INTERNAL NODE LAYOUT                                                       │
+│  ════════════════════                                                       │
+│                                                                             │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │ Header │ P₀ │ K₁ │ P₁ │ K₂ │ P₂ │ K₃ │ P₃ │ ... │ Kₙ │ Pₙ │ Free  │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  Header contains:                                                           │
+│  • Node type (internal/leaf)                                                │
+│  • Number of keys                                                           │
+│  • Right sibling pointer (optional)                                         │
+│  • Page LSN (for recovery)                                                  │
+│                                                                             │
+│  Relationship:                                                              │
+│  • P₀ points to subtree where all keys < K₁                                 │
+│  • Pᵢ points to subtree where Kᵢ ≤ keys < Kᵢ₊₁                              │
+│  • Pₙ points to subtree where all keys ≥ Kₙ                                 │
+│                                                                             │
+│  LEAF NODE LAYOUT                                                           │
+│  ════════════════                                                           │
+│                                                                             │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │Header│ K₁│V₁ │ K₂│V₂ │ K₃│V₃ │ ... │ Kₙ│Vₙ │ Free │ Prev │ Next │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  Values (V) can be:                                                         │
+│  • Actual row data (clustered index)                                        │
+│  • Row pointer/RID (non-clustered index)                                    │
+│  • Primary key (secondary index in InnoDB)                                  │
+│                                                                             │
+│  Prev/Next: Sibling pointers for range scans                                │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Slotted Page Organization
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    SLOTTED PAGE STRUCTURE                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Modern databases use slotted pages for B+Tree nodes:                       │
+│                                                                             │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │ PAGE HEADER                                                          │   │
+│  │ ┌────────────────────────────────────────────────────────────────┐   │   │
+│  │ │ Page ID │ LSN │ Type │ Slot Count │ Free Space Ptr │ Checksum │   │   │
+│  │ └────────────────────────────────────────────────────────────────┘   │   │
+│  ├──────────────────────────────────────────────────────────────────────┤   │
+│  │ SLOT ARRAY (grows downward →)                                        │   │
+│  │ ┌────────┬────────┬────────┬────────┬────────┬────────────────────┐  │   │
+│  │ │ Slot 0 │ Slot 1 │ Slot 2 │ Slot 3 │ Slot 4 │        ...         │  │   │
+│  │ │(off,len)│(off,len)│(off,len)│(off,len)│(off,len)│                │  │   │
+│  │ └────────┴────────┴────────┴────────┴────────┴────────────────────┘  │   │
+│  │                              │                                       │   │
+│  │                              ▼ (slots grow this way)                 │   │
+│  │                                                                      │   │
+│  │                        FREE SPACE                                    │   │
+│  │                                                                      │   │
+│  │                              ▲ (records grow this way)               │   │
+│  │                              │                                       │   │
+│  │ ┌────────────────────────────────────────────────────────────────┐   │   │
+│  │ │ Record N │ Record N-1 │ ... │ Record 2 │ Record 1 │ Record 0  │   │   │
+│  │ └────────────────────────────────────────────────────────────────┘   │   │
+│  │ RECORDS (grow upward ←)                                              │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  BENEFITS OF SLOTTED PAGES                                                  │
+│  ─────────────────────────────                                              │
+│  • Variable-length records supported                                        │
+│  • Records can be compacted without changing slot pointers                  │
+│  • Slot number provides stable "record ID" within page                      │
+│  • Easy deletion (just mark slot as free)                                   │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Lookup Operations
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    B+TREE POINT LOOKUP ALGORITHM                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ALGORITHM: Search(key)                                                     │
+│  ═══════════════════════                                                    │
+│                                                                             │
+│  1. Start at root node                                                      │
+│  2. While current node is internal:                                         │
+│     a. Binary search for key position                                       │
+│     b. Follow appropriate child pointer                                     │
+│  3. At leaf node:                                                           │
+│     a. Binary search for key                                                │
+│     b. Return value if found, NULL otherwise                                │
+│                                                                             │
+│  EXAMPLE: Search for key 45                                                 │
+│  ─────────────────────────────                                              │
+│                                                                             │
+│  Step 1: Start at root                                                      │
+│          ┌─────────────────────┐                                            │
+│          │   [30 | 60 | 90]    │   45 > 30, 45 < 60                         │
+│          │    ↓    ↓    ↓    ↓ │   → Follow P₁                              │
+│          └─────────────────────┘                                            │
+│                   │                                                         │
+│                   ▼                                                         │
+│  Step 2: Internal node                                                      │
+│          ┌─────────────────────┐                                            │
+│          │   [40 | 50 | 55]    │   45 > 40, 45 < 50                         │
+│          │    ↓    ↓    ↓    ↓ │   → Follow P₁                              │
+│          └─────────────────────┘                                            │
+│                   │                                                         │
+│                   ▼                                                         │
+│  Step 3: Leaf node (found!)                                                 │
+│          ┌─────────────────────┐                                            │
+│          │ [41|42|43|44|45|46] │   Binary search → found 45!                │
+│          │      data values    │   Return associated value                  │
+│          └─────────────────────┘                                            │
+│                                                                             │
+│  COMPLEXITY                                                                 │
+│  ──────────                                                                 │
+│  • Tree traversal: O(log_M N) where M = branching factor                    │
+│  • Binary search within node: O(log M)                                      │
+│  • Total: O(log_M N × log M) = O(log N)                                     │
+│  • Disk I/O: O(log_M N) pages read                                          │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Range Query Algorithm
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    B+TREE RANGE SCAN ALGORITHM                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ALGORITHM: RangeScan(low_key, high_key)                                    │
+│  ═══════════════════════════════════════                                    │
+│                                                                             │
+│  1. Search for low_key → find starting leaf                                 │
+│  2. Scan leaf for keys ≥ low_key                                            │
+│  3. While current key ≤ high_key:                                           │
+│     a. Collect matching records                                             │
+│     b. When leaf exhausted, follow "next" pointer                           │
+│  4. Return collected records                                                │
+│                                                                             │
+│  EXAMPLE: Range [25, 55]                                                    │
+│  ───────────────────────                                                    │
+│                                                                             │
+│                    [Root: 30 | 60]                                          │
+│                    /      |       \                                         │
+│               [15|20] [35|45|50] [65|70]                                    │
+│               /    |     |    \      \                                      │
+│              ▼     ▼     ▼     ▼      ▼                                     │
+│  Leaves: [10,15]→[20,25]→[30,35]→[40,45,50]→[55,60]→[65,70]                 │
+│              │                                  │                           │
+│              └──────────── scan ────────────────┘                           │
+│                                                                             │
+│  1. Search(25) → land on leaf [20,25]                                       │
+│  2. Scan: 25 ✓                                                              │
+│  3. Next leaf [30,35]: 30 ✓, 35 ✓                                           │
+│  4. Next leaf [40,45,50]: 40 ✓, 45 ✓, 50 ✓                                  │
+│  5. Next leaf [55,60]: 55 ✓, 60 > 55 → stop                                 │
+│  6. Return: {25, 30, 35, 40, 45, 50, 55}                                    │
+│                                                                             │
+│  PERFORMANCE                                                                │
+│  ───────────                                                                │
+│  • Initial lookup: O(log N)                                                 │
+│  • Scan: O(K) where K = number of results                                   │
+│  • Sequential I/O (leaves are linked) → very efficient                      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+
+
+---
+
+## Insertion Operations
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    B+TREE INSERTION ALGORITHM                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ALGORITHM: Insert(key, value)                                              │
+│  ═════════════════════════════                                              │
+│                                                                             │
+│  1. Search for appropriate leaf node                                        │
+│  2. If leaf has space:                                                      │
+│     a. Insert key-value pair in sorted order                                │
+│     b. Done!                                                                │
+│  3. If leaf is full (overflow):                                             │
+│     a. Split leaf into two nodes                                            │
+│     b. Distribute keys evenly                                               │
+│     c. Insert middle key into parent                                        │
+│     d. If parent overflows, split recursively                               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Insertion Without Split
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    SIMPLE INSERTION (NO SPLIT)                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Insert key 25 into B+Tree (order 4: max 3 keys per node)                   │
+│                                                                             │
+│  BEFORE:                                                                    │
+│  ═══════                                                                    │
+│                         [30]                                                │
+│                        /    \                                               │
+│                   [10|20]   [40|50]                                         │
+│                                                                             │
+│  Step 1: Search for 25 → leaf [10|20]                                       │
+│  Step 2: Leaf has space (2 keys, max 3)                                     │
+│  Step 3: Insert 25 in sorted position                                       │
+│                                                                             │
+│  AFTER:                                                                     │
+│  ══════                                                                     │
+│                         [30]                                                │
+│                        /    \                                               │
+│                 [10|20|25]  [40|50]                                         │
+│                      ↑                                                      │
+│                   inserted                                                  │
+│                                                                             │
+│  No structural changes needed!                                              │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Leaf Node Split
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    LEAF SPLIT INSERTION                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Insert key 35 into B+Tree (order 4: max 3 keys per node)                   │
+│                                                                             │
+│  BEFORE:                                                                    │
+│  ═══════                                                                    │
+│                         [30]                                                │
+│                        /    \                                               │
+│                 [10|20|25]  [40|50|60]  ← FULL!                              │
+│                                                                             │
+│  Step 1: Search for 35 → leaf [40|50|60]                                    │
+│  Step 2: Leaf is FULL (3 keys, max 3)                                       │
+│  Step 3: Split required!                                                    │
+│                                                                             │
+│  SPLIT PROCESS                                                              │
+│  ═════════════                                                              │
+│                                                                             │
+│  1. Insert key logically: [35|40|50|60] (4 keys - overflow!)                │
+│                                                                             │
+│  2. Split at midpoint:                                                      │
+│     Left:  [35|40]                                                          │
+│     Right: [50|60]                                                          │
+│     ↑ Copy 50 up to parent                                                  │
+│                                                                             │
+│  3. Link siblings:                                                          │
+│     [35|40] ←→ [50|60]                                                      │
+│                                                                             │
+│  AFTER:                                                                     │
+│  ══════                                                                     │
+│                       [30 | 50]                                             │
+│                      /    |    \                                            │
+│               [10|20|25] [35|40] [50|60]                                    │
+│                              ↑                                              │
+│                          new leaf                                           │
+│                                                                             │
+│  Note: In B+Trees, the split key (50) is COPIED up, not moved               │
+│        (50 remains in the right leaf for completeness)                      │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Internal Node Split (Cascading Split)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    INTERNAL NODE SPLIT                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  When a leaf split requires inserting into a full parent:                   │
+│                                                                             │
+│  BEFORE (root is full):                                                     │
+│  ══════════════════════                                                     │
+│                    [20 | 40 | 60]  ← FULL ROOT!                             │
+│                   /    |    |    \                                          │
+│                [10]  [30]  [50]  [70|80]                                    │
+│                                                                             │
+│  Insert 75: causes split of [70|80] → need to insert into root             │
+│                                                                             │
+│  SPLIT PROCESS                                                              │
+│  ═════════════                                                              │
+│                                                                             │
+│  1. Leaf [70|80] + 75 → [70|75] and [80]                                    │
+│     Push 80 up to parent                                                    │
+│                                                                             │
+│  2. Parent [20|40|60] + 80 → overflow!                                      │
+│     [20|40|60|80] needs split                                               │
+│                                                                             │
+│  3. Split parent at midpoint:                                               │
+│     Left:  [20|40]                                                          │
+│     Right: [60|80]                                                          │
+│     Push 50 up (middle key - but wait, we need to recalculate)              │
+│                                                                             │
+│  Actually: [20|40|60|80] splits as:                                         │
+│     Left:  [20|40]                                                          │
+│     Right: [80]                                                             │
+│     Middle key 60 pushed UP to new root                                     │
+│                                                                             │
+│  AFTER:                                                                     │
+│  ══════                                                                     │
+│                           [60]           ← NEW ROOT!                        │
+│                          /    \                                             │
+│                    [20|40]    [80]                                          │
+│                   /   |   \      \                                          │
+│                [10] [30] [50]  [70|75] [80]                                 │
+│                                                                             │
+│  KEY INSIGHT: In B+Trees, when internal nodes split:                        │
+│  • Middle key is MOVED up (not copied)                                      │
+│  • This differs from leaf splits where key is COPIED                        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Deletion Operations
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    B+TREE DELETION ALGORITHM                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ALGORITHM: Delete(key)                                                     │
+│  ═══════════════════════                                                    │
+│                                                                             │
+│  1. Search for key in leaf node                                             │
+│  2. Delete key from leaf                                                    │
+│  3. If leaf still meets minimum occupancy:                                  │
+│     a. Done! (update parent key if needed)                                  │
+│  4. If leaf underflows (below minimum):                                     │
+│     a. Try borrowing from sibling                                           │
+│     b. If cannot borrow, merge with sibling                                 │
+│     c. Update/delete parent key                                             │
+│     d. If parent underflows, recurse upward                                 │
+│                                                                             │
+│  MINIMUM OCCUPANCY                                                          │
+│  ─────────────────                                                          │
+│  Order M B+Tree:                                                            │
+│  • Minimum keys in leaf: ⌈M/2⌉ - 1                                          │
+│  • Minimum keys in internal: ⌈M/2⌉ - 1                                      │
+│  • Root: no minimum (can have 1 key)                                        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Deletion Without Underflow
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    SIMPLE DELETION (NO UNDERFLOW)                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  Delete key 25 from B+Tree (order 5: min 2 keys per node)                   │
+│                                                                             │
+│  BEFORE:                                                                    │
+│  ═══════                                                                    │
+│                         [30]                                                │
+│                        /    \                                               │
+│                 [10|20|25]  [40|50]                                         │
+│                                                                             │
+│  Step 1: Search for 25 → leaf [10|20|25]                                    │
+│  Step 2: Delete 25                                                          │
+│  Step 3: Leaf has 2 keys (minimum met)                                      │
+│                                                                             │
+│  AFTER:                                                                     │
+│  ══════                                                                     │
+│                         [30]                                                │
+│                        /    \                                               │
+│                   [10|20]   [40|50]                                         │
+│                                                                             │
+│  No rebalancing needed!                                                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+
+### Redistribution (Borrowing from Sibling)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    REDISTRIBUTION / BORROWING                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  When deletion causes underflow but sibling has spare keys:                 │
+│                                                                             │
+│  BEFORE: Delete 10 (order 5: min 2 keys per node)                           │
+│  ═══════                                                                    │
+│                         [30]                                                │
+│                        /    \                                               │
+│                   [10|20]   [40|50|60]  ← has spare keys                    │
+│                                                                             │
+│  Problem: After deleting 10, left leaf has only 1 key (underflow!)          │
+│           [20] - only 1 key, minimum is 2                                   │
+│                                                                             │
+│  Solution: Borrow from right sibling                                        │
+│                                                                             │
+│  REDISTRIBUTION PROCESS                                                     │
+│  ══════════════════════                                                     │
+│                                                                             │
+│  1. Delete 10 → left leaf becomes [20] (underflow)                          │
+│                                                                             │
+│  2. Right sibling [40|50|60] has 3 keys (can spare)                         │
+│                                                                             │
+│  3. Borrow: Move 40 from right sibling to left leaf                         │
+│                                                                             │
+│  4. Update parent separator: 30 → 50                                        │
+│                                                                             │
+│  AFTER:                                                                     │
+│  ══════                                                                     │
+│                         [50]                                                │
+│                        /    \                                               │
+│                   [20|40]   [50|60]                                         │
+│                                                                             │
+│  Both leaves now have 2 keys (minimum satisfied)                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Merge (Coalescence)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    NODE MERGE / COALESCENCE                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  When neither sibling can spare keys:                                       │
+│                                                                             │
+│  BEFORE: Delete 50 (order 5: min 2 keys per node)                           │
+│  ═══════                                                                    │
+│                         [30 | 50]                                           │
+│                        /    |    \                                          │
+│                   [10|20] [40] [50|60]                                      │
+│                             ↑     ↑                                         │
+│                       min keys  target                                      │
+│                                                                             │
+│  Problem: Deleting 50 leaves [60] with 1 key (underflow)                    │
+│           Left sibling [40] has minimum keys - can't borrow                 │
+│                                                                             │
+│  Solution: Merge [40] and [60]                                              │
+│                                                                             │
+│  MERGE PROCESS                                                              │
+│  ═════════════                                                              │
+│                                                                             │
+│  1. Delete 50 → [60] underflows                                             │
+│                                                                             │
+│  2. Merge [40] and [60] → [40|60]                                           │
+│                                                                             │
+│  3. Remove separator key 50 from parent                                     │
+│                                                                             │
+│  AFTER:                                                                     │
+│  ══════                                                                     │
+│                         [30]                                                │
+│                        /    \                                               │
+│                   [10|20]   [40|60]                                         │
+│                                                                             │
+│  Parent now has 1 key (still valid for root)                                │
+│                                                                             │
+│  CASCADE: If parent underflows, merge/borrow recursively                    │
+│           If root becomes empty, child becomes new root                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Balancing Mechanics
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    B+TREE BALANCE GUARANTEE                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  WHY B+TREES ARE ALWAYS BALANCED                                            │
+│  ═══════════════════════════════                                            │
+│                                                                             │
+│  1. Growth happens at the ROOT (splits propagate UP)                        │
+│     • Unlike BSTs where growth happens at leaves                            │
+│     • All leaves always at same depth                                       │
+│                                                                             │
+│  2. Shrinkage happens at the ROOT (merges propagate UP)                     │
+│     • When root has no keys, tree height decreases                          │
+│     • All leaves still at same depth                                        │
+│                                                                             │
+│  VISUALIZATION                                                              │
+│  ═════════════                                                              │
+│                                                                             │
+│  BST Growth (unbalanced):        B+Tree Growth (balanced):                  │
+│                                                                             │
+│       [1]                             [1]                                   │
+│         \                              │                                    │
+│          [2]                      Insert 2, 3, 4, 5...                      │
+│            \                           │                                    │
+│             [3]                        ▼                                    │
+│               \                      [3]          (split creates new root)  │
+│                [4]                  /    \                                  │
+│                  \               [1|2]  [3|4|5]                             │
+│                   [5]                                                       │
+│                                                                             │
+│  Height: 5 (degenerates)       Height: 2 (balanced!)                        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Space Utilization Analysis
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    SPACE UTILIZATION                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  FILL FACTOR ANALYSIS                                                       │
+│  ════════════════════                                                       │
+│                                                                             │
+│  For B+Tree of order M:                                                     │
+│  • Maximum keys per node: M - 1                                             │
+│  • Minimum keys per node: ⌈M/2⌉ - 1                                         │
+│                                                                             │
+│  Minimum fill factor = (⌈M/2⌉ - 1) / (M - 1) ≈ 50%                          │
+│                                                                             │
+│  Example: Order 100 B+Tree                                                  │
+│  • Max keys: 99                                                             │
+│  • Min keys: 49                                                             │
+│  • Min fill: 49/99 = 49.5%                                                  │
+│                                                                             │
+│  WORST CASE vs AVERAGE CASE                                                 │
+│  ══════════════════════════                                                 │
+│                                                                             │
+│  Worst case: All nodes at minimum (50% full)                                │
+│  Average case (random inserts): ~69% full                                   │
+│  Best case (bulk load): ~100% full (with proper algorithms)                 │
+│                                                                             │
+│  IMPLICATIONS                                                               │
+│  ════════════                                                               │
+│  • Even worst case guarantees reasonable space usage                        │
+│  • No need for periodic rebalancing/compaction                              │
+│  • Sequential inserts may cause suboptimal fill                             │
+│  • Bulk loading can achieve near-100% utilization                           │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Disk I/O Optimization
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    B+TREE I/O OPTIMIZATION TECHNIQUES                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. PAGE SIZE ALIGNMENT                                                     │
+│  ═══════════════════════                                                    │
+│  • Node size = disk page size (typically 4KB, 8KB, or 16KB)                 │
+│  • One I/O = one complete node read                                         │
+│  • Maximizes data retrieved per disk access                                 │
+│                                                                             │
+│  Typical page sizes:                                                        │
+│  • PostgreSQL: 8 KB                                                         │
+│  • MySQL InnoDB: 16 KB                                                      │
+│  • SQLite: 4 KB (configurable)                                              │
+│  • Oracle: 8 KB (configurable)                                              │
+│                                                                             │
+│  2. FANOUT MAXIMIZATION                                                     │
+│  ═══════════════════════                                                    │
+│  • More keys per node = lower tree height = fewer I/Os                      │
+│  • Key compression (prefix compression, suffix truncation)                  │
+│  • Pointer compression (relative page numbers)                              │
+│                                                                             │
+│  Example: 16KB page, 8-byte keys, 8-byte pointers                           │
+│  Fanout = 16384 / (8 + 8) ≈ 1000 children per node!                         │
+│                                                                             │
+│  Height for 1 billion records:                                              │
+│  log₁₀₀₀(10⁹) = 3 levels → only 3 I/Os per lookup                           │
+│                                                                             │
+│  3. BUFFER POOL CACHING                                                     │
+│  ═══════════════════════                                                    │
+│  • Keep hot pages (especially root and upper levels) in memory              │
+│  • Root node: almost always cached (1 page)                                 │
+│  • Level 1: likely cached (few hundred pages)                               │
+│  • Leaves: may require disk I/O                                             │
+│                                                                             │
+│  Effective I/O per lookup ≈ 1-2 (not tree height)                           │
+│                                                                             │
+│  4. PREFETCHING                                                             │
+│  ═════════════                                                              │
+│  • For range scans, prefetch next leaf pages                                │
+│  • Sequential read is faster than random read                               │
+│  • Exploit disk read-ahead capabilities                                     │
+│                                                                             │
+│  5. BULK LOADING                                                            │
+│  ═══════════════                                                            │
+│  • For initial data load, build bottom-up                                   │
+│  • Sort data first, then create leaves                                      │
+│  • Build internal nodes from leaf boundaries                                │
+│  • Achieves ~100% fill factor                                               │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Practical Performance Numbers
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    REAL-WORLD B+TREE PERFORMANCE                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  LOOKUP LATENCY (assuming warm cache for upper levels)                      │
+│  ══════════════════════════════════════════════════════                     │
+│                                                                             │
+│  Records    Tree Height    Uncached I/Os    Typical Latency                 │
+│  ────────   ───────────    ─────────────    ───────────────                 │
+│  10K        2              1                ~0.1 ms (SSD)                   │
+│  1M         3              1-2              ~0.2 ms (SSD)                   │
+│  100M       3-4            1-2              ~0.3 ms (SSD)                   │
+│  1B         4              1-2              ~0.4 ms (SSD)                   │
+│                                                                             │
+│  With spinning disk: multiply by 10-100x                                    │
+│                                                                             │
+│  RANGE SCAN THROUGHPUT                                                      │
+│  ══════════════════════                                                     │
+│                                                                             │
+│  Sequential leaf scan: ~100-500 MB/s (limited by disk/network)              │
+│  Records per second: millions (depends on record size)                      │
+│                                                                             │
+│  INSERT THROUGHPUT                                                          │
+│  ══════════════════                                                         │
+│                                                                             │
+│  Random inserts: 10K-50K ops/sec (depends on write strategy)                │
+│  Bulk load: 100K-1M+ records/sec                                            │
+│                                                                             │
+│  KEY INSIGHT                                                                │
+│  ═══════════                                                                │
+│  B+Trees are optimized for disk access patterns:                            │
+│  • Read a page → process many keys                                          │
+│  • Sequential access → exploit disk prefetching                             │
+│  • Cache upper levels → minimize random I/O                                 │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Summary
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CHAPTER 2 KEY TAKEAWAYS                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. B-Trees exist because disk I/O is expensive                             │
+│     → High branching factor minimizes tree height                           │
+│     → Each disk read yields maximum useful information                      │
+│                                                                             │
+│  2. B+Trees are the database standard                                       │
+│     → Data only in leaves (higher fanout for internal nodes)                │
+│     → Linked leaves enable efficient range scans                            │
+│     → Consistent lookup performance (all data at same depth)                │
+│                                                                             │
+│  3. Operations maintain balance automatically                               │
+│     → Inserts: split nodes when full, propagate upward                      │
+│     → Deletes: borrow or merge when underflow, propagate upward             │
+│     → Tree grows/shrinks at the root, not leaves                            │
+│                                                                             │
+│  4. Performance characteristics                                             │
+│     → O(log N) for all operations                                           │
+│     → In practice: 3-4 I/Os for billions of records                         │
+│     → With caching: often just 1-2 I/Os                                     │
+│                                                                             │
+│  WHAT'S NEXT                                                                │
+│  ──────────                                                                 │
+│  Chapter 3: B-Tree Variants                                                 │
+│  • B*-Trees (higher fill factor)                                            │
+│  • B-link Trees (better concurrency)                                        │
+│  • Copy-on-Write B-Trees (MVCC support)                                     │
+│  • Fractal Trees (write optimization)                                       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```

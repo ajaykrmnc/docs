@@ -1193,7 +1193,7 @@ Signals are software interrupts delivered to a process to notify it of events. T
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│                    SIGNALS IN MULTI-THREADED PROGRAMS                      │
+│                    SIGNALS IN MULTI-TH EADED PROGRAMS                      │
 ├───────────────────────────────────────────────────────────────────────────┤
 │                                                                            │
 │   In POSIX threads, signals have complex interactions with threads.       │

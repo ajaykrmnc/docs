@@ -92,7 +92,8 @@
 
 ### The C10K Problem and Nginx's Solution
 
-In the early 2000s, the internet faced a fundamental scaling challenge: **How do you handle 10,000 concurrent connections on a single server?**
+In the early 2000s, the internet faced a fundamental scaling challenge: **How do you handle 10,000 concurrent
+connections on a single server?**
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
@@ -144,12 +145,11 @@ In the early 2000s, the internet faced a fundamental scaling challenge: **How do
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-
-
-
 ### Why Nginx Was Created
 
-Igor Sysoev, a system administrator at Rambler (a Russian internet company), faced a practical problem: their Apache servers couldn't handle the growing traffic. The **process-per-connection model** was fundamentally broken for modern web workloads.
+Igor Sysoev, a system administrator at Rambler (a Russian internet company), faced a practical problem: their
+Apache servers couldn't handle the growing traffic. The **process-per-connection model** was fundamentally
+broken for modern web workloads.
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
@@ -252,17 +252,17 @@ Igor Sysoev, a system administrator at Rambler (a Russian internet company), fac
 
 This document explores nginx internals in depth:
 
-| Section | Focus |
-|---------|-------|
-| **Architecture** | Master-worker model, process roles, memory layout |
-| **Event Model** | Event loop, connection state machine, epoll/kqueue |
-| **Connections** | Accept queue, keep-alive, connection limits |
-| **Request Pipeline** | Phases, location matching, handlers, filters |
-| **Upstream** | Reverse proxy, load balancing, connection pooling |
-| **Memory** | Pool allocator, shared zones, buffer chains |
-| **Caching** | Proxy cache, cache zones, cache manager |
-| **SSL/TLS** | Termination, session resumption, HTTP/2 |
-| **Performance** | sendfile, TCP tuning, worker optimization |
+| Section              | Focus                                              |
+| -------------------- | -------------------------------------------------- |
+| **Architecture**     | Master-worker model, process roles, memory layout  |
+| **Event Model**      | Event loop, connection state machine, epoll/kqueue |
+| **Connections**      | Accept queue, keep-alive, connection limits        |
+| **Request Pipeline** | Phases, location matching, handlers, filters       |
+| **Upstream**         | Reverse proxy, load balancing, connection pooling  |
+| **Memory**           | Pool allocator, shared zones, buffer chains        |
+| **Caching**          | Proxy cache, cache zones, cache manager            |
+| **SSL/TLS**          | Termination, session resumption, HTTP/2            |
+| **Performance**      | sendfile, TCP tuning, worker optimization          |
 
 ---
 
@@ -513,7 +513,6 @@ Nginx uses a **multi-process architecture** with distinct roles:
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-
 ### Configuration Reload Without Downtime
 
 One of nginx's most impressive features: **zero-downtime configuration reload**.
@@ -669,8 +668,8 @@ One of nginx's most impressive features: **zero-downtime configuration reload**.
 
 ### Why Not Thread-Per-Connection?
 
-The traditional web server model creates one thread or process per connection. This seems intuitive but breaks down at scale:
-
+The traditional web server model creates one thread or process per connection. This seems intuitive but breaks
+down at scale:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
@@ -857,7 +856,6 @@ The heart of nginx is its event loop. Each worker runs this loop:
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-
 ### Connection State Machine
 
 Nginx tracks each connection through a state machine:
@@ -935,28 +933,28 @@ Nginx tracks each connection through a state machine:
 
 ```c
 struct ngx_connection_s {
-    ngx_socket_t        fd;           /* Socket file descriptor */
+  ngx_socket_t        fd;           /* Socket file descriptor */
 
-    ngx_event_t        *read;         /* Read event */
-    ngx_event_t        *write;        /* Write event */
+  ngx_event_t        *read;         /* Read event */
+  ngx_event_t        *write;        /* Write event */
 
-    ngx_recv_pt         recv;         /* Receive function pointer */
-    ngx_send_pt         send;         /* Send function pointer */
+  ngx_recv_pt         recv;         /* Receive function pointer */
+  ngx_send_pt         send;         /* Send function pointer */
 
-    ngx_pool_t         *pool;         /* Memory pool for this connection */
+  ngx_pool_t         *pool;         /* Memory pool for this connection */
 
-    struct sockaddr    *sockaddr;     /* Client address */
-    socklen_t           socklen;
+  struct sockaddr    *sockaddr;     /* Client address */
+  socklen_t           socklen;
 
-    ngx_buf_t          *buffer;       /* Receive buffer */
+  ngx_buf_t          *buffer;       /* Receive buffer */
 
-    void               *data;         /* Connection-specific data */
-                                      /* (e.g., ngx_http_request_t) */
+  void               *data;         /* Connection-specific data */
+  /* (e.g., ngx_http_request_t) */
 
-    unsigned            ssl:1;        /* Is SSL connection? */
-    unsigned            sendfile:1;   /* Can use sendfile? */
-    unsigned            tcp_nodelay:2;/* TCP_NODELAY state */
-    unsigned            tcp_nopush:2; /* TCP_NOPUSH/CORK state */
+  unsigned            ssl:1;        /* Is SSL connection? */
+  unsigned            sendfile:1;   /* Can use sendfile? */
+  unsigned            tcp_nodelay:2;/* TCP_NODELAY state */
+  unsigned            tcp_nopush:2; /* TCP_NOPUSH/CORK state */
 };
 ```
 
@@ -1127,7 +1125,8 @@ When a client connects to nginx, the connection goes through the kernel's TCP st
 
 ### Accept Mutex and Thundering Herd
 
-When multiple workers listen on the same socket, a new connection could wake ALL workers (thundering herd). Nginx solves this:
+When multiple workers listen on the same socket, a new connection could wake ALL workers (thundering herd).
+Nginx solves this:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
@@ -1255,7 +1254,6 @@ Nginx pre-allocates connection structures to avoid malloc() during request handl
 │                                                                            │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
-
 
 ### Keep-Alive Connections
 
@@ -1444,7 +1442,6 @@ Nginx provides multiple mechanisms to limit connections:
 ## 5. Request Processing Pipeline
 
 ### HTTP Request Parsing
-
 
 Nginx parses HTTP requests using a state machine:
 
@@ -1647,7 +1644,6 @@ Nginx processes each request through a series of phases:
 │                                                                            │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
-
 
 ### Filter Chain (Output Processing)
 
@@ -1863,7 +1859,6 @@ When nginx proxies requests to backend servers:
 │                                                                            │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
-
 
 ### Upstream Connection Pooling (Keepalive)
 
@@ -2194,7 +2189,6 @@ When nginx proxies requests to backend servers:
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-
 ### Shared Memory Zones
 
 ```
@@ -2439,7 +2433,6 @@ When nginx proxies requests to backend servers:
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-
 ### Cache File Structure
 
 ```
@@ -2634,7 +2627,6 @@ When nginx proxies requests to backend servers:
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-
 ### SSL Session Resumption
 
 ```
@@ -2827,7 +2819,6 @@ When nginx proxies requests to backend servers:
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-
 ### HTTP/2 and ALPN
 
 ```
@@ -2999,7 +2990,6 @@ When nginx proxies requests to backend servers:
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-
 ### TCP_CORK and TCP_NODELAY
 
 ```
@@ -3162,7 +3152,6 @@ When nginx proxies requests to backend servers:
 │                                                                            │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
-
 
 ---
 
@@ -3368,7 +3357,6 @@ When nginx proxies requests to backend servers:
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-
 ---
 
 ## 12. Summary and Appendix
@@ -3518,7 +3506,6 @@ When nginx proxies requests to backend servers:
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-
 ### The Big Picture
 
 ```
@@ -3648,8 +3635,6 @@ When nginx proxies requests to backend servers:
 │                                                                                          │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
-
-
 
 ---
 
@@ -3850,10 +3835,9 @@ When nginx proxies requests to backend servers:
 
 ---
 
-*Document created in the style of Maurice J. Bach's "The Design of the UNIX Operating System"*
-*Emphasizing kernel algorithms, data structures, and visual explanations*
+_Document created in the style of Maurice J. Bach's "The Design of the UNIX Operating System"_
+_Emphasizing kernel algorithms, data structures, and visual explanations_
 
 ---
 
 **END OF DOCUMENT**
-
