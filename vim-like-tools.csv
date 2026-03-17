@@ -1,0 +1,1003 @@
+Name,Category,Description,GitHub URL,Stars,Native/Plugin,Language
+neovim,Text Editor,Vim-fork focused on extensibility and usability,https://github.com/neovim/neovim,85000+,Native,C/Lua
+helix,Text Editor,A post-modern modal text editor,https://github.com/helix-editor/helix,35000+,Native,Rust
+kakoune,Text Editor,Modal editor inspired by Vim,https://github.com/mawww/kakoune,10000+,Native,C++
+amp,Text Editor,A complete text editor for your terminal,https://github.com/jmacdonald/amp,3700+,Native,Rust
+vis,Text Editor,Vi-like editor based on Plan 9's structural regular expressions,https://github.com/martanne/vis,4400+,Native,C
+micro,Text Editor,A modern and intuitive terminal-based text editor,https://github.com/zyedidia/micro,25000+,Native,Go
+yazi,File Manager,Blazing fast terminal file manager in Rust,https://github.com/sxyazi/yazi,18000+,Native,Rust
+ranger,File Manager,Console file manager with VI key bindings,https://github.com/ranger/ranger,16000+,Native,Python
+lf,File Manager,Terminal file manager inspired by ranger,https://github.com/gokcehan/lf,7800+,Native,Go
+vifm,File Manager,TUI file manager with vi keybindings,https://github.com/vifm/vifm,2600+,Native,C
+nnn,File Manager,TUI file manager (tiny and fast),https://github.com/jarun/nnn,19000+,Native,C
+superfile,File Manager,Pretty fancy terminal file manager,https://github.com/yorukot/superfile,8000+,Native,Go
+xplr,File Manager,Hackable minimal fast TUI file explorer,https://github.com/sayanarijit/xplr,4300+,Native,Rust
+broot,File Manager,Interactive file tree explorer,https://github.com/Canop/broot,11000+,Native,Rust
+lazygit,Git Client,Simple terminal UI for git commands,https://github.com/jesseduffield/lazygit,55000+,Native,Go
+tig,Git Client,Text-mode interface for git,https://github.com/jonas/tig,12500+,Native,C
+gitui,Git Client,Blazing fast terminal-ui for git,https://github.com/gitui-org/gitui,18500+,Native,Rust
+zathura,PDF Viewer,Document reader with vim keybindings,https://github.com/pwmt/zathura,2000+,Native,C
+sioyek,PDF Viewer,PDF viewer with keyboard navigation,https://github.com/ahrm/sioyek,7500+,Native,C++
+mupdf,PDF Viewer,PDF and ebook reader with vim keybindings,https://github.com/ArtifexSoftware/mupdf,3000+,Native,C
+apvlv,PDF Viewer,PDF Viewer that acts like Vim,https://github.com/naihe2010/apvlv,500+,Native,C++
+qutebrowser,Web Browser,Keyboard-driven vim-like browser,https://github.com/qutebrowser/qutebrowser,10000+,Native,Python
+vimium,Browser Extension,Vim keybindings for Chrome,https://github.com/philc/vimium,23000+,Plugin,JavaScript
+vimium-c,Browser Extension,Vim keybindings for browsers,https://github.com/nickyc975/vimium-c,2500+,Plugin,TypeScript
+tridactyl,Browser Extension,Vim-like interface for Firefox,https://github.com/tridactyl/tridactyl,5500+,Plugin,TypeScript
+surfingkeys,Browser Extension,Vim-like keybindings for browsers,https://github.com/nickyc975/nickyc975.github.io,5000+,Plugin,JavaScript
+vimb,Web Browser,The vim like browser,https://github.com/fanglingsu/vimb,1400+,Native,C
+nyxt,Web Browser,Keyboard-driven browser inspired by Vim/Emacs,https://github.com/atlas-engineer/nyxt,10000+,Native,Common Lisp
+vieb,Web Browser,Vim bindings for the web by design,https://github.com/Jelmerro/Vieb,2000+,Native,JavaScript
+cmus,Music Player,Console music player with vim keybindings,https://github.com/cmus/cmus,5600+,Native,C
+ncmpcpp,Music Player,ncurses MPD client,https://github.com/ncmpcpp/ncmpcpp,2200+,Native,C++
+spotify-tui,Music Player,Spotify TUI client,https://github.com/Rigellute/spotify-tui,17500+,Native,Rust
+termusic,Music Player,Music Player TUI in Rust,https://github.com/tramhao/termusic,1100+,Native,Rust
+kew,Music Player,Terminal music player for Linux,https://github.com/ravachol/kew,3500+,Native,C
+visidata,Data Tool,TUI data exploration tool,https://github.com/saulpw/visidata,8500+,Native,Python
+sc-im,Spreadsheet,Vim-like spreadsheet calculator,https://github.com/andmarti1424/sc-im,4500+,Native,C
+harlequin,Database Client,SQL IDE for Your Terminal,https://github.com/tconbeer/harlequin,4000+,Native,Python
+lazysql,Database Client,Cross-platform TUI database client,https://github.com/jorgerojas26/lazysql,1000+,Native,Go
+rainfrog,Database Client,Database TUI for Postgres/MySQL/SQLite,https://github.com/achristmascarl/rainfrog,3000+,Native,Rust
+neomutt,Email Client,Command line mail reader,https://github.com/neomutt/neomutt,3500+,Native,C
+aerc,Email Client,Terminal email client,https://git.sr.ht/~rstratto/aerc,1000+,Native,Go
+himalaya,Email Client,CLI email client,https://github.com/sostrunk/himalaya,3200+,Native,Rust
+newsboat,RSS Reader,RSS/Atom feed reader for terminals,https://github.com/newsboat/newsboat,3000+,Native,C++
+k9s,Kubernetes,TUI for managing Kubernetes,https://github.com/derailed/k9s,28000+,Native,Go
+lazydocker,Docker,Lazier way to manage docker,https://github.com/jesseduffield/lazydocker,40000+,Native,Go
+dive,Docker,Tool for exploring docker images,https://github.com/wagoodman/dive,48000+,Native,Go
+ctop,Docker,Top-like interface for containers,https://github.com/bcicen/ctop,15500+,Native,Go
+htop,System Monitor,Interactive process viewer,https://github.com/htop-dev/htop,6500+,Native,C
+btop,System Monitor,Resource monitor,https://github.com/aristocratos/btop,22000+,Native,C++
+bottom,System Monitor,Graphical process/system monitor,https://github.com/ClementTsang/bottom,10500+,Native,Rust
+glances,System Monitor,Top/htop alternative,https://github.com/nicolargo/glances,27000+,Native,Python
+zenith,System Monitor,Terminal graphical metrics,https://github.com/bvaisvil/zenith,2500+,Native,Rust
+tmux,Terminal Multiplexer,Terminal multiplexer,https://github.com/tmux/tmux,36000+,Native,C
+zellij,Terminal Multiplexer,Terminal workspace,https://github.com/zellij-org/zellij,22000+,Native,Rust
+posting,API Client,HTTP client in terminal,https://github.com/darrenburns/posting,6000+,Native,Python
+ATAC,API Client,Terminal API client,https://github.com/Julien-cpsn/ATAC,2500+,Native,Rust
+fzf,Fuzzy Finder,Command-line fuzzy finder,https://github.com/junegunn/fzf,67000+,Native,Go
+telescope.nvim,Fuzzy Finder,Neovim fuzzy finder,https://github.com/nvim-telescope/telescope.nvim,16000+,Plugin,Lua
+glow,Markdown,Terminal markdown reader,https://github.com/charmbracelet/glow,17000+,Native,Go
+mdp,Markdown,Command-line markdown presentation,https://github.com/visit1985/mdp,5000+,Native,C
+presenterm,Presentation,Terminal-based presentations,https://github.com/mfontanini/presenterm,2500+,Native,Rust
+slides,Presentation,Terminal presentation tool,https://github.com/maaslalani/slides,10000+,Native,Go
+obsidian,Note Taking,Markdown knowledge base (with vim mode),https://obsidian.md,N/A,Native,JavaScript
+logseq,Note Taking,Knowledge management (vim plugin),https://github.com/logseq/logseq,35000+,Plugin,Clojure
+trilium,Note Taking,Hierarchical note taking (vim mode),https://github.com/zadam/trilium,28000+,Native,JavaScript
+calcurse,Calendar,Calendar and scheduling,https://github.com/lfos/calcurse,3500+,Native,C
+taskwarrior-tui,Task Management,TUI for Taskwarrior,https://github.com/kdheepak/taskwarrior-tui,1100+,Native,Rust
+taskell,Task Management,Command-line Kanban board,https://github.com/smallhadroncollider/taskell,1800+,Native,Haskell
+vit,Task Management,TUI for Taskwarrior,https://github.com/vit-project/vit,500+,Native,Python
+termshark,Network,Terminal UI for tshark,https://github.com/gcla/termshark,9500+,Native,Go
+bandwhich,Network,Terminal bandwidth tool,https://github.com/imsnif/bandwhich,10000+,Native,Rust
+trippy,Network,Network diagnostic tool,https://github.com/fujiapple852/trippy,4000+,Native,Rust
+mpv,Video Player,Command line video player,https://github.com/mpv-player/mpv,29000+,Native,C
+cointop,Crypto,Terminal cryptocurrency tracker,https://github.com/cointop-sh/cointop,4000+,Native,Go
+ticker,Finance,Terminal stock ticker,https://github.com/achannarasappa/ticker,5000+,Native,Go
+ncdu,Disk Usage,ncurses disk usage explorer,https://github.com/rofl0r/ncdu,2300+,Native,C
+gdu,Disk Usage,Fast disk usage analyzer,https://github.com/dundee/gdu,4000+,Native,Go
+dust,Disk Usage,More intuitive du,https://github.com/bootandy/dust,9000+,Native,Rust
+bat,Pager,Cat clone with syntax highlighting,https://github.com/sharkdp/bat,51000+,Native,Rust
+less,Pager,Terminal pager,https://github.com/gwsw/less,600+,Native,C
+delta,Git Diff,Syntax-highlighting pager for git,https://github.com/dandavison/delta,24000+,Native,Rust
+fx,JSON Viewer,Terminal JSON viewer,https://github.com/antonmedv/fx,19000+,Native,Go
+jq,JSON Processor,Command-line JSON processor,https://github.com/jqlang/jq,31000+,Native,C
+IdeaVim,IDE Plugin,Vim for JetBrains IDEs,https://github.com/JetBrains/ideavim,9500+,Plugin,Kotlin
+VSCodeVim,IDE Plugin,Vim for VS Code,https://github.com/VSCodeVim/Vim,13500+,Plugin,TypeScript
+vscode-neovim,IDE Plugin,Neovim integration for VS Code,https://github.com/vscode-neovim/vscode-neovim,6500+,Plugin,TypeScript
+evil-mode,Emacs Plugin,Extensible vi layer for Emacs,https://github.com/emacs-evil/evil,3500+,Plugin,Emacs Lisp
+spacemacs,Emacs Config,Emacs with vim bindings,https://github.com/syl20bnr/spacemacs,23800+,Plugin,Emacs Lisp
+doom-emacs,Emacs Config,Emacs framework with evil-mode,https://github.com/doomemacs/doomemacs,19500+,Plugin,Emacs Lisp
+i3wm,Window Manager,Tiling window manager,https://github.com/i3/i3,9500+,Native,C
+sway,Window Manager,i3 for Wayland,https://github.com/swaywm/sway,15000+,Native,C
+imv,Image Viewer,Image viewer for X11/Wayland,https://sr.ht/~exec64/imv/,500+,Native,C
+nsxiv,Image Viewer,Neo Simple X Image Viewer,https://github.com/nsxiv/nsxiv,1100+,Native,C
+vimiv-qt,Image Viewer,Image viewer with vim keybindings,https://github.com/karlch/vimiv-qt,700+,Native,Python
+ble.sh,Shell Enhancement,Bash Line Editor with vim mode,https://github.com/akinomyoga/ble.sh,2800+,Plugin,Bash
+zsh-vi-mode,Shell Plugin,Better vim mode for zsh,https://github.com/jeffreytse/zsh-vi-mode,3500+,Plugin,Zsh
+iamb,Chat Client,Matrix client for Vim addicts,https://github.com/ulyssa/iamb,600+,Native,Rust
+weechat,IRC Client,Extensible chat client,https://github.com/weechat/weechat,3000+,Native,C
+irssi,IRC Client,IRC terminal client,https://github.com/irssi/irssi,2900+,Native,C
+tig,Git TUI,Text-mode interface for git,https://github.com/jonas/tig,12500+,Native,C
+gh-dash,GitHub TUI,GitHub dashboard,https://github.com/dlvhdr/gh-dash,5500+,Native,Go
+mycli,Database CLI,CLI for MySQL with vim mode,https://github.com/dbcli/mycli,11500+,Native,Python
+pgcli,Database CLI,CLI for PostgreSQL with vim mode,https://github.com/dbcli/pgcli,12300+,Native,Python
+litecli,Database CLI,CLI for SQLite with vim mode,https://github.com/dbcli/litecli,2200+,Native,Python
+wtfutil,Dashboard,Personal info dashboard,https://github.com/wtfutil/wtf,16000+,Native,Go
+termscp,File Transfer,TUI file transfer,https://github.com/veeso/termscp,2100+,Native,Rust
+mc,File Manager,GNU Midnight Commander,https://github.com/MidnightCommander/mc,2600+,Native,C
+bvi,Hex Editor,Vi-like hex editor,https://bvi.sourceforge.net/,N/A,Native,C
+hexer,Hex Editor,Vi-like binary editor,https://devel.ringlet.net/editors/hexer/,N/A,Native,C
+ly,Display Manager,TUI display manager,https://github.com/fairyglade/ly,5500+,Native,Zig
+alacritty,Terminal Emulator,Cross-platform terminal,https://github.com/alacritty/alacritty,57000+,Native,Rust
+kitty,Terminal Emulator,GPU-based terminal,https://github.com/kovidgoyal/kitty,25000+,Native,C/Python
+wezterm,Terminal Emulator,GPU-accelerated terminal,https://github.com/wez/wezterm,18000+,Native,Rust
+vhs,Terminal Recording,Terminal GIF recording,https://github.com/charmbracelet/vhs,15000+,Native,Go
+asciinema,Terminal Recording,Record terminal sessions,https://github.com/asciinema/asciinema,14500+,Native,Rust
+procs,Process Viewer,Modern replacement for ps,https://github.com/dalance/procs,5000+,Native,Rust
+viddy,Watch Command,Modern watch command,https://github.com/sachaos/viddy,4800+,Native,Go
+tldr,Documentation,Simplified man pages,https://github.com/tldr-pages/tldr,52000+,Native,Various
+cheat,Documentation,Cheatsheets on CLI,https://github.com/cheat/cheat,12500+,Native,Go
+tealdeer,Documentation,Fast tldr client,https://github.com/dbrgn/tealdeer,4200+,Native,Rust
+navi,Documentation,Cheatsheet tool,https://github.com/denisidoro/navi,15500+,Native,Rust
+atuin,Shell History,Magical shell history,https://github.com/atuinsh/atuin,22000+,Native,Rust
+mcfly,Shell History,Intelligent history search,https://github.com/cantino/mcfly,7000+,Native,Rust
+zoxide,Directory Jump,Smarter cd command,https://github.com/ajeetdsouza/zoxide,24000+,Native,Rust
+ripgrep,Search,Fast grep alternative,https://github.com/BurntSushi/ripgrep,50000+,Native,Rust
+fd,Search,Fast find alternative,https://github.com/sharkdp/fd,35000+,Native,Rust
+sd,Search/Replace,Find and replace CLI,https://github.com/chmln/sd,6000+,Native,Rust
+eza,File Listing,Modern ls replacement,https://github.com/eza-community/eza,13000+,Native,Rust
+lsd,File Listing,LSDeluxe - next gen ls,https://github.com/lsd-rs/lsd,14000+,Native,Rust
+erdtree,File Listing,Tree-like file system viewer,https://github.com/solidiquis/erdtree,3500+,Native,Rust
+hyperfine,Benchmarking,Command-line benchmarking,https://github.com/sharkdp/hyperfine,23000+,Native,Rust
+tokei,Code Stats,Code statistics,https://github.com/XAMPPRocky/tokei,11500+,Native,Rust
+scc,Code Stats,Fast code counter,https://github.com/boyter/scc,7000+,Native,Go
+onefetch,Git Stats,Git repository summary,https://github.com/o2sh/onefetch,10000+,Native,Rust
+lazyjj,Jujutsu,TUI for jj version control,https://github.com/Cretezy/lazyjj,500+,Native,Rust
+serie,Git Visualization,Rich git commit graph,https://github.com/lusingander/serie,700+,Native,Rust
+khal,Calendar,CLI calendar program,https://github.com/pimutils/khal,2700+,Native,Python
+todoman,Task Management,CLI task manager,https://github.com/pimutils/todoman,500+,Native,Python
+papis,Bibliography,CLI bibliography manager,https://github.com/papis/papis,1500+,Native,Python
+pass,Password Manager,Standard Unix password manager,https://www.passwordstore.org/,N/A,Native,Shell
+gopass,Password Manager,Team password manager,https://github.com/gopasspw/gopass,6000+,Native,Go
+abook,Address Book,TUI addressbook,https://abook.sourceforge.io/,N/A,Native,C
+joplin,Note Taking,Note taking app (vim mode),https://github.com/laurent22/joplin,47000+,Native,TypeScript
+notable,Note Taking,Markdown note taking,https://github.com/notable/notable,22500+,Native,TypeScript
+zk,Note Taking,Zettelkasten CLI,https://github.com/zk-org/zk,800+,Native,Go
+nb,Note Taking,CLI note-taking,https://github.com/xwmx/nb,6800+,Native,Shell
+stu,AWS S3,TUI for Amazon S3,https://github.com/lusingander/stu,1000+,Native,Rust
+s3cmd,AWS S3,S3 command line tool,https://github.com/s3tools/s3cmd,4600+,Native,Python
+awscli,AWS CLI,AWS Command Line Interface,https://github.com/aws/aws-cli,15500+,Native,Python
+aws-vault,AWS,AWS credential helper,https://github.com/99designs/aws-vault,8600+,Native,Go
+kubectl,Kubernetes,Kubernetes CLI,https://github.com/kubernetes/kubectl,3000+,Native,Go
+helm,Kubernetes,Kubernetes package manager,https://github.com/helm/helm,27500+,Native,Go
+stern,Kubernetes,Multi-pod log tailing,https://github.com/stern/stern,7200+,Native,Go
+kubectx,Kubernetes,Context/namespace switcher,https://github.com/ahmetb/kubectx,18000+,Native,Go
+podman,Container,Docker alternative,https://github.com/containers/podman,24500+,Native,Go
+buildah,Container,Container image builder,https://github.com/containers/buildah,7500+,Native,Go
+skopeo,Container,Container image operations,https://github.com/containers/skopeo,8500+,Native,Go
+duf,Disk Usage,Better df alternative,https://github.com/muesli/duf,13000+,Native,Go
+diskus,Disk Usage,Minimal fast disk usage,https://github.com/sharkdp/diskus,600+,Native,Rust
+xh,HTTP Client,Friendly HTTPie clone,https://github.com/ducaale/xh,5500+,Native,Rust
+httpie,HTTP Client,Human-friendly HTTP client,https://github.com/httpie/cli,34500+,Native,Python
+curlie,HTTP Client,Curl with HTTPie interface,https://github.com/rs/curlie,2900+,Native,Go
+grpcurl,gRPC Client,curl for gRPC,https://github.com/fullstorydev/grpcurl,11000+,Native,Go
+evans,gRPC Client,gRPC REPL client,https://github.com/ktr0731/evans,4300+,Native,Go
+hugo,Static Site,Static site generator,https://github.com/gohugoio/hugo,78000+,Native,Go
+hexyl,Hex Viewer,Command-line hex viewer,https://github.com/sharkdp/hexyl,9500+,Native,Rust
+oxker,Docker,Docker TUI,https://github.com/mrjackwills/oxker,700+,Native,Rust
+lazycli,CLI Builder,Static CLI builder,https://github.com/jesseduffield/lazycli,200+,Native,Go
+gum,Shell Scripts,Glamorous shell scripts,https://github.com/charmbracelet/gum,19000+,Native,Go
+charm,Cloud,Charm cloud tools,https://github.com/charmbracelet/charm,700+,Native,Go
+soft-serve,Git Server,Self-hostable git server,https://github.com/charmbracelet/soft-serve,5500+,Native,Go
+mods,AI,AI on the CLI,https://github.com/charmbracelet/mods,3000+,Native,Go
+ollama,AI,Run LLMs locally,https://github.com/ollama/ollama,105000+,Native,Go
+aichat,AI,AI chat CLI,https://github.com/sigoden/aichat,5000+,Native,Rust
+tgpt,AI,Terminal GPT,https://github.com/aandrew-me/tgpt,2000+,Native,Go
+shell-gpt,AI,Shell GPT assistant,https://github.com/TheR1D/shell_gpt,10000+,Native,Python
+fabric,AI,AI patterns framework,https://github.com/danielmiessler/fabric,26000+,Native,Go
+gptel,AI,Emacs LLM client,https://github.com/karthink/gptel,1500+,Plugin,Emacs Lisp
+copilot.vim,AI,GitHub Copilot for Vim,https://github.com/github/copilot.vim,8500+,Plugin,Vim script
+codeium.vim,AI,AI autocomplete for Vim,https://github.com/Exafunction/codeium.vim,4000+,Plugin,Vim script
+age,Encryption,Simple encryption tool,https://github.com/FiloSottile/age,17500+,Native,Go
+sops,Encryption,Secrets management,https://github.com/getsops/sops,17000+,Native,Go
+git-crypt,Encryption,Git encryption,https://github.com/AGWA/git-crypt,8500+,Native,C++
+chezmoi,Dotfiles,Dotfiles manager,https://github.com/twpayne/chezmoi,14000+,Native,Go
+yadm,Dotfiles,Yet Another Dotfiles Manager,https://github.com/TheLocehili);/yadm,5200+,Native,Shell
+stow,Dotfiles,Symlink farm manager,https://www.gnu.org/software/stow/,N/A,Native,Perl
+direnv,Environment,Directory environments,https://github.com/direnv/direnv,13000+,Native,Go
+asdf,Version Manager,Multi-runtime version manager,https://github.com/asdf-vm/asdf,22500+,Native,Shell
+mise,Version Manager,Dev environment setup,https://github.com/jdx/mise,12000+,Native,Rust
+fnm,Version Manager,Fast Node manager,https://github.com/Schniz/fnm,18500+,Native,Rust
+pyenv,Version Manager,Python version manager,https://github.com/pyenv/pyenv,40000+,Native,Shell
+rbenv,Version Manager,Ruby version manager,https://github.com/rbenv/rbenv,16300+,Native,Shell
+rustup,Version Manager,Rust toolchain manager,https://github.com/rust-lang/rustup,6500+,Native,Rust
+starship,Shell Prompt,Cross-shell prompt,https://github.com/starship/starship,47000+,Native,Rust
+powerlevel10k,Shell Prompt,Zsh theme,https://github.com/romkatv/powerlevel10k,47000+,Plugin,Zsh
+oh-my-zsh,Shell Config,Zsh configuration framework,https://github.com/ohmyzsh/ohmyzsh,176000+,Plugin,Shell
+zinit,Shell Plugin,Zsh plugin manager,https://github.com/zdharma-continuum/zinit,3300+,Plugin,Zsh
+fish,Shell,Friendly interactive shell,https://github.com/fish-shell/fish-shell,26000+,Native,C++
+nushell,Shell,New type of shell,https://github.com/nushell/nushell,33500+,Native,Rust
+xonsh,Shell,Python-powered shell,https://github.com/xonsh/xonsh,8500+,Native,Python
+lazytrivy,Security,Trivy scanner TUI,https://github.com/owenrumney/lazytrivy,200+,Native,Go
+grype,Security,Vulnerability scanner,https://github.com/anchore/grype,9000+,Native,Go
+syft,Security,SBOM generator,https://github.com/anchore/syft,6500+,Native,Go
+trivy,Security,Security scanner,https://github.com/aquasecurity/trivy,24000+,Native,Go
+gitleaks,Security,Secret scanner,https://github.com/gitleaks/gitleaks,18500+,Native,Go
+trufflehog,Security,Secret finder,https://github.com/trufflesecurity/trufflehog,17000+,Native,Go
+hadolint,Linting,Dockerfile linter,https://github.com/hadolint/hadolint,10500+,Native,Haskell
+shellcheck,Linting,Shell script analyzer,https://github.com/koalaman/shellcheck,37000+,Native,Haskell
+actionlint,Linting,GitHub Actions linter,https://github.com/rhysd/actionlint,2800+,Native,Go
+yamllint,Linting,YAML linter,https://github.com/adrienverge/yamllint,2900+,Native,Python
+markdownlint,Linting,Markdown linter,https://github.com/DavidAnson/markdownlint,4900+,Native,JavaScript
+vale,Linting,Prose linter,https://github.com/errata-ai/vale,5000+,Native,Go
+difftastic,Diff,Structural diff tool,https://github.com/Wilfred/difftastic,21000+,Native,Rust
+dyff,Diff,YAML/JSON diff tool,https://github.com/homeport/dyff,1400+,Native,Go
+jless,JSON Viewer,JSON viewer,https://github.com/PaulJuliusMartinez/jless,4800+,Native,Rust
+yq,YAML Processor,YAML processor,https://github.com/mikefarah/yq,12500+,Native,Go
+dasel,Data Processor,Data selector,https://github.com/TomWright/dasel,5500+,Native,Go
+miller,Data Processor,CSV/JSON/tabular processor,https://github.com/johnkerl/miller,9000+,Native,Go
+csvkit,Data Processor,CSV tools,https://github.com/wireservice/csvkit,6000+,Native,Python
+vd,Data Processor,VisiData alias,https://github.com/saulpw/visidata,8500+,Native,Python
+pv,Pipeline,Pipe viewer,https://github.com/a-j-wood/pv,500+,Native,C
+parallel,Pipeline,Parallel command execution,https://www.gnu.org/software/parallel/,N/A,Native,Perl
+watchexec,File Watcher,Execute on file change,https://github.com/watchexec/watchexec,5500+,Native,Rust
+entr,File Watcher,Run commands on file change,https://github.com/eradman/entr,4500+,Native,C
+reflex,File Watcher,Run commands on file change,https://github.com/cespare/reflex,2500+,Native,Go
+just,Task Runner,Command runner,https://github.com/casey/just,22500+,Native,Rust
+task,Task Runner,Task runner/build tool,https://github.com/go-task/task,12000+,Native,Go
+make,Task Runner,GNU Make,https://www.gnu.org/software/make/,N/A,Native,C
+mage,Task Runner,Make/Rake for Go,https://github.com/magefile/mage,4200+,Native,Go
+xc,Task Runner,Markdown task runner,https://github.com/joerdav/xc,1200+,Native,Go
+act,CI/CD,Run GitHub Actions locally,https://github.com/nektos/act,57000+,Native,Go
+dagger,CI/CD,Portable devkit,https://github.com/dagger/dagger,12000+,Native,Go
+earthly,CI/CD,Build automation,https://github.com/earthly/earthly,11500+,Native,Go
+nix,Package Manager,Nix package manager,https://github.com/NixOS/nix,13000+,Native,C++
+home-manager,Nix,Nix user environment,https://github.com/nix-community/home-manager,7500+,Native,Nix
+brew,Package Manager,Homebrew,https://github.com/Homebrew/brew,42000+,Native,Ruby
+cargo,Package Manager,Rust package manager,https://github.com/rust-lang/cargo,13500+,Native,Rust
+pnpm,Package Manager,Fast npm alternative,https://github.com/pnpm/pnpm,30500+,Native,TypeScript
+yarn,Package Manager,JavaScript package manager,https://github.com/yarnpkg/berry,7500+,Native,TypeScript
+uv,Package Manager,Fast Python package installer,https://github.com/astral-sh/uv,35000+,Native,Rust
+rye,Python Tools,Python project manager,https://github.com/astral-sh/rye,14000+,Native,Rust
+poetry,Python Tools,Python dependency manager,https://github.com/python-poetry/poetry,32000+,Native,Python
+pdm,Python Tools,Python package manager,https://github.com/pdm-project/pdm,8000+,Native,Python
+pipx,Python Tools,Python app installer,https://github.com/pypa/pipx,10500+,Native,Python
+rustfmt,Code Format,Rust formatter,https://github.com/rust-lang/rustfmt,6000+,Native,Rust
+prettier,Code Format,Code formatter,https://github.com/prettier/prettier,50000+,Native,JavaScript
+black,Code Format,Python formatter,https://github.com/psf/black,39500+,Native,Python
+ruff,Python Tools,Fast Python linter,https://github.com/astral-sh/ruff,35000+,Native,Rust
+biome,Code Format,Web toolchain,https://github.com/biomejs/biome,16500+,Native,Rust
+shfmt,Code Format,Shell formatter,https://github.com/mvdan/sh,7500+,Native,Go
+stylua,Code Format,Lua formatter,https://github.com/JohnnyMorganz/StyLua,2000+,Native,Rust
+taplo,Code Format,TOML toolkit,https://github.com/tamasfe/taplo,1500+,Native,Rust
+neofetch,System Info,System info script,https://github.com/dylanaraps/neofetch,22500+,Native,Shell
+fastfetch,System Info,System info tool,https://github.com/fastfetch-cli/fastfetch,11000+,Native,C
+macchina,System Info,System info fetcher,https://github.com/Macchina-CLI/macchina,1500+,Native,Rust
+pfetch,System Info,Pretty system info,https://github.com/dylanaraps/pfetch,2200+,Native,Shell
+screenfetch,System Info,System info script,https://github.com/KittyKatt/screenFetch,3900+,Native,Shell
+inxi,System Info,System information,https://github.com/smxi/inxi,1000+,Native,Perl
+tree,File Listing,Directory tree,https://github.com/Old-Man-Programmer/tree,500+,Native,C
+tre,File Listing,Tree with git awareness,https://github.com/dduan/tre,800+,Native,Rust
+broot,File Listing,Interactive tree,https://github.com/Canop/broot,11000+,Native,Rust
+tree-sitter,Parsing,Parser generator,https://github.com/tree-sitter/tree-sitter,19000+,Native,Rust
+semgrep,Code Analysis,Static analysis,https://github.com/semgrep/semgrep,11000+,Native,OCaml
+ast-grep,Code Analysis,Structural search,https://github.com/ast-grep/ast-grep,7500+,Native,Rust
+comby,Code Analysis,Structural code search,https://github.com/comby-tools/comby,2500+,Native,OCaml
+silver-searcher,Search,Ag - code searching,https://github.com/ggreer/the_silver_searcher,26500+,Native,C
+ack,Search,Code-aware grep,https://github.com/beyondgrep/ack3,1800+,Native,Perl
+ugrep,Search,Fast grep,https://github.com/Genivia/ugrep,1700+,Native,C++
+peco,Filter,Simplistic interactive filtering,https://github.com/peco/peco,7700+,Native,Go
+percol,Filter,Interactive filtering,https://github.com/mooz/percol,3300+,Native,Python
+skim,Fuzzy Finder,Fuzzy finder in Rust,https://github.com/lotabout/skim,5200+,Native,Rust
+rofi,Launcher,Window switcher/launcher,https://github.com/davatorium/rofi,13500+,Native,C
+dmenu,Launcher,Dynamic menu,https://tools.suckless.org/dmenu/,N/A,Native,C
+wofi,Launcher,Wayland launcher,https://hg.sr.ht/~scoopta/wofi,N/A,Native,C
+tofi,Launcher,Wayland dmenu replacement,https://github.com/philj56/tofi,800+,Native,C
+bemenu,Launcher,Dynamic menu for Wayland,https://github.com/Cloudef/bemenu,800+,Native,C
+croc,File Transfer,Easy file transfer,https://github.com/schollz/croc,28500+,Native,Go
+magic-wormhole,File Transfer,Secure file transfer,https://github.com/magic-wormhole/magic-wormhole,20500+,Native,Python
+rsync,File Transfer,File synchronization,https://rsync.samba.org/,N/A,Native,C
+rclone,File Transfer,Cloud storage sync,https://github.com/rclone/rclone,48500+,Native,Go
+syncthing,File Sync,Continuous file sync,https://github.com/syncthing/syncthing,67000+,Native,Go
+lftp,FTP Client,FTP/HTTP client,https://lftp.yar.ru/,N/A,Native,C++
+aria2,Download,Download utility,https://github.com/aria2/aria2,36000+,Native,C++
+curl,HTTP Client,URL transfer tool,https://github.com/curl/curl,36500+,Native,C
+wget,HTTP Client,Network downloader,https://www.gnu.org/software/wget/,N/A,Native,C
+axel,Download,Light download accelerator,https://github.com/axel-download-accelerator/axel,3000+,Native,C
+youtube-dl,Media Download,Video downloader,https://github.com/ytdl-org/youtube-dl,133000+,Native,Python
+yt-dlp,Media Download,youtube-dl fork,https://github.com/yt-dlp/yt-dlp,93000+,Native,Python
+gallery-dl,Media Download,Image/video downloader,https://github.com/mikf/gallery-dl,12500+,Native,Python
+ani-cli,Media,Anime streaming CLI,https://github.com/pystardust/ani-cli,8500+,Native,Shell
+mov-cli,Media,Media streaming CLI,https://github.com/mov-cli/mov-cli,1500+,Native,Python
+streamlink,Media,Stream extractor,https://github.com/streamlink/streamlink,10500+,Native,Python
+catt,Media,Cast to Chromecast,https://github.com/skorokithakis/catt,2300+,Native,Python
+imagemagick,Image Processing,Image manipulation,https://github.com/ImageMagick/ImageMagick,12500+,Native,C
+ffmpeg,Media Processing,Media processing,https://github.com/FFmpeg/FFmpeg,47000+,Native,C
+sox,Audio Processing,Sound processing,https://sourceforge.net/projects/sox/,N/A,Native,C
+espeak,Text-to-Speech,Speech synthesizer,https://github.com/espeak-ng/espeak-ng,4500+,Native,C
+asciinema-agg,Terminal Recording,GIF generator for asciinema,https://github.com/asciinema/agg,1300+,Native,Rust
+peek,Screen Recording,GIF screen recorder,https://github.com/phw/peek,10500+,Native,Vala
+silicon,Code Images,Create code images,https://github.com/Aloxaf/silicon,3500+,Native,Rust
+carbon-now-cli,Code Images,Code to image,https://github.com/mixn/carbon-now-cli,5800+,Native,JavaScript
+freeze,Code Images,Generate images from code,https://github.com/charmbracelet/freeze,3500+,Native,Go
+slides,Presentations,Terminal presentations,https://github.com/maaslalani/slides,10000+,Native,Go
+mdp,Presentations,Markdown presentation,https://github.com/visit1985/mdp,5000+,Native,C
+lookatme,Presentations,Terminal markdown presenter,https://github.com/d0c-s4vage/lookatme,2100+,Native,Python
+sent,Presentations,Simple plaintext presentations,https://tools.suckless.org/sent/,N/A,Native,C
+patat,Presentations,Presentations using Pandoc,https://github.com/jaspervdj/patat,2200+,Native,Haskell
+pastel,Colors,Color manipulation CLI,https://github.com/sharkdp/pastel,5000+,Native,Rust
+vivid,Colors,LS_COLORS generator,https://github.com/sharkdp/vivid,2000+,Native,Rust
+fortune,Fun,Random quotes,https://github.com/shlomif/fortune-mod,500+,Native,C
+cowsay,Fun,Speaking cow,https://github.com/piuccio/cowsay,1500+,Native,JavaScript
+figlet,Fun,ASCII art text,https://github.com/cmatsuoka/figlet,1400+,Native,C
+lolcat,Fun,Rainbow text,https://github.com/busyloop/lolcat,6200+,Native,Ruby
+toilet,Fun,ASCII art generator,https://github.com/cacalabs/toilet,400+,Native,C
+pipes.sh,Fun,Animated pipes,https://github.com/pipeseroni/pipes.sh,2500+,Native,Shell
+cmatrix,Fun,Matrix rain effect,https://github.com/abishekvashok/cmatrix,4200+,Native,C
+sl,Fun,Steam locomotive,https://github.com/mtoyoda/sl,3700+,Native,C
+nyancat,Fun,Nyan cat in terminal,https://github.com/klange/nyancat,3000+,Native,C
+asciiquarium,Fun,ASCII aquarium,https://github.com/cmatsuoka/asciiquarium,3500+,Native,Perl
+hollywood,Fun,Hacker terminal,https://github.com/dustinkirkland/hollywood,1800+,Native,Shell
+no-more-secrets,Fun,Decryption effect,https://github.com/bartobri/no-more-secrets,5700+,Native,C
+genact,Fun,Fake activity generator,https://github.com/svenstaro/genact,9500+,Native,Rust
+thefuck,Productivity,Correct previous commands,https://github.com/nvbn/thefuck,86000+,Native,Python
+tldr++,Documentation,Interactive tldr client,https://github.com/isacikgoz/tldr,1000+,Native,Go
+eg,Documentation,Useful examples,https://github.com/srsudar/eg,700+,Native,Python
+cheat.sh,Documentation,Unified cheat sheet,https://github.com/chubin/cheat.sh,38500+,Native,Python
+howdoi,Documentation,Stack Overflow from CLI,https://github.com/gleitz/howdoi,10500+,Native,Python
+so,Documentation,Stack Overflow terminal,https://github.com/samtay/so,600+,Native,Rust
+explain,Documentation,Shell command explainer,https://github.com/dthree/explain,100+,Native,JavaScript
+km,Documentation,Knowledge base manager,https://github.com/gnebbia/kb,3200+,Native,Python
+buku,Bookmarks,Browser bookmark manager,https://github.com/jarun/buku,6500+,Native,Python
+ddgr,Search,DuckDuckGo from terminal,https://github.com/jarun/ddgr,3000+,Native,Python
+googler,Search,Google from terminal,https://github.com/jarun/googler,6100+,Native,Python
+s,Search,Web search from terminal,https://github.com/zquestz/s,2400+,Native,Go
+tuxi,Search,Google search scraper,https://github.com/Bugswriter/tuxi,1800+,Native,Shell
+xdg-ninja,Cleanup,XDG spec compliance checker,https://github.com/b3nj5m1n/xdg-ninja,2500+,Native,Shell
+rmlint,Cleanup,Find redundant data,https://github.com/sahib/rmlint,1900+,Native,C
+fdupes,Cleanup,Find duplicate files,https://github.com/adrianlopezroche/fdupes,2500+,Native,C
+jdupes,Cleanup,Fast duplicate finder,https://github.com/jbruchon/jdupes,1500+,Native,C
+dua,Disk Usage,Disk usage analyzer,https://github.com/Byron/dua-cli,4000+,Native,Rust
+dutree,Disk Usage,Disk usage visualizer,https://github.com/nachoparker/dutree,700+,Native,Rust
+sn0int,OSINT,Semi-automatic OSINT,https://github.com/kpcyrd/sn0int,2000+,Native,Rust
+amass,OSINT,Network mapping,https://github.com/owasp-amass/amass,12500+,Native,Go
+sherlock,OSINT,Username hunter,https://github.com/sherlock-project/sherlock,60000+,Native,Python
+maigret,OSINT,Username collector,https://github.com/soxoj/maigret,11000+,Native,Python
+httpx,Web,Fast HTTP toolkit,https://github.com/projectdiscovery/httpx,8000+,Native,Go
+subfinder,Web,Subdomain discovery,https://github.com/projectdiscovery/subfinder,10500+,Native,Go
+nuclei,Security,Vulnerability scanner,https://github.com/projectdiscovery/nuclei,21000+,Native,Go
+nmap,Network,Network scanner,https://github.com/nmap/nmap,10500+,Native,C
+masscan,Network,Fast port scanner,https://github.com/robertdavidgraham/masscan,24000+,Native,C
+rustscan,Network,Fast port scanner,https://github.com/RustScan/RustScan,15000+,Native,Rust
+tcpdump,Network,Packet analyzer,https://www.tcpdump.org/,N/A,Native,C
+wireshark,Network,Network analyzer (tshark CLI),https://www.wireshark.org/,N/A,Native,C
+mtr,Network,Network diagnostic,https://github.com/traviscross/mtr,2800+,Native,C
+iperf,Network,Network performance,https://github.com/esnet/iperf,7000+,Native,C
+speedtest-cli,Network,Speed test,https://github.com/sivel/speedtest-cli,13500+,Native,Python
+fast,Network,Netflix speed test,https://github.com/Netflix/fast,1000+,Native,Go
+dog,DNS,DNS client,https://github.com/ogham/dog,6200+,Native,Rust
+doggo,DNS,DNS client,https://github.com/mr-karan/doggo,3000+,Native,Go
+dig,DNS,DNS lookup (bind-tools),https://www.isc.org/bind/,N/A,Native,C
+whois,Network,WHOIS client,N/A,N/A,Native,C
+ssh,Remote,OpenSSH client,https://www.openssh.com/,N/A,Native,C
+mosh,Remote,Mobile shell,https://github.com/mobile-shell/mosh,12500+,Native,C++
+eternal-terminal,Remote,Remote shell with reconnect,https://github.com/MisterTea/EternalTerminal,2800+,Native,C++
+sshfs,Remote,Mount remote filesystems,https://github.com/libfuse/sshfs,5800+,Native,C
+sshuttle,VPN,SSH-based VPN,https://github.com/sshuttle/sshuttle,11500+,Native,Python
+wireguard,VPN,WireGuard tools,https://github.com/WireGuard/wireguard-tools,900+,Native,C
+tailscale,VPN,Tailscale CLI,https://github.com/tailscale/tailscale,20000+,Native,Go
+wg-meshconf,VPN,WireGuard mesh config,https://github.com/k4yt3x/wg-meshconf,500+,Native,Python
+openconnect,VPN,VPN client,https://github.com/openconnect/openconnect,1000+,Native,C
+pueue,Process Manager,Task management daemon,https://github.com/Nukesor/pueue,5000+,Native,Rust
+nq,Process Manager,Queue utility,https://github.com/chneukirchen/nq,2800+,Native,C
+ts,Process Manager,Task spooler,https://viric.name/soft/ts/,N/A,Native,C
+chronic,Process Manager,Run quietly unless fails,https://joeyh.name/code/moreutils/,N/A,Native,C
+timeout,Process Manager,Run with time limit,https://www.gnu.org/software/coreutils/,N/A,Native,C
+flock,Process Manager,File locking,https://www.gnu.org/software/coreutils/,N/A,Native,C
+supervisor,Process Manager,Process control,https://github.com/Supervisor/supervisor,8500+,Native,Python
+pm2,Process Manager,Node.js process manager,https://github.com/Unitech/pm2,41500+,Native,JavaScript
+forever,Process Manager,CLI tool for node,https://github.com/foreversd/forever,13200+,Native,JavaScript
+monit,Monitoring,Process monitoring,https://mmonit.com/monit/,N/A,Native,C
+netdata,Monitoring,Infrastructure monitoring,https://github.com/netdata/netdata,73000+,Native,C
+prometheus,Monitoring,Monitoring system,https://github.com/prometheus/prometheus,56500+,Native,Go
+grafana,Monitoring,Observability platform,https://github.com/grafana/grafana,66000+,Native,Go/TypeScript
+vector,Observability,Data pipeline,https://github.com/vectordotdev/vector,18500+,Native,Rust
+loki,Logging,Log aggregation,https://github.com/grafana/loki,24500+,Native,Go
+fluentd,Logging,Log collector,https://github.com/fluent/fluentd,12800+,Native,Ruby
+logcli,Logging,Loki CLI,https://github.com/grafana/loki,24500+,Native,Go
+stern,Logging,Multi-pod log tailing,https://github.com/stern/stern,7200+,Native,Go
+kubetail,Logging,Kubernetes log tailing,https://github.com/johanhaleby/kubetail,3500+,Native,Shell
+lnav,Logging,Advanced log viewer,https://github.com/tstack/lnav,7500+,Native,C++
+multitail,Logging,View multiple logs,https://github.com/folkertvanheusden/multitail,700+,Native,C
+grc,Logging,Generic colourizer,https://github.com/garabik/grc,2000+,Native,Python
+ccze,Logging,Log colorizer,https://github.com/cornet/ccze,200+,Native,C
+bat,Pager,Cat with wings (syntax highlight),https://github.com/sharkdp/bat,51000+,Native,Rust
+moar,Pager,Nicely scrolling pager,https://github.com/walles/moar,2500+,Native,Go
+most,Pager,Paging program,https://www.jedsoft.org/most/,N/A,Native,C
+gping,Network,Ping with graph,https://github.com/orf/gping,11000+,Native,Rust
+prettyping,Network,Pretty ping wrapper,https://github.com/denilsonsa/prettyping,2000+,Native,Shell
+sampler,Dashboard,Terminal sampling,https://github.com/sqshq/sampler,12500+,Native,Go
+dstat,Monitoring,Resource stats,https://github.com/dstat-real/dstat,1000+,Native,Python
+nmon,Monitoring,Performance monitor,https://nmon.sourceforge.io/,N/A,Native,C
+sar,Monitoring,System activity (sysstat),https://github.com/sysstat/sysstat,3000+,Native,C
+iotop,Monitoring,I/O monitoring,https://github.com/Tomas-M/iotop,400+,Native,C
+iostat,Monitoring,I/O stats (sysstat),https://github.com/sysstat/sysstat,3000+,Native,C
+vmstat,Monitoring,Virtual memory stats,N/A,N/A,Native,C
+free,Monitoring,Memory usage,N/A,N/A,Native,C
+uptime,Monitoring,System uptime,N/A,N/A,Native,C
+dmesg,System,Kernel messages,N/A,N/A,Native,C
+journalctl,Logging,Journal viewer,https://systemd.io/,N/A,Native,C
+systemctl,System,Systemd control,https://systemd.io/,N/A,Native,C
+loginctl,System,Session control,https://systemd.io/,N/A,Native,C
+timedatectl,System,Time control,https://systemd.io/,N/A,Native,C
+hostnamectl,System,Hostname control,https://systemd.io/,N/A,Native,C
+networkctl,System,Network control,https://systemd.io/,N/A,Native,C
+coredumpctl,System,Core dump control,https://systemd.io/,N/A,Native,C
+machinectl,System,VM/Container control,https://systemd.io/,N/A,Native,C
+resolvectl,System,DNS resolve control,https://systemd.io/,N/A,Native,C
+busctl,System,D-Bus tool,https://systemd.io/,N/A,Native,C
+localectl,System,Locale control,https://systemd.io/,N/A,Native,C
+nmcli,Network,NetworkManager CLI,https://networkmanager.dev/,N/A,Native,C
+iwctl,Network,iwd wireless CLI,https://iwd.wiki.kernel.org/,N/A,Native,C
+bluetoothctl,Bluetooth,Bluetooth control,https://www.bluez.org/,N/A,Native,C
+pactl,Audio,PulseAudio control,https://www.freedesktop.org/wiki/Software/PulseAudio/,N/A,Native,C
+wpctl,Audio,WirePlumber control,https://pipewire.org/,N/A,Native,C
+pw-cli,Audio,PipeWire CLI,https://pipewire.org/,N/A,Native,C
+amixer,Audio,ALSA mixer,https://alsa-project.org/,N/A,Native,C
+brightnessctl,Display,Brightness control,https://github.com/Hummer12007/brightnessctl,1200+,Native,C
+light,Display,Backlight control,https://github.com/haikarainen/light,1000+,Native,C
+xbacklight,Display,X11 backlight,https://gitlab.freedesktop.org/xorg/app/xbacklight,N/A,Native,C
+redshift,Display,Color temperature,https://github.com/jonls/redshift,6100+,Native,C
+gammastep,Display,Wayland color temp,https://gitlab.com/chinstrap/gammastep,900+,Native,C
+wlsunset,Display,Wayland day/night gamma,https://sr.ht/~kennylevinsen/wlsunset/,N/A,Native,C
+xrandr,Display,X11 display config,https://gitlab.freedesktop.org/xorg/app/xrandr,N/A,Native,C
+wlr-randr,Display,Wayland display config,https://sr.ht/~emersion/wlr-randr/,N/A,Native,C
+swaymsg,Window Manager,Sway IPC,https://github.com/swaywm/sway,15000+,Native,C
+i3-msg,Window Manager,i3 IPC,https://github.com/i3/i3,9500+,Native,C
+xdotool,Automation,X11 automation,https://github.com/jordansissel/xdotool,3300+,Native,C
+ydotool,Automation,Wayland automation,https://github.com/ReimuNotMoe/ydotool,1400+,Native,C++
+wtype,Automation,Wayland typing,https://github.com/atx/wtype,500+,Native,C
+wl-clipboard,Clipboard,Wayland clipboard,https://github.com/bugaevc/wl-clipboard,1100+,Native,C
+xclip,Clipboard,X11 clipboard,https://github.com/astrand/xclip,1000+,Native,C
+xsel,Clipboard,X11 selection,https://github.com/kfish/xsel,400+,Native,C
+pbcopy,Clipboard,macOS clipboard,N/A,N/A,Native,C
+maim,Screenshot,X11 screenshot,https://github.com/naelstrof/maim,3000+,Native,C++
+grim,Screenshot,Wayland screenshot,https://sr.ht/~emersion/grim/,N/A,Native,C
+slurp,Selection,Wayland region select,https://github.com/emersion/slurp,600+,Native,C
+scrot,Screenshot,X11 screenshot,https://github.com/resurrecting-open-source-projects/scrot,600+,Native,C
+flameshot,Screenshot,Screenshot tool,https://github.com/flameshot-org/flameshot,25000+,Native,C++
+dunst,Notifications,Notification daemon,https://github.com/dunst-project/dunst,4800+,Native,C
+mako,Notifications,Wayland notifications,https://github.com/emersion/mako,1000+,Native,C
+fnott,Notifications,Wayland notifications,https://codeberg.org/dnkl/fnott,N/A,Native,C
+libnotify,Notifications,Send notifications,https://gitlab.gnome.org/GNOME/libnotify,N/A,Native,C
+notify-send,Notifications,Send notifications CLI,https://gitlab.gnome.org/GNOME/libnotify,N/A,Native,C
+fcitx5,Input Method,Input method framework,https://github.com/fcitx/fcitx5,3500+,Native,C++
+ibus,Input Method,Intelligent Input Bus,https://github.com/ibus/ibus,800+,Native,C
+uim,Input Method,Universal Input Method,https://github.com/uim/uim,200+,Native,C
+pandoc,Documents,Universal document converter,https://github.com/jgm/pandoc,35500+,Native,Haskell
+groff,Documents,GNU troff,https://www.gnu.org/software/groff/,N/A,Native,C++
+asciidoctor,Documents,AsciiDoc processor,https://github.com/asciidoctor/asciidoctor,4900+,Native,Ruby
+docutils,Documents,reStructuredText processor,https://github.com/docutils-mirror/docutils,400+,Native,Python
+sphinx,Documents,Documentation generator,https://github.com/sphinx-doc/sphinx,6700+,Native,Python
+mkdocs,Documents,Documentation generator,https://github.com/mkdocs/mkdocs,20000+,Native,Python
+mdbook,Documents,Markdown book generator,https://github.com/rust-lang/mdBook,18500+,Native,Rust
+gitbook,Documents,Documentation tool,https://github.com/GitbookIO/gitbook,27000+,Native,JavaScript
+docsify,Documents,Documentation site generator,https://github.com/docsifyjs/docsify,28500+,Native,JavaScript
+vuepress,Documents,Vue-powered documentation,https://github.com/vuejs/vuepress,22500+,Native,JavaScript
+docusaurus,Documents,Documentation website tool,https://github.com/facebook/docusaurus,57000+,Native,TypeScript
+honkit,Documents,GitBook fork,https://github.com/honkit/honkit,3000+,Native,TypeScript
+latex,Documents,TeX typesetting,https://www.latex-project.org/,N/A,Native,C
+pdflatex,Documents,PDF from LaTeX,https://www.tug.org/applications/pdftex/,N/A,Native,C
+xelatex,Documents,Unicode LaTeX,https://tug.org/xetex/,N/A,Native,C
+lualatex,Documents,Lua-based LaTeX,https://www.luatex.org/,N/A,Native,C
+latexmk,Documents,LaTeX build tool,https://personal.psu.edu/~jcc8/software/latexmk/,N/A,Native,Perl
+biber,Documents,BibTeX replacement,https://github.com/plk/biber,300+,Native,Perl
+texlive,Documents,TeX distribution,https://www.tug.org/texlive/,N/A,Native,Various
+tectonic,Documents,Modern TeX engine,https://github.com/tectonic-typesetting/tectonic,3500+,Native,Rust
+typst,Documents,Modern typesetting,https://github.com/typst/typst,36000+,Native,Rust
+groff,Documents,GNU troff,https://www.gnu.org/software/groff/,N/A,Native,C++
+enscript,Documents,Text to PostScript,https://www.gnu.org/software/enscript/,N/A,Native,C
+a2ps,Documents,Any to PostScript,https://www.gnu.org/software/a2ps/,N/A,Native,C
+ghostscript,Documents,PostScript/PDF interpreter,https://www.ghostscript.com/,N/A,Native,C
+pdftk,Documents,PDF toolkit,https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/,N/A,Native,Java
+qpdf,Documents,PDF transformation,https://github.com/qpdf/qpdf,3500+,Native,C++
+poppler,Documents,PDF rendering library,https://poppler.freedesktop.org/,N/A,Native,C++
+pdftotext,Documents,PDF to text,https://poppler.freedesktop.org/,N/A,Native,C++
+pdfgrep,Documents,Search PDFs,https://pdfgrep.org/,N/A,Native,C++
+ocrmypdf,Documents,OCR PDFs,https://github.com/ocrmypdf/OCRmyPDF,14500+,Native,Python
+tesseract,OCR,OCR engine,https://github.com/tesseract-ocr/tesseract,63000+,Native,C++
+jp2a,Image Conversion,JPEG to ASCII,https://github.com/cslarsen/jp2a,900+,Native,C
+viu,Image Viewer,Terminal image viewer,https://github.com/atanunq/viu,1200+,Native,Rust
+timg,Image Viewer,Terminal image viewer,https://github.com/hzeller/timg,1100+,Native,C++
+catimg,Image Viewer,Image in terminal,https://github.com/posva/catimg,1100+,Native,C
+imgcat,Image Viewer,iTerm2 image display,https://github.com/eddieantonio/imgcat,800+,Native,C
+chafa,Image Viewer,Terminal image converter,https://github.com/hpjansson/chafa,2700+,Native,C
+ueberzug,Image Viewer,X11 terminal image layers,https://github.com/seebye/ueberzug,1200+,Native,Python
+ueberzugpp,Image Viewer,Ueberzug successor,https://github.com/jstkdng/ueberzugpp,700+,Native,C++
+termux-api,Mobile,Termux API,https://github.com/termux/termux-api,1000+,Native,Java
+termux,Mobile,Android terminal,https://github.com/termux/termux-app,37000+,Native,Java
+a-shell,Mobile,iOS terminal,https://github.com/holzschu/a-shell,3500+,Native,Objective-C
+iSH,Mobile,Linux shell for iOS,https://github.com/ish-app/ish,17500+,Native,C
+play,Playground,TUI test playground,https://github.com/ruivieira/play,100+,Native,Go
+termpixels,Graphics,Terminal pixel drawing,https://github.com/loganzartman/termpixels,200+,Native,Python
+drawille,Graphics,Terminal pixel drawing,https://github.com/asciimoo/drawille,3100+,Native,Python
+termgraph,Graphics,Terminal graphs,https://github.com/mkaz/termgraph,3200+,Native,Python
+asciichart,Graphics,ASCII line charts,https://github.com/kroitor/asciichart,1800+,Native,Various
+spark,Graphics,Sparklines in shell,https://github.com/holman/spark,5700+,Native,Shell
+bashplotlib,Graphics,Bash plotting,https://github.com/glamp/bashplotlib,1800+,Native,Python
+gnuplot,Graphics,Plotting program,https://gnuplot.sourceforge.net/,N/A,Native,C
+plotext,Graphics,Terminal plotting,https://github.com/piccolomo/plotext,2000+,Native,Python
+uniplot,Graphics,Terminal plotting,https://github.com/olavolav/uniplot,300+,Native,Python
+youplot,Graphics,CLI plotting,https://github.com/red-data-tools/YouPlot,700+,Native,Ruby
+ttyplot,Graphics,Realtime terminal plots,https://github.com/tenox7/ttyplot,1100+,Native,C
+histogram.py,Graphics,ASCII histograms,N/A,N/A,Native,Python
+cowsay,Fun,Speaking ASCII cow,https://github.com/piuccio/cowsay,1500+,Native,Perl/JS
+ponysay,Fun,cowsay with ponies,https://github.com/erkin/ponysay,1200+,Native,Python
+boxes,Fun,ASCII art boxes,https://github.com/ascii-boxes/boxes,600+,Native,C
+toilet,Fun,Large colorful text,https://github.com/cacalabs/toilet,400+,Native,C
+lolcat,Fun,Rainbow coloring,https://github.com/busyloop/lolcat,6200+,Native,Ruby
+dotacat,Fun,Dotted rainbow cat,https://github.com/bouzuya/dotacat,50+,Native,Rust
+terminal-parrot,Fun,Party parrot,https://github.com/jmhobbs/terminal-parrot,600+,Native,Go
+asciimatics,Fun,ASCII animations,https://github.com/peterbrittain/asciimatics,3700+,Native,Python
+rich,Text Formatting,Rich text for Python,https://github.com/Textualize/rich,50000+,Native,Python
+chalk,Text Formatting,Terminal string styling,https://github.com/chalk/chalk,22000+,Native,JavaScript
+colored,Text Formatting,Terminal colors for Rust,https://github.com/mackwic/colored,1700+,Native,Rust
+termcolor,Text Formatting,Terminal colors,https://github.com/termcolor/termcolor,400+,Native,Python
+colorama,Text Formatting,Windows terminal colors,https://github.com/tartley/colorama,3400+,Native,Python
+tput,Terminal,Terminal control,N/A,N/A,Native,C
+stty,Terminal,Terminal settings,N/A,N/A,Native,C
+tset,Terminal,Terminal initialization,N/A,N/A,Native,C
+reset,Terminal,Terminal reset,N/A,N/A,Native,C
+clear,Terminal,Clear screen,N/A,N/A,Native,C
+tty,Terminal,Print terminal name,N/A,N/A,Native,C
+infocmp,Terminal,Terminfo comparison,N/A,N/A,Native,C
+tic,Terminal,Terminfo compiler,N/A,N/A,Native,C
+toe,Terminal,Table of terminfo entries,N/A,N/A,Native,C
+tabs,Terminal,Set terminal tabs,N/A,N/A,Native,C
+resize,Terminal,Reset terminal size,N/A,N/A,Native,C
+screen,Terminal Multiplexer,GNU Screen,https://www.gnu.org/software/screen/,N/A,Native,C
+dtach,Terminal Multiplexer,Simple detach,https://github.com/crigler/dtach,200+,Native,C
+abduco,Terminal Multiplexer,Session management,https://github.com/martanne/abduco,400+,Native,C
+dvtm,Terminal Multiplexer,dwm for terminals,https://github.com/martanne/dvtm,500+,Native,C
+mtm,Terminal Multiplexer,Micro terminal mux,https://github.com/deadpixi/mtm,500+,Native,C
+byobu,Terminal Multiplexer,Screen/tmux wrapper,https://github.com/dustinkirkland/byobu,1900+,Native,Python
+reptyr,Terminal,Move process to new terminal,https://github.com/nelhage/reptyr,5700+,Native,C
+script,Terminal,Record terminal session,N/A,N/A,Native,C
+scriptreplay,Terminal,Replay terminal session,N/A,N/A,Native,C
+ttyrec,Terminal Recording,Terminal recorder,https://github.com/mjording/ttyrec,100+,Native,C
+ttyrecord,Terminal Recording,Modern ttyrec,https://github.com/KrystianLis/ttyrecord,50+,Native,Rust
+termrec,Terminal Recording,Terminal recorder,https://github.com/thestinger/termrec,100+,Native,C
+gotty,Terminal Sharing,Share terminal as web app,https://github.com/sorenisanerd/gotty,18500+,Native,Go
+tmate,Terminal Sharing,Instant terminal sharing,https://github.com/tmate-io/tmate,5700+,Native,C
+teleconsole,Terminal Sharing,Secure terminal sharing,https://github.com/gravitational/teleconsole,3200+,Native,Go
+upterm,Terminal Sharing,Secure terminal sharing,https://github.com/owenthereal/upterm,800+,Native,Go
+websocat,WebSocket,WebSocket CLI,https://github.com/vi/websocat,7200+,Native,Rust
+wscat,WebSocket,WebSocket client,https://github.com/websockets/wscat,2200+,Native,JavaScript
+wsta,WebSocket,WebSocket tool,https://github.com/esphen/wsta,500+,Native,Rust
+webcat,HTTP,Request tool,N/A,N/A,Native,Various
+openssl,Crypto,Crypto toolkit,https://github.com/openssl/openssl,26000+,Native,C
+gpg,Crypto,GNU Privacy Guard,https://gnupg.org/,N/A,Native,C
+gpg-agent,Crypto,GPG agent,https://gnupg.org/,N/A,Native,C
+ssh-agent,Crypto,SSH agent,https://www.openssh.com/,N/A,Native,C
+ssh-keygen,Crypto,SSH key generation,https://www.openssh.com/,N/A,Native,C
+ssh-copy-id,Crypto,SSH key installation,https://www.openssh.com/,N/A,Native,Shell
+keychain,Crypto,SSH/GPG agent manager,https://github.com/funtoo/keychain,1100+,Native,Shell
+pwgen,Password,Password generator,https://github.com/jbernard/pwgen,200+,Native,C
+apg,Password,Password generator,https://github.com/wilx/apg,100+,Native,C
+diceware,Password,Passphrase generator,https://github.com/ulif/diceware,500+,Native,Python
+xkcdpass,Password,XKCD-style passwords,https://github.com/redacted/XKCD-password-generator,1000+,Native,Python
+bitwarden-cli,Password Manager,Bitwarden CLI,https://github.com/bitwarden/clients,9500+,Native,TypeScript
+rbw,Password Manager,Bitwarden CLI,https://github.com/doy/rbw,700+,Native,Rust
+1password-cli,Password Manager,1Password CLI,https://1password.com/downloads/command-line/,N/A,Native,Go
+lastpass-cli,Password Manager,LastPass CLI,https://github.com/lastpass/lastpass-cli,2000+,Native,C
+keepassxc-cli,Password Manager,KeePassXC CLI,https://github.com/keepassxreboot/keepassxc,21500+,Native,C++
+dashlane-cli,Password Manager,Dashlane CLI,https://github.com/Dashlane/dashlane-cli,300+,Native,TypeScript
+vault,Secrets,HashiCorp Vault,https://github.com/hashicorp/vault,31500+,Native,Go
+consul,Service Discovery,HashiCorp Consul,https://github.com/hashicorp/consul,28500+,Native,Go
+etcd,Key-Value Store,Distributed KV store,https://github.com/etcd-io/etcd,48000+,Native,Go
+redis-cli,Database,Redis CLI,https://github.com/redis/redis,67000+,Native,C
+mongo,Database,MongoDB shell,https://github.com/mongodb/mongo,26500+,Native,C++
+psql,Database,PostgreSQL CLI,https://www.postgresql.org/,N/A,Native,C
+mysql,Database,MySQL CLI,https://github.com/mysql/mysql-server,10800+,Native,C++
+sqlite3,Database,SQLite CLI,https://sqlite.org/,N/A,Native,C
+usql,Database,Universal database CLI,https://github.com/xo/usql,9000+,Native,Go
+dbmate,Database,Database migrations,https://github.com/amacneil/dbmate,5500+,Native,Go
+migrate,Database,Database migrations,https://github.com/golang-migrate/migrate,15500+,Native,Go
+flyway,Database,Database migrations,https://github.com/flyway/flyway,8300+,Native,Java
+liquibase,Database,Database schema change,https://github.com/liquibase/liquibase,4800+,Native,Java
+sqitch,Database,Database change management,https://sqitch.org/,N/A,Native,Perl
+gh,GitHub,GitHub CLI,https://github.com/cli/cli,37500+,Native,Go
+hub,GitHub,GitHub wrapper,https://github.com/github/hub,22800+,Native,Go
+glab,GitLab,GitLab CLI,https://github.com/profclems/glab,2300+,Native,Go
+git-bug,Git,Bug tracker in git,https://github.com/MichaelMure/git-bug,8200+,Native,Go
+git-lfs,Git,Git Large File Storage,https://github.com/git-lfs/git-lfs,13000+,Native,Go
+git-annex,Git,Manage files with git,https://git-annex.branchable.com/,N/A,Native,Haskell
+git-secret,Git,Store secrets in git,https://github.com/sobolevn/git-secret,3700+,Native,Shell
+git-filter-repo,Git,Rewrite git history,https://github.com/newren/git-filter-repo,8500+,Native,Python
+bfg,Git,Remove large files from git,https://github.com/rtyley/bfg-repo-cleaner,11200+,Native,Scala
+pre-commit,Git,Git hooks framework,https://github.com/pre-commit/pre-commit,13000+,Native,Python
+lefthook,Git,Git hooks manager,https://github.com/evilmartians/lefthook,5500+,Native,Go
+husky,Git,Git hooks for Node.js,https://github.com/typicode/husky,32500+,Native,TypeScript
+commitizen,Git,Conventional commits,https://github.com/commitizen/cz-cli,17500+,Native,JavaScript
+cz-cli,Git,Commitizen CLI,https://github.com/commitizen/cz-cli,17500+,Native,JavaScript
+conventional-changelog,Git,Changelog from commits,https://github.com/conventional-changelog/conventional-changelog,7900+,Native,JavaScript
+semantic-release,Git,Automated versioning,https://github.com/semantic-release/semantic-release,21500+,Native,JavaScript
+release-please,Git,Release automation,https://github.com/googleapis/release-please,8500+,Native,TypeScript
+goreleaser,Go,Release automation,https://github.com/goreleaser/goreleaser,14000+,Native,Go
+cargo-release,Rust,Release automation,https://github.com/crate-ci/cargo-release,1500+,Native,Rust
+npm-check-updates,Node.js,Update dependencies,https://github.com/raineorshine/npm-check-updates,9500+,Native,JavaScript
+ncu,Node.js,npm-check-updates alias,https://github.com/raineorshine/npm-check-updates,9500+,Native,JavaScript
+depcheck,Node.js,Dependency checker,https://github.com/depcheck/depcheck,4200+,Native,JavaScript
+snyk,Security,Vulnerability scanner,https://github.com/snyk/cli,5000+,Native,TypeScript
+dependabot,Security,Dependency updates,https://github.com/dependabot/dependabot-core,4700+,Native,Ruby
+renovate,Security,Dependency updates,https://github.com/renovatebot/renovate,18000+,Native,TypeScript
+clair,Security,Container vulnerability scanner,https://github.com/quay/clair,10500+,Native,Go
+cosign,Security,Container signing,https://github.com/sigstore/cosign,4700+,Native,Go
+schemathesis,Testing,API testing,https://github.com/schemathesis/schemathesis,2300+,Native,Python
+dredd,Testing,API testing,https://github.com/apiaryio/dredd,4200+,Native,JavaScript
+vegeta,Testing,HTTP load testing,https://github.com/tsenart/vegeta,23500+,Native,Go
+hey,Testing,HTTP load generator,https://github.com/rakyll/hey,18000+,Native,Go
+wrk,Testing,HTTP benchmarking,https://github.com/wg/wrk,38000+,Native,C
+k6,Testing,Load testing,https://github.com/grafana/k6,26500+,Native,Go
+locust,Testing,Load testing,https://github.com/locustio/locust,25500+,Native,Python
+artillery,Testing,Load testing,https://github.com/artilleryio/artillery,8200+,Native,JavaScript
+ab,Testing,Apache Bench,https://httpd.apache.org/,N/A,Native,C
+siege,Testing,HTTP load testing,https://github.com/JoeDog/siege,5800+,Native,C
+autocannon,Testing,HTTP benchmarking,https://github.com/mcollina/autocannon,7800+,Native,JavaScript
+bombardier,Testing,HTTP benchmarking,https://github.com/codesenberg/bombardier,6000+,Native,Go
+plow,Testing,HTTP benchmarking,https://github.com/six-ddc/plow,4200+,Native,Go
+httpstat,Testing,HTTP stats,https://github.com/reorx/httpstat,5700+,Native,Python
+goreplay,Testing,HTTP traffic replay,https://github.com/buger/goreplay,18500+,Native,Go
+mitmproxy,Testing,HTTP/HTTPS proxy,https://github.com/mitmproxy/mitmproxy,37000+,Native,Python
+charles,Testing,HTTP proxy (GUI but scriptable),https://www.charlesproxy.com/,N/A,Native,Java
+whistle,Testing,HTTP debugging proxy,https://github.com/nickyc975/nickyc975.github.io,14000+,Native,JavaScript
+newman,Testing,Postman CLI,https://github.com/postmanlabs/newman,6900+,Native,JavaScript
+httpbin,Testing,HTTP request testing,https://github.com/postmanlabs/httpbin,13500+,Native,Python
+mockbin,Testing,Mock HTTP endpoints,https://mockbin.org/,N/A,Native,JavaScript
+wiremock,Testing,HTTP mock server,https://github.com/wiremock/wiremock,6500+,Native,Java
+mountebank,Testing,Test doubles over wire,https://github.com/bbyars/mountebank,3000+,Native,JavaScript
+json-server,Testing,Fake REST API,https://github.com/typicode/json-server,73000+,Native,JavaScript
+prism,Testing,Mock server,https://github.com/stoplightio/prism,4400+,Native,TypeScript
+drakov,Testing,Mock server,https://github.com/Aconex/drakov,500+,Native,JavaScript
+faker-cli,Testing,Fake data generator,N/A,N/A,Native,Various
+gofakeit,Testing,Random data generator,https://github.com/brianvoe/gofakeit,4800+,Native,Go
+mimesis,Testing,Fake data for Python,https://github.com/lk-geimfari/mimesis,4500+,Native,Python
+faker,Testing,Fake data,https://github.com/joke2k/faker,18000+,Native,Python
+chance,Testing,Random generator,https://github.com/chancejs/chancejs,6500+,Native,JavaScript
+casual,Testing,Fake data generator,https://github.com/boo1ean/casual,3200+,Native,JavaScript
+ava,Testing,Test runner,https://github.com/avajs/ava,20700+,Native,JavaScript
+jest,Testing,JavaScript testing,https://github.com/jestjs/jest,44500+,Native,JavaScript
+mocha,Testing,JavaScript test framework,https://github.com/mochajs/mocha,22600+,Native,JavaScript
+vitest,Testing,Vite test runner,https://github.com/vitest-dev/vitest,13500+,Native,TypeScript
+pytest,Testing,Python testing,https://github.com/pytest-dev/pytest,12500+,Native,Python
+nose2,Testing,Python testing,https://github.com/nose-devs/nose2,800+,Native,Python
+unittest,Testing,Python unit testing,N/A,N/A,Native,Python
+tox,Testing,Python test automation,https://github.com/tox-dev/tox,3700+,Native,Python
+nox,Testing,Python test automation,https://github.com/wntrblm/nox,1400+,Native,Python
+hypothesis,Testing,Property-based testing,https://github.com/HypothesisWorks/hypothesis,7600+,Native,Python
+coverage,Testing,Code coverage,https://github.com/nedbat/coveragepy,3000+,Native,Python
+pytest-cov,Testing,Coverage plugin,https://github.com/pytest-dev/pytest-cov,1800+,Native,Python
+cargo-test,Testing,Rust testing,https://doc.rust-lang.org/cargo/,N/A,Native,Rust
+cargo-nextest,Testing,Rust test runner,https://github.com/nextest-rs/nextest,2200+,Native,Rust
+go-test,Testing,Go testing,https://golang.org/,N/A,Native,Go
+gotestsum,Testing,Go test output,https://github.com/gotestyourself/gotestsum,2200+,Native,Go
+ginkgo,Testing,Go BDD testing,https://github.com/onsi/ginkgo,8500+,Native,Go
+gomega,Testing,Go matcher library,https://github.com/onsi/gomega,2200+,Native,Go
+testify,Testing,Go testing toolkit,https://github.com/stretchr/testify,23500+,Native,Go
+rspec,Testing,Ruby testing,https://github.com/rspec/rspec-core,3000+,Native,Ruby
+minitest,Testing,Ruby testing,https://github.com/minitest/minitest,3200+,Native,Ruby
+cucumber,Testing,BDD testing,https://github.com/cucumber/cucumber-ruby,5200+,Native,Ruby
+behave,Testing,Python BDD,https://github.com/behave/behave,3200+,Native,Python
+robot,Testing,Robot Framework,https://github.com/robotframework/robotframework,9800+,Native,Python
+cypress,Testing,E2E testing,https://github.com/cypress-io/cypress,47500+,Native,JavaScript
+playwright,Testing,Browser automation,https://github.com/microsoft/playwright,68000+,Native,TypeScript
+puppeteer,Testing,Chrome automation,https://github.com/puppeteer/puppeteer,89000+,Native,TypeScript
+selenium,Testing,Browser automation,https://github.com/SeleniumHQ/selenium,31000+,Native,Java
+nightwatch,Testing,E2E testing,https://github.com/nightwatchjs/nightwatch,11700+,Native,JavaScript
+testcafe,Testing,E2E testing,https://github.com/DevExpress/testcafe,9800+,Native,JavaScript
+webdriverio,Testing,WebDriver automation,https://github.com/webdriverio/webdriverio,9200+,Native,TypeScript
+taiko,Testing,Browser automation,https://github.com/nickyc975/nickyc975.github.io,3500+,Native,JavaScript
+casperjs,Testing,Navigation scripting,https://github.com/casperjs/casperjs,7200+,Native,JavaScript
+codeceptjs,Testing,E2E testing,https://github.com/codeceptjs/CodeceptJS,4200+,Native,JavaScript
+zombiejs,Testing,Headless browser,https://github.com/assaf/zombie,5700+,Native,JavaScript
+storybook,Testing,UI component explorer,https://github.com/storybookjs/storybook,85000+,Native,TypeScript
+chromatic,Testing,Visual testing,https://www.chromatic.com/,N/A,Native,TypeScript
+percy,Testing,Visual testing,https://percy.io/,N/A,Native,Various
+applitools,Testing,Visual AI testing,https://applitools.com/,N/A,Native,Various
+loki,Testing,Visual regression,https://github.com/oblador/loki,1800+,Native,JavaScript
+reg-suit,Testing,Visual regression,https://github.com/nickyc975/nickyc975.github.io,1100+,Native,TypeScript
+backstopjs,Testing,Visual regression,https://github.com/garris/BackstopJS,6700+,Native,JavaScript
+wraith,Testing,Visual regression,https://github.com/BBC-News/wraith,4800+,Native,Ruby
+galen,Testing,Layout testing,https://github.com/nickyc975/nickyc975.github.io,1400+,Native,Java
+stryker,Testing,Mutation testing,https://github.com/stryker-mutator/stryker-js,2700+,Native,TypeScript
+pitest,Testing,Mutation testing,https://github.com/hcoles/pitest,1800+,Native,Java
+mutant,Testing,Mutation testing,https://github.com/mbj/mutant,2000+,Native,Ruby
+mutmut,Testing,Mutation testing,https://github.com/boxed/mutmut,700+,Native,Python
+cosmic-ray,Testing,Mutation testing,https://github.com/sixty-north/cosmic-ray,500+,Native,Python
+pact,Testing,Contract testing,https://github.com/pact-foundation/pact-ruby,2200+,Native,Ruby
+pactflow,Testing,Contract testing platform,https://pactflow.io/,N/A,Native,Various
+dredd,Testing,API contract testing,https://github.com/apiaryio/dredd,4200+,Native,JavaScript
+spectral,Testing,API linting,https://github.com/stoplightio/spectral,2600+,Native,TypeScript
+swagger-cli,Testing,OpenAPI validator,https://github.com/APIDevTools/swagger-cli,500+,Native,JavaScript
+openapi-generator,API,OpenAPI code generator,https://github.com/OpenAPITools/openapi-generator,22000+,Native,Java
+swagger-codegen,API,Swagger code generator,https://github.com/swagger-api/swagger-codegen,17200+,Native,Java
+oapi-codegen,API,OpenAPI Go generator,https://github.com/oapi-codegen/oapi-codegen,6500+,Native,Go
+buf,API,Protocol buffer tooling,https://github.com/bufbuild/buf,9500+,Native,Go
+protoc,API,Protocol buffer compiler,https://github.com/protocolbuffers/protobuf,66000+,Native,C++
+grpc_cli,API,gRPC CLI,https://grpc.io/,N/A,Native,C++
+bloomrpc,API,gRPC GUI client,https://github.com/bloomrpc/bloomrpc,10000+,Native,TypeScript
+kreya,API,gRPC/REST client,https://kreya.app/,N/A,Native,C#
+insomnia,API,API client,https://github.com/Kong/insomnia,35000+,Native,TypeScript
+bruno,API,API client,https://github.com/usebruno/bruno,28000+,Native,JavaScript
+hoppscotch,API,API development ecosystem,https://github.com/hoppscotch/hoppscotch,66000+,Native,TypeScript
+httpie-desktop,API,HTTPie GUI,https://httpie.io/desktop,N/A,Native,Electron
+thunder-client,API,VS Code REST client,https://marketplace.visualstudio.com/items?itemName=rangav.vscode-thunder-client,N/A,Plugin,TypeScript
+rest-client,API,VS Code REST client,https://github.com/Huachao/vscode-restclient,5200+,Plugin,TypeScript
+graphql-playground,API,GraphQL IDE,https://github.com/graphql/graphql-playground,8800+,Native,TypeScript
+graphiql,API,GraphQL IDE,https://github.com/graphql/graphiql,16000+,Native,TypeScript
+altair,API,GraphQL client,https://github.com/altair-graphql/altair,5300+,Native,TypeScript
+banana-cake-pop,API,GraphQL IDE,https://chillicream.com/products/bananacakepop,N/A,Native,C#
+voyager,API,GraphQL visualizer,https://github.com/IvanGoncharov/graphql-voyager,7800+,Native,TypeScript
+graphql-cli,API,GraphQL CLI,https://github.com/Urigo/graphql-cli,2000+,Native,TypeScript
+gqlgen,API,GraphQL Go generator,https://github.com/99designs/gqlgen,10000+,Native,Go
+hasura,API,GraphQL engine,https://github.com/hasura/graphql-engine,31500+,Native,Haskell
+postgraphile,API,GraphQL from PostgreSQL,https://github.com/graphile/crystal,12500+,Native,TypeScript
+prisma,Database,Database toolkit,https://github.com/prisma/prisma,40500+,Native,TypeScript
+drizzle,Database,TypeScript ORM,https://github.com/drizzle-team/drizzle-orm,25500+,Native,TypeScript
+typeorm,Database,TypeScript ORM,https://github.com/typeorm/typeorm,34500+,Native,TypeScript
+sequelize,Database,Node.js ORM,https://github.com/sequelize/sequelize,29500+,Native,JavaScript
+knex,Database,SQL query builder,https://github.com/knex/knex,19500+,Native,JavaScript
+kysely,Database,TypeScript SQL builder,https://github.com/kysely-org/kysely,11000+,Native,TypeScript
+sqlalchemy,Database,Python SQL toolkit,https://github.com/sqlalchemy/sqlalchemy,9600+,Native,Python
+peewee,Database,Python ORM,https://github.com/coleifer/peewee,11200+,Native,Python
+tortoise-orm,Database,Python async ORM,https://github.com/tortoise/tortoise-orm,4600+,Native,Python
+diesel,Database,Rust ORM,https://github.com/diesel-rs/diesel,12800+,Native,Rust
+sqlx,Database,Rust SQL toolkit,https://github.com/launchbadge/sqlx,14000+,Native,Rust
+sea-orm,Database,Rust async ORM,https://github.com/SeaQL/sea-orm,7500+,Native,Rust
+gorm,Database,Go ORM,https://github.com/go-gorm/gorm,37500+,Native,Go
+ent,Database,Go entity framework,https://github.com/ent/ent,15800+,Native,Go
+sqlc,Database,SQL to Go,https://github.com/sqlc-dev/sqlc,13500+,Native,Go
+atlas,Database,Schema management,https://github.com/ariga/atlas,6000+,Native,Go
+soda,Database,Pop CLI tool,https://github.com/gobuffalo/pop,1500+,Native,Go
+goose,Database,Migration tool,https://github.com/pressly/goose,7000+,Native,Go
+alembic,Database,SQLAlchemy migrations,https://github.com/sqlalchemy/alembic,2800+,Native,Python
+sqlacodegen,Database,SQLAlchemy model generator,https://github.com/agronholm/sqlacodegen,2000+,Native,Python
+django-extensions,Django,Django utilities,https://github.com/django-extensions/django-extensions,6500+,Native,Python
+flask-migrate,Flask,Flask migrations,https://github.com/miguelgrinberg/Flask-Migrate,2300+,Native,Python
+rails,Framework,Ruby on Rails,https://github.com/rails/rails,56000+,Native,Ruby
+django,Framework,Django framework,https://github.com/django/django,81000+,Native,Python
+fastapi,Framework,Fast API framework,https://github.com/fastapi/fastapi,79000+,Native,Python
+flask,Framework,Flask framework,https://github.com/pallets/flask,68500+,Native,Python
+express,Framework,Node.js framework,https://github.com/expressjs/express,65500+,Native,JavaScript
+nest,Framework,Node.js framework,https://github.com/nestjs/nest,68500+,Native,TypeScript
+hono,Framework,Fast web framework,https://github.com/honojs/hono,21000+,Native,TypeScript
+elysia,Framework,Bun web framework,https://github.com/elysiajs/elysia,11000+,Native,TypeScript
+gin,Framework,Go web framework,https://github.com/gin-gonic/gin,79500+,Native,Go
+echo,Framework,Go web framework,https://github.com/labstack/echo,30000+,Native,Go
+fiber,Framework,Go web framework,https://github.com/gofiber/fiber,34500+,Native,Go
+chi,Framework,Go HTTP router,https://github.com/go-chi/chi,18500+,Native,Go
+gorilla,Framework,Go web toolkit,https://github.com/gorilla/mux,21000+,Native,Go
+actix-web,Framework,Rust web framework,https://github.com/actix/actix-web,22000+,Native,Rust
+axum,Framework,Rust web framework,https://github.com/tokio-rs/axum,19500+,Native,Rust
+rocket,Framework,Rust web framework,https://github.com/SergioBenitez/Rocket,24500+,Native,Rust
+warp,Framework,Rust web framework,https://github.com/seanmonstar/warp,9700+,Native,Rust
+tide,Framework,Rust async web,https://github.com/http-rs/tide,5000+,Native,Rust
+phoenix,Framework,Elixir web framework,https://github.com/phoenixframework/phoenix,21500+,Native,Elixir
+absinthe,Framework,Elixir GraphQL,https://github.com/absinthe-graphql/absinthe,4300+,Native,Elixir
+ecto,Database,Elixir database wrapper,https://github.com/elixir-ecto/ecto,6100+,Native,Elixir
+lucky,Framework,Crystal web framework,https://github.com/luckyframework/lucky,2600+,Native,Crystal
+kemal,Framework,Crystal web framework,https://github.com/kemalcr/kemal,3700+,Native,Crystal
+amber,Framework,Crystal web framework,https://github.com/amberframework/amber,2600+,Native,Crystal
+sinatra,Framework,Ruby DSL,https://github.com/sinatra/sinatra,12200+,Native,Ruby
+hanami,Framework,Ruby web framework,https://github.com/hanami/hanami,6200+,Native,Ruby
+padrino,Framework,Ruby web framework,https://github.com/padrino/padrino-framework,3400+,Native,Ruby
+grape,Framework,Ruby REST API,https://github.com/ruby-grape/grape,9900+,Native,Ruby
+roda,Framework,Ruby routing tree,https://github.com/jeremyevans/roda,1200+,Native,Ruby
+spring,Framework,Java framework,https://github.com/spring-projects/spring-framework,56500+,Native,Java
+micronaut,Framework,JVM framework,https://github.com/micronaut-projects/micronaut-core,6100+,Native,Java
+quarkus,Framework,Kubernetes Java,https://github.com/quarkusio/quarkus,14000+,Native,Java
+ktor,Framework,Kotlin framework,https://github.com/ktorio/ktor,13000+,Native,Kotlin
+http4k,Framework,Kotlin HTTP toolkit,https://github.com/http4k/http4k,2600+,Native,Kotlin
+vertx,Framework,Reactive JVM,https://github.com/eclipse-vertx/vert.x,14200+,Native,Java
+play,Framework,Scala framework,https://github.com/playframework/playframework,12600+,Native,Scala
+akka-http,Framework,Scala HTTP toolkit,https://github.com/akka/akka-http,1300+,Native,Scala
+finatra,Framework,Scala framework,https://github.com/twitter/finatra,2200+,Native,Scala
+tapir,Framework,Scala API toolkit,https://github.com/softwaremill/tapir,1400+,Native,Scala
+http4s,Framework,Scala HTTP,https://github.com/http4s/http4s,2500+,Native,Scala
+zio,Framework,Scala effect system,https://github.com/zio/zio,4100+,Native,Scala
+cats-effect,Framework,Scala effect system,https://github.com/typelevel/cats-effect,2000+,Native,Scala
+laravel,Framework,PHP framework,https://github.com/laravel/laravel,78500+,Native,PHP
+symfony,Framework,PHP framework,https://github.com/symfony/symfony,29800+,Native,PHP
+lumen,Framework,PHP micro-framework,https://github.com/laravel/lumen,7700+,Native,PHP
+slim,Framework,PHP micro-framework,https://github.com/slimphp/Slim,12000+,Native,PHP
+codeigniter,Framework,PHP framework,https://github.com/bcit-ci/CodeIgniter,18300+,Native,PHP
+yii2,Framework,PHP framework,https://github.com/yiisoft/yii2,14200+,Native,PHP
+cakephp,Framework,PHP framework,https://github.com/cakephp/cakephp,8700+,Native,PHP
+laminas,Framework,PHP framework,https://github.com/laminas/laminas-mvc,1600+,Native,PHP
+aspnet,Framework,.NET web framework,https://github.com/dotnet/aspnetcore,35500+,Native,C#
+blazor,Framework,.NET web UI,https://github.com/dotnet/aspnetcore,35500+,Native,C#
+nancy,Framework,.NET web framework,https://github.com/NancyFx/Nancy,7200+,Native,C#
+servicestack,Framework,.NET web framework,https://github.com/ServiceStack/ServiceStack,5400+,Native,C#
+joshuto,File Manager,Ranger-like file manager in Rust,https://github.com/kamiyaa/joshuto,3500+,Native,Rust
+felix,File Manager,TUI file manager in Rust,https://github.com/kyoheiu/felix,1000+,Native,Rust
+fff,File Manager,Fast file manager in Bash,https://github.com/dylanaraps/fff,4100+,Native,Bash
+clifm,File Manager,Shell-like file manager,https://github.com/leo-arch/clifm,1400+,Native,C
+cfiles,File Manager,ncurses file manager,https://github.com/mananapr/cfiles,600+,Native,C
+rover,File Manager,Simple file browser,https://github.com/lecram/rover,500+,Native,C
+goful,File Manager,TUI file manager in Go,https://github.com/anmitsu/goful,300+,Native,Go
+tere,File Explorer,Terminal file explorer,https://github.com/mgunyho/tere,1800+,Native,Rust
+walk,File Manager,Navigate through files,https://github.com/antonmedv/walk,3500+,Native,Go
+fx,JSON,JSON viewer and processor,https://github.com/antonmedv/fx,19000+,Native,Go
+jid,JSON,JSON incremental digger,https://github.com/simeji/jid,6800+,Native,Go
+gron,JSON,Make JSON greppable,https://github.com/tomnomnom/gron,14000+,Native,Go
+jp,JSON,JSON processor,https://github.com/sgreben/jp,1000+,Native,Go
+jo,JSON,JSON output from shell,https://github.com/jpmens/jo,4700+,Native,C
+xsv,CSV,CSV toolkit,https://github.com/BurntSushi/xsv,10500+,Native,Rust
+qsv,CSV,CSV data-wrangling,https://github.com/jqnatividad/qsv,2500+,Native,Rust
+csvlens,CSV,CSV viewer,https://github.com/YS-L/csvlens,2800+,Native,Rust
+tidy-viewer,CSV,CSV viewer,https://github.com/alexhallam/tv,2200+,Native,Rust
+mlr,CSV,Miller data processor,https://github.com/johnkerl/miller,9000+,Native,Go
+tv,CSV,Tidy Viewer,https://github.com/alexhallam/tv,2200+,Native,Rust
+teip,Text Processing,Masking tool,https://github.com/greymd/teip,1200+,Native,Rust
+choose,Text Processing,Cut alternative,https://github.com/theryangeary/choose,1800+,Native,Rust
+hck,Text Processing,Sharper cut,https://github.com/sstadick/hck,700+,Native,Rust
+rargs,Text Processing,xargs + awk,https://github.com/lotabout/rargs,500+,Native,Rust
+runiq,Text Processing,Filter unique lines,https://github.com/whitfin/runiq,200+,Native,Rust
+uniq,Text Processing,Filter unique lines,N/A,N/A,Native,C
+sort,Text Processing,Sort lines,N/A,N/A,Native,C
+cut,Text Processing,Cut columns,N/A,N/A,Native,C
+paste,Text Processing,Merge lines,N/A,N/A,Native,C
+join,Text Processing,Join files on field,N/A,N/A,Native,C
+comm,Text Processing,Compare sorted files,N/A,N/A,Native,C
+tr,Text Processing,Translate characters,N/A,N/A,Native,C
+expand,Text Processing,Convert tabs to spaces,N/A,N/A,Native,C
+unexpand,Text Processing,Convert spaces to tabs,N/A,N/A,Native,C
+fold,Text Processing,Wrap lines,N/A,N/A,Native,C
+fmt,Text Processing,Simple text formatter,N/A,N/A,Native,C
+pr,Text Processing,Paginate for printing,N/A,N/A,Native,C
+column,Text Processing,Columnate,N/A,N/A,Native,C
+rev,Text Processing,Reverse lines,N/A,N/A,Native,C
+tac,Text Processing,Cat in reverse,N/A,N/A,Native,C
+head,Text Processing,Output first lines,N/A,N/A,Native,C
+tail,Text Processing,Output last lines,N/A,N/A,Native,C
+wc,Text Processing,Word count,N/A,N/A,Native,C
+nl,Text Processing,Number lines,N/A,N/A,Native,C
+cat,Text Processing,Concatenate files,N/A,N/A,Native,C
+tee,Text Processing,Read stdin write stdout and files,N/A,N/A,Native,C
+split,Text Processing,Split files,N/A,N/A,Native,C
+csplit,Text Processing,Context split,N/A,N/A,Native,C
+shuf,Text Processing,Shuffle lines,N/A,N/A,Native,C
+awk,Text Processing,Pattern scanning,N/A,N/A,Native,C
+sed,Text Processing,Stream editor,N/A,N/A,Native,C
+perl,Text Processing,Perl interpreter,https://github.com/Perl/perl5,2000+,Native,C
+python,Language,Python interpreter,https://github.com/python/cpython,64500+,Native,C
+node,Language,Node.js runtime,https://github.com/nodejs/node,108000+,Native,C++
+deno,Language,Deno runtime,https://github.com/denoland/deno,97000+,Native,Rust
+bun,Language,Bun runtime,https://github.com/oven-sh/bun,75000+,Native,Zig
+ruby,Language,Ruby interpreter,https://github.com/ruby/ruby,22200+,Native,C
+php,Language,PHP interpreter,https://github.com/php/php-src,38500+,Native,C
+lua,Language,Lua interpreter,https://github.com/lua/lua,8500+,Native,C
+julia,Language,Julia language,https://github.com/JuliaLang/julia,46000+,Native,Julia
+R,Language,R language,https://github.com/wch/r-source,1000+,Native,C
+go,Language,Go compiler,https://github.com/golang/go,125000+,Native,Go
+rustc,Language,Rust compiler,https://github.com/rust-lang/rust,99000+,Native,Rust
+clang,Language,C/C++ compiler,https://github.com/llvm/llvm-project,29000+,Native,C++
+gcc,Language,GNU C compiler,https://gcc.gnu.org/,N/A,Native,C
+javac,Language,Java compiler,https://openjdk.org/,N/A,Native,Java
+kotlinc,Language,Kotlin compiler,https://github.com/JetBrains/kotlin,49500+,Native,Kotlin
+scalac,Language,Scala compiler,https://github.com/scala/scala,14500+,Native,Scala
+ghc,Language,Haskell compiler,https://github.com/ghc/ghc,3100+,Native,Haskell
+ocaml,Language,OCaml compiler,https://github.com/ocaml/ocaml,5500+,Native,OCaml
+erlang,Language,Erlang VM,https://github.com/erlang/otp,11600+,Native,Erlang
+elixir,Language,Elixir language,https://github.com/elixir-lang/elixir,24500+,Native,Elixir
+crystal,Language,Crystal language,https://github.com/crystal-lang/crystal,19500+,Native,Crystal
+nim,Language,Nim language,https://github.com/nim-lang/Nim,16800+,Native,Nim
+zig,Language,Zig language,https://github.com/ziglang/zig,35500+,Native,Zig
+v,Language,V language,https://github.com/vlang/v,35800+,Native,V
+d,Language,D compiler,https://github.com/dlang/dmd,3000+,Native,D
+swift,Language,Swift language,https://github.com/apple/swift,67500+,Native,C++
+dotnet,Language,.NET SDK,https://github.com/dotnet/sdk,2700+,Native,C#
+fsharp,Language,F# compiler,https://github.com/dotnet/fsharp,3900+,Native,F#
+clojure,Language,Clojure language,https://github.com/clojure/clojure,10500+,Native,Java
+racket,Language,Racket language,https://github.com/racket/racket,5000+,Native,Racket
+janet,Language,Janet language,https://github.com/janet-lang/janet,3500+,Native,C
+fennel,Language,Fennel language,https://github.com/bakpakin/Fennel,2500+,Native,Lua
+cue,Language,CUE language,https://github.com/cue-lang/cue,5200+,Native,Go
+pkl,Language,Apple Pkl,https://github.com/apple/pkl,10500+,Native,Kotlin
+jsonnet,Language,Jsonnet,https://github.com/google/jsonnet,7000+,Native,C++
+dhall,Language,Dhall language,https://github.com/dhall-lang/dhall-haskell,900+,Native,Haskell
+starlark,Language,Starlark language,https://github.com/google/starlark-go,2400+,Native,Go
+terraform,IaC,Infrastructure as Code,https://github.com/hashicorp/terraform,43000+,Native,Go
+opentofu,IaC,Terraform fork,https://github.com/opentofu/opentofu,24000+,Native,Go
+pulumi,IaC,Infrastructure as Code,https://github.com/pulumi/pulumi,22000+,Native,Go
+ansible,IaC,Configuration management,https://github.com/ansible/ansible,63500+,Native,Python
+salt,IaC,Configuration management,https://github.com/saltstack/salt,14200+,Native,Python
+puppet,IaC,Configuration management,https://github.com/puppetlabs/puppet,7500+,Native,Ruby
+chef,IaC,Configuration management,https://github.com/chef/chef,7600+,Native,Ruby
+cdktf,IaC,Terraform CDK,https://github.com/hashicorp/terraform-cdk,4900+,Native,TypeScript
+cdk,IaC,AWS CDK,https://github.com/aws/aws-cdk,11700+,Native,TypeScript
+serverless,IaC,Serverless framework,https://github.com/serverless/serverless,46500+,Native,JavaScript
+sam,IaC,AWS SAM CLI,https://github.com/aws/aws-sam-cli,6700+,Native,Python
+copilot-cli,IaC,AWS Copilot,https://github.com/aws/copilot-cli,3500+,Native,Go
+eksctl,Kubernetes,EKS management,https://github.com/eksctl-io/eksctl,5000+,Native,Go
+kops,Kubernetes,Kubernetes operations,https://github.com/kubernetes/kops,16000+,Native,Go
+kind,Kubernetes,Kubernetes in Docker,https://github.com/kubernetes-sigs/kind,13500+,Native,Go
+minikube,Kubernetes,Local Kubernetes,https://github.com/kubernetes/minikube,29500+,Native,Go
+k3d,Kubernetes,k3s in Docker,https://github.com/k3d-io/k3d,5500+,Native,Go
+k3s,Kubernetes,Lightweight Kubernetes,https://github.com/k3s-io/k3s,28500+,Native,Go
+microk8s,Kubernetes,Minimal Kubernetes,https://github.com/canonical/microk8s,8500+,Native,Go
+rancher,Kubernetes,Kubernetes management,https://github.com/rancher/rancher,23500+,Native,Go
+argocd,Kubernetes,GitOps CD,https://github.com/argoproj/argo-cd,18000+,Native,Go
+flux,Kubernetes,GitOps toolkit,https://github.com/fluxcd/flux2,6500+,Native,Go
+kustomize,Kubernetes,Kubernetes customization,https://github.com/kubernetes-sigs/kustomize,11000+,Native,Go
+skaffold,Kubernetes,Local development,https://github.com/GoogleContainerTools/skaffold,15000+,Native,Go
+tilt,Kubernetes,Local development,https://github.com/tilt-dev/tilt,7500+,Native,Go
+telepresence,Kubernetes,Local development,https://github.com/telepresenceio/telepresence,6500+,Native,Go
+devspace,Kubernetes,Development workflow,https://github.com/devspace-sh/devspace,4400+,Native,Go
+garden,Kubernetes,Development platform,https://github.com/garden-io/garden,3400+,Native,TypeScript
+okteto,Kubernetes,Development platform,https://github.com/okteto/okteto,3400+,Native,Go
+kubebuilder,Kubernetes,Operator SDK,https://github.com/kubernetes-sigs/kubebuilder,7900+,Native,Go
+operator-sdk,Kubernetes,Operator framework,https://github.com/operator-framework/operator-sdk,7200+,Native,Go
+krew,Kubernetes,Plugin manager,https://github.com/kubernetes-sigs/krew,6500+,Native,Go
+kubeseal,Kubernetes,Sealed secrets,https://github.com/bitnami-labs/sealed-secrets,7800+,Native,Go
+velero,Kubernetes,Backup and migrate,https://github.com/vmware-tanzu/velero,8700+,Native,Go
+crossplane,Kubernetes,Infrastructure management,https://github.com/crossplane/crossplane,9500+,Native,Go
+kubevela,Kubernetes,Application platform,https://github.com/kubevela/kubevela,6500+,Native,Go
+dapr,Kubernetes,Runtime for microservices,https://github.com/dapr/dapr,24000+,Native,Go
+istio,Kubernetes,Service mesh,https://github.com/istio/istio,36000+,Native,Go
+linkerd,Kubernetes,Service mesh,https://github.com/linkerd/linkerd2,10700+,Native,Go
+envoy,Kubernetes,Edge proxy,https://github.com/envoyproxy/envoy,25000+,Native,C++
+traefik,Kubernetes,Edge router,https://github.com/traefik/traefik,51500+,Native,Go
+nginx-ingress,Kubernetes,Ingress controller,https://github.com/kubernetes/ingress-nginx,17500+,Native,Go
+cert-manager,Kubernetes,Certificate management,https://github.com/cert-manager/cert-manager,12500+,Native,Go
+external-dns,Kubernetes,DNS management,https://github.com/kubernetes-sigs/external-dns,7800+,Native,Go
+vault-operator,Kubernetes,Vault on K8s,https://github.com/bank-vanguard/vault-operator,100+,Native,Go
+prometheus-operator,Kubernetes,Prometheus on K8s,https://github.com/prometheus-operator/prometheus-operator,9200+,Native,Go
+loki-operator,Kubernetes,Loki on K8s,https://github.com/grafana/loki,24500+,Native,Go
+jaeger,Observability,Distributed tracing,https://github.com/jaegertracing/jaeger,20500+,Native,Go
+zipkin,Observability,Distributed tracing,https://github.com/openzipkin/zipkin,17000+,Native,Java
+tempo,Observability,Distributed tracing,https://github.com/grafana/tempo,4000+,Native,Go
+opentelemetry,Observability,Observability framework,https://github.com/open-telemetry/opentelemetry-collector,4500+,Native,Go
+signoz,Observability,APM platform,https://github.com/SigNoz/signoz,19500+,Native,Go
+uptrace,Observability,APM platform,https://github.com/uptrace/uptrace,3200+,Native,Go
+sentry,Observability,Error tracking,https://github.com/getsentry/sentry,39500+,Native,Python
+honeycomb,Observability,Observability platform,https://www.honeycomb.io/,N/A,Native,Go
+datadog,Observability,Monitoring platform,https://www.datadoghq.com/,N/A,Native,Various
+newrelic,Observability,Monitoring platform,https://github.com/newrelic/newrelic-cli,200+,Native,Go
+highlight,Observability,Session replay & monitoring,https://github.com/highlight/highlight,8000+,Native,TypeScript
+posthog,Analytics,Product analytics,https://github.com/PostHog/posthog,22500+,Native,Python
+plausible,Analytics,Web analytics,https://github.com/plausible/analytics,21000+,Native,Elixir
+umami,Analytics,Web analytics,https://github.com/umami-software/umami,23000+,Native,TypeScript
+matomo,Analytics,Web analytics,https://github.com/matomo-org/matomo,20000+,Native,PHP
+fathom,Analytics,Privacy-first analytics,https://github.com/usefathom/fathom,8500+,Native,Go
+pirsch,Analytics,Privacy analytics,https://github.com/pirsch-analytics/pirsch,2200+,Native,Go
+goatcounter,Analytics,Web analytics,https://github.com/arp242/goatcounter,4600+,Native,Go
+countly,Analytics,Product analytics,https://github.com/Countly/countly-server,5600+,Native,JavaScript
+rudderstack,Analytics,Customer data platform,https://github.com/rudderlabs/rudder-server,4200+,Native,Go
+segment,Analytics,Customer data platform,https://segment.com/,N/A,Native,Various
+mixpanel,Analytics,Product analytics,https://mixpanel.com/,N/A,Native,Various
+amplitude,Analytics,Product analytics,https://amplitude.com/,N/A,Native,Various
+snowplow,Analytics,Data collection,https://github.com/snowplow/snowplow,6800+,Native,Scala
+n8n,Automation,Workflow automation,https://github.com/n8n-io/n8n,50000+,Native,TypeScript
+windmill,Automation,Developer platform,https://github.com/windmill-labs/windmill,10500+,Native,Rust
+temporal,Automation,Workflow orchestration,https://github.com/temporalio/temporal,12500+,Native,Go
+prefect,Automation,Workflow orchestration,https://github.com/PrefectHQ/prefect,17000+,Native,Python
+dagster,Automation,Data orchestration,https://github.com/dagster-io/dagster,12000+,Native,Python
+airflow,Automation,Workflow platform,https://github.com/apache/airflow,37500+,Native,Python
+luigi,Automation,Pipeline framework,https://github.com/spotify/luigi,17700+,Native,Python
+nextflow,Automation,Data-driven pipelines,https://github.com/nextflow-io/nextflow,2800+,Native,Groovy
+snakemake,Automation,Workflow management,https://github.com/snakemake/snakemake,2300+,Native,Python
+dvc,ML Ops,Data version control,https://github.com/iterative/dvc,14000+,Native,Python
+mlflow,ML Ops,ML lifecycle,https://github.com/mlflow/mlflow,19000+,Native,Python
+kubeflow,ML Ops,ML on Kubernetes,https://github.com/kubeflow/kubeflow,14500+,Native,Go
+metaflow,ML Ops,ML framework,https://github.com/Netflix/metaflow,8200+,Native,Python
+hydra,ML Config,Configuration framework,https://github.com/facebookresearch/hydra,8800+,Native,Python
+wandb,ML Tracking,Experiment tracking,https://github.com/wandb/wandb,9200+,Native,Python
+neptune,ML Tracking,ML metadata store,https://neptune.ai/,N/A,Native,Python
+comet,ML Tracking,ML platform,https://www.comet.com/,N/A,Native,Python
+clearml,ML Ops,ML/DL ops,https://github.com/allegroai/clearml,5700+,Native,Python
+bentoml,ML Deploy,Model serving,https://github.com/bentoml/BentoML,7200+,Native,Python
+seldon,ML Deploy,Model deployment,https://github.com/SeldonIO/seldon-core,4400+,Native,Python
+triton,ML Deploy,Inference server,https://github.com/triton-inference-server/server,8500+,Native,C++
+vllm,ML Deploy,LLM serving,https://github.com/vllm-project/vllm,33000+,Native,Python
+text-generation-inference,ML Deploy,LLM serving,https://github.com/huggingface/text-generation-inference,9500+,Native,Rust
+llama.cpp,ML Deploy,LLM inference,https://github.com/ggerganov/llama.cpp,71000+,Native,C++
+whisper.cpp,ML Deploy,Whisper inference,https://github.com/ggerganov/whisper.cpp,36000+,Native,C++
+stable-diffusion.cpp,ML Deploy,SD inference,https://github.com/leejet/stable-diffusion.cpp,3500+,Native,C++
+localai,ML Deploy,Local AI server,https://github.com/mudler/LocalAI,26000+,Native,Go
+jan,ML Deploy,Local AI assistant,https://github.com/janhq/jan,25000+,Native,TypeScript
+lmstudio,ML Deploy,Local LLM GUI,https://lmstudio.ai/,N/A,Native,Various
+gpt4all,ML Deploy,Local LLMs,https://github.com/nomic-ai/gpt4all,71000+,Native,C++
+privateGPT,ML Deploy,Private LLM,https://github.com/zylon-ai/private-gpt,54000+,Native,Python
+chatbot-ui,AI,ChatGPT clone,https://github.com/mckaywrigley/chatbot-ui,29000+,Native,TypeScript
+open-webui,AI,LLM web UI,https://github.com/open-webui/open-webui,52000+,Native,Svelte
+text-generation-webui,AI,LLM web UI,https://github.com/oobabooga/text-generation-webui,41000+,Native,Python
+librechat,AI,ChatGPT clone,https://github.com/danny-avila/LibreChat,19000+,Native,TypeScript
+chatgpt-web,AI,ChatGPT web client,https://github.com/Chanzhaoyu/chatgpt-web,31500+,Native,Vue
+lobe-chat,AI,AI chat framework,https://github.com/lobehub/lobe-chat,50000+,Native,TypeScript
+comfyui,AI,Stable Diffusion UI,https://github.com/comfyanonymous/ComfyUI,58000+,Native,Python
+automatic1111,AI,Stable Diffusion UI,https://github.com/AUTOMATIC1111/stable-diffusion-webui,145000+,Native,Python
+fooocus,AI,Image generation,https://github.com/lllyasviel/Fooocus,42000+,Native,Python
+invoke-ai,AI,Creative engine,https://github.com/invoke-ai/InvokeAI,24000+,Native,Python
+
