@@ -42,7 +42,8 @@ GSSAPIAuthentication no
 PreferredAuthentications publickey,keyboard-interactive,password
 ```
 
-**Problem**: GSSAPI (Kerberos) authentication performs DNS lookups to find the KDC (Key Distribution Center). Even if you don't use Kerberos, SSH still attempts this by default.
+**Problem**: GSSAPI (Kerberos) authentication performs DNS lookups to find the KDC (Key Distribution Center). 
+Even if you don't use Kerberos, SSH still attempts this by default.
 
 **What happens**:
 1. SSH tries to resolve the hostname to a Kerberos realm

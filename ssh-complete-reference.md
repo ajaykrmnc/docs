@@ -145,10 +145,8 @@ Client                                          Server
 ### Phase 2: Protocol Version Exchange (instant)
 
 ```
-Client                                          Server
-
 ### Phase 4: User Authentication (1-10+ seconds)
-
+```
 This phase can be the SLOWEST if misconfigured:
 
 ```
@@ -176,7 +174,7 @@ Client                                          Server
 
 ### Phase 5: Channel Setup (instant)
 
-```
+`
 Client                                          Server
    │                                               │
    │ ─────── SSH_MSG_CHANNEL_OPEN ──────────────> │
@@ -190,9 +188,7 @@ Client                                          Server
    │         Interactive Session Ready             │
    │                                               │
 ```
-
 ## Total Connection Time Breakdown
-
 | Phase | Typical Time | With Optimization |
 |-------|--------------|-------------------|
 | TCP Handshake | 50-500ms | Same |
@@ -1023,35 +1019,1204 @@ With time limit (more secure):
 Host *
     AddKeysToAgent 4h            # Key expires after 4 hours
 ```
-   │                                               │
+
+
+---
+
+# Chapter 8: Connection Multiplexing (ControlMaster)
+
+## The Most Impactful Optimization
+
+Connection multiplexing is the single most effective way to speed up SSH.
+It allows multiple SSH sessions to share a single TCP connection.
+
+## How Normal SSH Works (Without Multiplexing)
+
+```
+Session 1: ssh server "command1"
+┌─────────────────────────────────────────────────────────────┐
+│ TCP Handshake → Key Exchange → Auth → Execute → Close      │
+│                        ~5-10 seconds                        │
+└─────────────────────────────────────────────────────────────┘
+
+Session 2: ssh server "command2"
+┌─────────────────────────────────────────────────────────────┐
+│ TCP Handshake → Key Exchange → Auth → Execute → Close      │
+│                        ~5-10 seconds                        │
+└─────────────────────────────────────────────────────────────┘
+
+Session 3: ssh server "command3"
+┌─────────────────────────────────────────────────────────────┐
+│ TCP Handshake → Key Exchange → Auth → Execute → Close      │
+│                        ~5-10 seconds                        │
+└─────────────────────────────────────────────────────────────┘
+
+Total time: ~15-30 seconds
 ```
 
-### Phase 3: Key Exchange (1-3 seconds)
-
-This is where cryptographic parameters are negotiated:
+## How Multiplexing Works
 
 ```
-Client                                          Server
-   │                                               │
-   │ ─────── SSH_MSG_KEXINIT ────────────────────> │
-   │  (supported algorithms list)                  │
-   │                                               │
-   │ <────── SSH_MSG_KEXINIT ─────────────────────│
-   │  (supported algorithms list)                  │
-   │                                               │
-   │         Algorithm Negotiation:                │
-   │         - Key Exchange: ecdh-sha2-nistp256    │
-   │         - Host Key: ssh-ed25519               │
-   │         - Cipher: aes256-gcm                  │
-   │         - MAC: implicit (GCM mode)            │
-   │                                               │
-   │ ─────── ECDH Public Key ───────────────────> │
-   │                                               │
-   │ <────── ECDH Public Key + Host Key ──────────│
-   │         + Signature                           │
-   │                                               │
-   │        Both derive shared secret              │
-   │        Encryption keys established            │
-   │                                               │
+Session 1 (Master): ssh server "command1"
+┌─────────────────────────────────────────────────────────────┐
+│ TCP Handshake → Key Exchange → Auth → Execute              │
+│                        ~5-10 seconds                        │
+│                                                             │
+│                   Creates control socket:                   │
+│               ~/.ssh/sockets/user@server-22                 │
+│                                                             │
+│                 ┌─────────────────────┐                     │
+│                 │   Master Process    │                     │
+│                 │  (stays running)    │                     │
+│                 └─────────────────────┘                     │
+└─────────────────────────────────────────────────────────────┘
+
+Session 2 (Slave): ssh server "command2"
+┌─────────────────────────────────────────────────────────────┐
+│ Connect to control socket → Multiplex channel → Execute    │
+│                        ~0.1-0.5 seconds!                    │
+└─────────────────────────────────────────────────────────────┘
+
+Session 3 (Slave): ssh server "command3"
+┌─────────────────────────────────────────────────────────────┐
+│ Connect to control socket → Multiplex channel → Execute    │
+│                        ~0.1-0.5 seconds!                    │
+└─────────────────────────────────────────────────────────────┘
+
+Total time: ~5-11 seconds (vs 15-30 without multiplexing)
 ```
 
+## ControlMaster
+
+**Purpose**: Enable connection sharing.
+
+### Syntax
+
+```ssh-config
+ControlMaster auto|yes|no|ask|autoask
+```
+
+### Values Explained
+
+| Value | Behavior |
+|-------|----------|
+| `no` | Disable multiplexing |
+| `yes` | Always be the master (fails if master exists) |
+| `auto` | Become master if none exists, otherwise be slave |
+| `ask` | Like `yes`, but ask before becoming master |
+| `autoask` | Like `auto`, but ask before becoming master |
+
+### Recommended Value
+
+```ssh-config
+ControlMaster auto
+```
+
+Why `auto`?
+- First connection becomes master automatically
+- Subsequent connections become slaves automatically
+- No manual intervention needed
+
+### How ControlMaster Works Internally
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      FIRST CONNECTION                        │
+│                                                             │
+│  $ ssh server                                               │
+│      │                                                      │
+│      ▼                                                      │
+│  Check: Does control socket exist?                          │
+│      │                                                      │
+│      ▼ NO                                                   │
+│  Create new TCP connection to server                        │
+│      │                                                      │
+│      ▼                                                      │
+│  Perform full SSH handshake                                 │
+│      │                                                      │
+│      ▼                                                      │
+│  Create Unix domain socket at ControlPath                   │
+│      │                                                      │
+│      ▼                                                      │
+│  Fork: Parent becomes "master", child handles session       │
+│      │                                                      │
+│      ▼                                                      │
+│  Master listens on control socket for new connections       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│                    SUBSEQUENT CONNECTION                     │
+│                                                             │
+│  $ ssh server                                               │
+│      │                                                      │
+│      ▼                                                      │
+│  Check: Does control socket exist?                          │
+│      │                                                      │
+│      ▼ YES                                                  │
+│  Connect to Unix socket (local IPC, instant)                │
+│      │                                                      │
+│      ▼                                                      │
+│  Request new channel from master                            │
+│      │                                                      │
+│      ▼                                                      │
+│  Master opens new channel on existing TCP connection        │
+│      │                                                      │
+│      ▼                                                      │
+│  Session ready! (no TCP handshake, no auth)                 │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## ControlPath
+
+**Purpose**: Specify the location of the control socket file.
+
+### Syntax
+
+```ssh-config
+ControlPath path_with_tokens
+```
+
+### Token Substitutions
+
+| Token | Meaning | Example |
+|-------|---------|---------|
+| `%r` | Remote username | ajay.kumar |
+| `%h` | Remote hostname | 10.247.213.3 |
+| `%p` | Remote port | 22 |
+| `%l` | Local hostname | macbook.local |
+| `%L` | Local hostname (short) | macbook |
+| `%n` | Original hostname | myalias |
+| `%C` | Hash of %l%h%p%r | a1b2c3d4... |
+| `%%` | Literal % | % |
+
+### Recommended ControlPath
+
+```ssh-config
+ControlPath ~/.ssh/sockets/%r@%h-%p
+```
+
+This creates paths like:
+```
+~/.ssh/sockets/ajay.kumar@10.247.213.3-22
+~/.ssh/sockets/root@192.168.1.1-22
+~/.ssh/sockets/deploy@production.example.com-2222
+```
+
+### Why Include All Components?
+
+```
+%r (user)   - Different users = different sessions
+%h (host)   - Different hosts = different sessions
+%p (port)   - Different ports = different sessions (SSH on 22 vs 2222)
+```
+
+### Alternative: Using Hash
+
+For very long hostnames, the path might exceed filesystem limits.
+Use `%C` to create a fixed-length hash:
+
+```ssh-config
+ControlPath ~/.ssh/sockets/%C
+```
+
+Creates paths like:
+```
+~/.ssh/sockets/a1b2c3d4e5f6789012345678901234567890abcd
+```
+
+### Socket Directory Setup
+
+**Important**: Create the sockets directory first!
+
+```bash
+mkdir -p ~/.ssh/sockets
+chmod 700 ~/.ssh/sockets
+```
+
+Without this directory, you'll see:
+```
+muxserver_listen: mkdir /Users/user/.ssh/sockets failed: No such file or directory
+```
+
+## ControlPersist
+
+**Purpose**: Keep the master connection alive after the initial session closes.
+
+### Syntax
+
+```ssh-config
+ControlPersist yes|no|time
+```
+
+### Values
+
+| Value | Behavior |
+|-------|----------|
+| `no` | Close master when last session closes |
+| `yes` | Keep master alive indefinitely |
+| `600` | Keep master alive for 600 seconds (10 minutes) |
+| `30m` | Keep master alive for 30 minutes |
+| `2h` | Keep master alive for 2 hours |
+
+### How ControlPersist Works
+
+```
+Without ControlPersist (or ControlPersist no):
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  Session 1 starts (master created)                          │
+│      │                                                      │
+│      ▼                                                      │
+│  Session 2 starts (slave)                                   │
+│      │                                                      │
+│      ▼                                                      │
+│  Session 1 closes                                           │
+│      │                                                      │
+│      ▼                                                      │
+│  Session 2 closes                                           │
+│      │                                                      │
+│      ▼                                                      │
+│  Master closes immediately ← No persistence                 │
+│      │                                                      │
+│      ▼                                                      │
+│  Session 3 starts: Full handshake required again!           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+With ControlPersist 600:
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  Session 1 starts (master created)                          │
+│      │                                                      │
+│      ▼                                                      │
+│  Session 1 closes                                           │
+│      │                                                      │
+│      ▼                                                      │
+│  Master stays alive in background                           │
+│  (timer starts: 600 seconds)                                │
+│      │                                                      │
+│     ... 5 minutes later ...                                 │
+│      │                                                      │
+│      ▼                                                      │
+│  Session 2 starts: Instant! (uses existing master)          │
+│      │                                                      │
+│      ▼                                                      │
+│  Session 2 closes                                           │
+│      │                                                      │
+│      ▼                                                      │
+│  (timer resets: 600 seconds)                                │
+│      │                                                      │
+│     ... 10+ minutes of no activity ...                      │
+│      │                                                      │
+│      ▼                                                      │
+│  Master closes (timeout expired)                            │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Recommended Value
+
+```ssh-config
+ControlPersist 600    # 10 minutes
+```
+
+Why 600 seconds?
+- Long enough for typical work sessions
+- Short enough to not waste resources
+- Good balance between convenience and security
+
+### Complete Multiplexing Configuration
+
+```ssh-config
+Host *
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
+```
+
+### Managing Master Connections
+
+**Check if master is running:**
+```bash
+ssh -O check hostname
+# Output: Master running (pid=12345)
+# Or: Control socket not found
+```
+
+**Stop master connection:**
+```bash
+ssh -O exit hostname
+# Output: Exit request sent.
+```
+
+**Force new connection (bypass master):**
+```bash
+ssh -o ControlMaster=no hostname
+```
+
+**List all active sockets:**
+```bash
+ls -la ~/.ssh/sockets/
+```
+
+**Stop all master connections:**
+```bash
+for socket in ~/.ssh/sockets/*; do
+    ssh -O exit -o ControlPath="$socket" dummy 2>/dev/null
+done
+```
+
+---
+
+# Chapter 9: Keep-Alive and Timeout Settings
+
+## Why Keep-Alive is Necessary
+
+Network devices terminate idle connections:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    WITHOUT KEEP-ALIVE                        │
+│                                                             │
+│  Client                NAT/Firewall              Server     │
+│    │                      │                        │        │
+│    │ ──────────────────── │ ─────────────────────> │        │
+│    │      SSH Session     │     Established        │        │
+│    │                      │                        │        │
+│    │     (idle for 5 minutes...)                   │        │
+│    │                      │                        │        │
+│    │      NAT table entry │                        │        │
+│    │      expires!        │                        │        │
+│    │         ╳            │                        │        │
+│    │                      │                        │        │
+│    │ ──── Send data ────> │ ╳ (connection lost)    │        │
+│    │                      │                        │        │
+│    │  "Connection reset"  │                        │        │
+│    │                      │                        │        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## ServerAliveInterval
+
+**Purpose**: Send keep-alive messages at specified intervals.
+
+### Syntax
+
+```ssh-config
+ServerAliveInterval seconds
+```
+
+### Default Value
+
+`0` (disabled)
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  WITH ServerAliveInterval 60                 │
+│                                                             │
+│  Client                                         Server      │
+│    │                                               │        │
+│    │  ────── SSH_MSG_GLOBAL_REQUEST ─────────────> │        │
+│    │         "keepalive@openssh.com"               │        │
+│    │                                               │        │
+│    │  <───── SSH_MSG_REQUEST_SUCCESS ───────────── │        │
+│    │                                               │        │
+│    │         (60 seconds later)                    │        │
+│    │                                               │        │
+│    │  ────── SSH_MSG_GLOBAL_REQUEST ─────────────> │        │
+│    │         "keepalive@openssh.com"               │        │
+│    │                                               │        │
+│    │  <───── SSH_MSG_REQUEST_SUCCESS ───────────── │        │
+│    │                                               │        │
+│    │         (continues every 60 seconds...)       │        │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Recommended Value
+
+```ssh-config
+ServerAliveInterval 60
+```
+
+Why 60 seconds?
+- Most NAT devices have 5-15 minute timeouts
+- 60 seconds provides good margin
+- Low overhead (small encrypted packets)
+
+## ServerAliveCountMax
+
+**Purpose**: Number of keep-alive messages without response before disconnect.
+
+### Syntax
+
+```ssh-config
+ServerAliveCountMax count
+```
+
+### Default Value
+
+`3`
+
+### How It Works
+
+```
+ServerAliveInterval 60 + ServerAliveCountMax 3:
+
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  Time 0s:    Send keepalive #1                              │
+│  Time 60s:   No response... Send keepalive #2               │
+│  Time 120s:  No response... Send keepalive #3               │
+│  Time 180s:  No response... Disconnect!                     │
+│                                                             │
+│  Total tolerance: 180 seconds (3 minutes) of unresponsive   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Recommended Configuration
+
+```ssh-config
+Host *
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+```
+
+This means:
+- Send keepalive every 60 seconds
+- Disconnect after 3 consecutive failures (180 seconds)
+
+### Calculation
+
+```
+Disconnect after = ServerAliveInterval × ServerAliveCountMax seconds
+
+Example:
+  60 × 3 = 180 seconds = 3 minutes without response
+```
+
+### Different Scenarios
+
+```ssh-config
+# Stable connection, detect failures quickly
+Host local-server
+    ServerAliveInterval 15
+    ServerAliveCountMax 2
+    # Disconnect after 30 seconds
+
+# Unstable connection, more tolerance
+Host flaky-vpn
+    ServerAliveInterval 60
+    ServerAliveCountMax 6
+    # Disconnect after 360 seconds (6 minutes)
+
+# Long-running sessions
+Host batch-server
+    ServerAliveInterval 120
+    ServerAliveCountMax 5
+    # Disconnect after 600 seconds (10 minutes)
+```
+
+---
+
+# Chapter 10: Compression Settings
+
+## Compression Directive
+
+**Purpose**: Enable or disable data compression.
+
+### Syntax
+
+```ssh-config
+Compression yes|no
+```
+
+### Default Value
+
+`no`
+
+### How Compression Works
+
+```
+Without Compression:
+┌──────────┐                              ┌──────────┐
+│  Client  │                              │  Server  │
+│          │ ────── 1000 bytes ─────────> │          │
+│          │       (raw data)             │          │
+└──────────┘                              └──────────┘
+
+With Compression:
+┌──────────┐                              ┌──────────┐
+│  Client  │                              │  Server  │
+│  ┌─────┐ │                              │ ┌─────┐  │
+│  │Comp-│ │ ────── 300 bytes ──────────> │ │Decom│  │
+│  │ress │ │     (compressed)             │ │press│  │
+│  └─────┘ │                              │ └─────┘  │
+│          │                              │          │
+│  CPU     │                              │  CPU     │
+│  cost    │                              │  cost    │
+└──────────┘                              └──────────┘
+```
+
+### When to Enable Compression
+
+| Scenario | Compression | Reason |
+|----------|-------------|--------|
+| Slow WAN link | Yes | Bandwidth limited |
+| High latency (satellite) | Yes | Reduce round trips |
+| Text-heavy data | Yes | Compresses well |
+| Local network | No | Fast enough |
+| Already compressed data | No | Won't compress further |
+| CPU-limited device | No | CPU overhead |
+
+### Compression Algorithm
+
+SSH uses zlib compression:
+
+```
+Compression levels:
+  Level 1-3: Fast compression, lower ratio
+  Level 4-6: Balanced (default is ~6)
+  Level 7-9: Best compression, CPU intensive
+```
+
+### Examples
+
+```ssh-config
+# Slow connection to remote server
+Host remote-datacenter
+    Compression yes
+
+# Fast local network
+Host local-*
+    Compression no
+
+# Default for everything
+Host *
+    Compression no
+```
+
+### Performance Comparison
+
+```
+Test: Transfer 100MB text file over different networks
+
+1 Gbps LAN, Compression no:
+  Time: 0.8 seconds
+  CPU: 2%
+
+1 Gbps LAN, Compression yes:
+  Time: 3.2 seconds (SLOWER!)
+  CPU: 45%
+
+10 Mbps WAN, Compression no:
+  Time: 80 seconds
+  CPU: 2%
+
+10 Mbps WAN, Compression yes:
+  Time: 25 seconds (FASTER!)
+  CPU: 35%
+```
+
+**Conclusion**: Only use compression on slow networks!
+
+---
+
+# Chapter 11: Agent Forwarding
+
+## ForwardAgent
+
+**Purpose**: Forward your local SSH agent to remote servers.
+
+### Syntax
+
+```ssh-config
+ForwardAgent yes|no
+```
+
+### Default Value
+
+`no`
+
+### What is SSH Agent?
+
+SSH agent is a program that holds your private keys in memory:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                       SSH Agent                              │
+│                                                             │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │                     Memory                             │  │
+│  │                                                        │  │
+│  │   ┌──────────────┐   ┌──────────────┐                 │  │
+│  │   │  id_ed25519  │   │  work_key    │                 │  │
+│  │   │  (decrypted) │   │  (decrypted) │                 │  │
+│  │   └──────────────┘   └──────────────┘                 │  │
+│  │                                                        │  │
+│  └───────────────────────────────────────────────────────┘  │
+│                                                             │
+│  Socket: /tmp/ssh-XXXXXX/agent.12345                        │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### How Agent Forwarding Works
+
+```
+Without Agent Forwarding:
+┌──────────┐         ┌───────────┐         ┌───────────┐
+│  Laptop  │  SSH    │  Jump     │  SSH    │  Target   │
+│          │ ──────> │  Server   │ ──────> │  Server   │
+│ [keys]   │         │ [no keys] │  FAIL!  │           │
+└──────────┘         └───────────┘         └───────────┘
+
+With Agent Forwarding:
+┌──────────┐         ┌───────────┐         ┌───────────┐
+│  Laptop  │  SSH    │  Jump     │  SSH    │  Target   │
+│          │ ──────> │  Server   │ ──────> │  Server   │
+│ [keys]   │         │ [forward] │ SUCCESS │           │
+│  ▲       │         │     │     │         │           │
+│  │       │◄────────│─────┘     │         │           │
+│  │ Sign request forwarded back to laptop │           │
+└──────────┘         └───────────┘         └───────────┘
+```
+
+### Detailed Flow
+
+```
+1. Laptop → JumpServer: SSH connection with ForwardAgent yes
+2. JumpServer creates forwarded agent socket: /tmp/ssh-XXXXXX/agent.YYYY
+3. JumpServer → TargetServer: SSH connection request
+4. TargetServer: "I need authentication"
+5. JumpServer: Receives sign request, forwards to Laptop via SSH channel
+6. Laptop's ssh-agent: Signs the challenge
+7. Signed response travels: Laptop → JumpServer → TargetServer
+8. TargetServer: "Signature valid, access granted"
+```
+
+### Security Warning!
+
+⚠️ **Agent forwarding is a security risk!**
+
+```
+RISK: Root on JumpServer can access your agent
+
+┌──────────┐         ┌───────────┐         ┌───────────┐
+│  Laptop  │  SSH    │  Jump     │         │ Attacker  │
+│          │ ──────> │  Server   │         │  Server   │
+│ [keys]   │         │           │         │           │
+│          │         │ Malicious │ SSH     │           │
+│          │ ◄────── │ root user │ ──────> │ Got in!   │
+│          │  Uses   │ hijacks   │ using   │           │
+│          │  your   │ agent     │ YOUR    │           │
+│          │  key!   │ socket    │ keys!   │           │
+└──────────┘         └───────────┘         └───────────┘
+```
+
+### When to Use Agent Forwarding
+
+✅ **Safe scenarios:**
+- Trusted jump servers you control
+- Short sessions
+- Internal infrastructure
+
+❌ **Avoid:**
+- Shared/public jump servers
+- Long-running sessions
+- Servers with multiple admins
+
+### Safer Alternative: ProxyJump
+
+Instead of agent forwarding, use ProxyJump:
+
+```ssh-config
+Host target-server
+    HostName internal.target.com
+    ProxyJump jump.example.com
+    # No ForwardAgent needed!
+```
+
+ProxyJump tunnels through the jump server without exposing your agent.
+
+---
+
+# Chapter 12: Security Considerations
+
+## Security Best Practices
+
+### 1. Use Strong Key Types
+
+```bash
+# Generate Ed25519 (recommended)
+ssh-keygen -t ed25519 -a 100 -C "email@example.com"
+
+# If RSA required, use 4096 bits
+ssh-keygen -t rsa -b 4096 -C "email@example.com"
+```
+
+### 2. Protect Private Keys
+
+```bash
+# Set correct permissions
+chmod 600 ~/.ssh/id_ed25519
+chmod 600 ~/.ssh/id_rsa
+
+# Use passphrase!
+# When generating key, ALWAYS set a passphrase
+```
+
+### 3. Use Different Keys for Different Purposes
+
+```ssh-config
+# Personal projects
+Host github.com
+    IdentityFile ~/.ssh/personal_ed25519
+    IdentitiesOnly yes
+
+# Work
+Host *.company.com
+    IdentityFile ~/.ssh/work_ed25519
+    IdentitiesOnly yes
+
+# Servers
+Host production-*
+    IdentityFile ~/.ssh/prod_ed25519
+    IdentitiesOnly yes
+```
+
+### 4. Verify Host Keys
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ First connection to new server:                             │
+│                                                             │
+│ The authenticity of host 'server.com' can't be established. │
+│ ED25519 key fingerprint is SHA256:abcd1234...              │
+│ Are you sure you want to continue connecting (yes/no)?      │
+│                                                             │
+│ ⚠️  VERIFY this fingerprint with server admin!              │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 5. Limit Agent Forwarding
+
+```ssh-config
+# Disable by default
+Host *
+    ForwardAgent no
+
+# Enable only for specific trusted hosts
+Host trusted-jump
+    ForwardAgent yes
+```
+
+---
+
+# Chapter 13: Troubleshooting Guide
+
+## Verbose Mode
+
+SSH has multiple verbosity levels:
+
+```bash
+ssh server           # Normal (no debug)
+ssh -v server        # Debug level 1
+ssh -vv server       # Debug level 2
+ssh -vvv server      # Debug level 3 (most verbose)
+```
+
+## Common Issues and Solutions
+
+### Issue 1: "Connection timed out"
+
+**Symptoms:**
+```
+ssh: connect to host server port 22: Connection timed out
+```
+
+**Causes and Solutions:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Cause                    │ Solution                         │
+├─────────────────────────────────────────────────────────────┤
+│ Server is down           │ Check server status              │
+│ Wrong IP/hostname        │ Verify HostName setting          │
+│ Firewall blocking        │ Check firewall rules             │
+│ Wrong port               │ Verify Port setting              │
+│ Network unreachable      │ Check routing                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Issue 2: "Connection refused"
+
+**Symptoms:**
+```
+ssh: connect to host server port 22: Connection refused
+```
+
+**Causes:**
+- SSH server not running
+- SSH listening on different port
+- TCP wrapper denying connection
+
+### Issue 3: "Permission denied (publickey)"
+
+**Symptoms:**
+```
+Permission denied (publickey).
+```
+
+**Debug steps:**
+
+```bash
+# Check which keys are being offered
+ssh -v server 2>&1 | grep "Offering"
+
+# Verify your public key is on server
+ssh server "cat ~/.ssh/authorized_keys"
+
+# Check key permissions
+ls -la ~/.ssh/
+
+# Test specific key
+ssh -i ~/.ssh/specific_key server
+```
+
+### Issue 4: "Too many authentication failures"
+
+**Symptoms:**
+```
+Received disconnect from server: Too many authentication failures
+```
+
+**Solution:**
+
+```ssh-config
+Host server
+    IdentityFile ~/.ssh/correct_key
+    IdentitiesOnly yes      # Use ONLY this key
+```
+
+### Issue 5: Control socket issues
+
+**Symptoms:**
+```
+Control socket connect(...): Connection refused
+ControlPath ... already exists, disabling multiplexing
+```
+
+**Solutions:**
+
+```bash
+# Remove stale socket
+rm ~/.ssh/sockets/user@server-22
+
+# Or exit the master
+ssh -O exit server
+
+# Force new connection
+ssh -o ControlMaster=no server
+```
+
+## Diagnostic Commands
+
+```bash
+# Test TCP connectivity
+nc -zv server 22
+
+# Check DNS resolution
+nslookup server
+
+# Trace route to server
+traceroute server
+
+# Check SSH configuration
+ssh -G server | grep -E "^(hostname|user|port|identityfile)"
+
+# Test authentication methods
+ssh -o PreferredAuthentications=publickey server
+ssh -o PreferredAuthentications=password server
+
+# Check master connection status
+ssh -O check server
+
+# View loaded keys in agent
+ssh-add -l
+```
+
+---
+
+# Chapter 14: Best Practices
+
+## Recommended Global Configuration
+
+```ssh-config
+# Place this at the END of ~/.ssh/config
+
+Host *
+    # Security
+    AddKeysToAgent yes
+
+    # Performance - Disable slow auth methods
+    GSSAPIAuthentication no
+
+    # Connection multiplexing (huge speed boost!)
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
+
+    # Keep connections alive
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    TCPKeepAlive yes
+
+    # Reasonable timeout
+    ConnectTimeout 10
+
+    # Disable compression for fast networks
+    Compression no
+```
+
+## Per-Host Configuration Template
+
+```ssh-config
+Host myserver
+    # Connection
+    HostName actual.hostname.or.ip
+    Port 22
+    User username
+
+    # Authentication
+    IdentityFile ~/.ssh/specific_key
+    IdentitiesOnly yes
+
+    # Forwarding (only if needed)
+    ForwardAgent no
+    LocalForward 8080 localhost:80    # Optional
+```
+
+## Security Checklist
+
+```
+[ ] Use Ed25519 or RSA-4096 keys
+[ ] All keys have passphrases
+[ ] Private keys have 600 permissions
+[ ] ~/.ssh directory has 700 permissions
+[ ] ForwardAgent disabled by default
+[ ] IdentitiesOnly used with specific keys
+[ ] Host keys verified before first connection
+[ ] Unused keys removed from agent
+```
+
+## Performance Checklist
+
+```
+[ ] GSSAPIAuthentication disabled
+[ ] ControlMaster enabled
+[ ] ControlPath configured
+[ ] ControlPersist set (600+ seconds)
+[ ] ServerAliveInterval set (60 seconds)
+[ ] ConnectTimeout set (10-30 seconds)
+[ ] IdentityFile specified (avoid key scanning)
+[ ] Sockets directory created (~/.ssh/sockets)
+```
+
+---
+
+# Chapter 15: Complete Configuration Examples
+
+## Example 1: Developer Workstation
+
+```ssh-config
+# GitHub
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/github_ed25519
+    IdentitiesOnly yes
+
+# GitLab
+Host gitlab.com
+    HostName gitlab.com
+    User git
+    IdentityFile ~/.ssh/gitlab_ed25519
+    IdentitiesOnly yes
+
+# Production servers
+Host prod-*
+    User deploy
+    IdentityFile ~/.ssh/production_ed25519
+    IdentitiesOnly yes
+    ForwardAgent no
+
+# Development servers
+Host dev-*
+    User developer
+    IdentityFile ~/.ssh/dev_ed25519
+    ForwardAgent yes
+
+# Jump server
+Host bastion
+    HostName bastion.company.com
+    User admin
+    IdentityFile ~/.ssh/bastion_ed25519
+    IdentitiesOnly yes
+
+# Internal servers via jump
+Host internal-*
+    ProxyJump bastion
+    User admin
+
+# Global defaults
+Host *
+    AddKeysToAgent yes
+    GSSAPIAuthentication no
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    ConnectTimeout 10
+```
+
+## Example 2: Your Optimized Configuration (a4c and ap-remote)
+
+```ssh-config
+Host ap-remote
+    HostName ajaykumar-ajaykrarista-2zfg4
+    ForwardAgent yes
+    User ajay.kumar
+    AddKeysToAgent yes
+    GSSAPIAuthentication no
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    ConnectTimeout 10
+    TCPKeepAlive yes
+    Compression no
+
+Host a4c
+    HostName 10.247.213.3
+    User ajay.kumar
+    IdentityFile ~/.ssh/id_ed25519
+    IdentitiesOnly yes
+    AddKeysToAgent yes
+    GSSAPIAuthentication no
+    PreferredAuthentications publickey,keyboard-interactive,password
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    ConnectTimeout 10
+    TCPKeepAlive yes
+    Compression no
+```
+
+---
+
+# Chapter 16: Quick Reference Card
+
+## Essential SSH Config Options
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    QUICK REFERENCE                           │
+├──────────────────────┬──────────────────────────────────────┤
+│ Host pattern         │ Start config block for matching hosts│
+│ HostName ip/name     │ Actual host to connect to            │
+│ User username        │ Remote username                      │
+│ Port 22              │ SSH port number                      │
+├──────────────────────┼──────────────────────────────────────┤
+│ IdentityFile path    │ Private key file                     │
+│ IdentitiesOnly yes   │ Use only specified key               │
+│ AddKeysToAgent yes   │ Cache key in agent                   │
+├──────────────────────┼──────────────────────────────────────┤
+│ GSSAPIAuth no        │ Disable Kerberos (speeds up!)        │
+│ PreferredAuth pubkey │ Auth method order                    │
+├──────────────────────┼──────────────────────────────────────┤
+│ ControlMaster auto   │ Enable connection multiplexing       │
+│ ControlPath path     │ Socket location                      │
+│ ControlPersist 600   │ Keep master alive (seconds)          │
+├──────────────────────┼──────────────────────────────────────┤
+│ ServerAliveInt 60    │ Keepalive interval (seconds)         │
+│ ServerAliveMax 3     │ Max missed keepalives                │
+│ TCPKeepAlive yes     │ TCP-level keepalive                  │
+│ ConnectTimeout 10    │ Connection timeout (seconds)         │
+├──────────────────────┼──────────────────────────────────────┤
+│ Compression no       │ Disable compression (fast networks)  │
+│ ForwardAgent no      │ Don't forward agent (security)       │
+└──────────────────────┴──────────────────────────────────────┘
+```
+
+## Essential SSH Commands
+
+```bash
+# Basic connection
+ssh user@host
+ssh host              # Uses config file
+
+# With options
+ssh -p 2222 host      # Different port
+ssh -i key host       # Specific key
+ssh -v host           # Verbose (debug)
+
+# Key management
+ssh-keygen -t ed25519 # Generate key
+ssh-add key           # Add to agent
+ssh-add -l            # List keys in agent
+ssh-add -D            # Remove all keys
+
+# Multiplexing control
+ssh -O check host     # Check master status
+ssh -O exit host      # Stop master
+ssh -O stop host      # Stop accepting new sessions
+
+# File transfer
+scp file host:path    # Copy file
+sftp host             # Interactive transfer
+rsync -avz dir host:  # Sync directory
+
+# Port forwarding
+ssh -L 8080:localhost:80 host   # Local forward
+ssh -R 8080:localhost:80 host   # Remote forward
+ssh -D 1080 host               # SOCKS proxy
+```
+
+---
+
+# References and Further Reading
+
+1. **Man Pages**
+   - `man ssh` - SSH client
+   - `man ssh_config` - Client configuration
+   - `man sshd_config` - Server configuration
+   - `man ssh-keygen` - Key generation
+   - `man ssh-agent` - Key agent
+
+2. **RFCs**
+   - RFC 4251 - SSH Protocol Architecture
+   - RFC 4252 - SSH Authentication Protocol
+   - RFC 4253 - SSH Transport Layer Protocol
+   - RFC 4254 - SSH Connection Protocol
+
+3. **Online Resources**
+   - OpenSSH: https://www.openssh.com/
+   - SSH.com: https://www.ssh.com/academy/ssh
+   - Wikibooks: https://en.wikibooks.org/wiki/OpenSSH
+
+---
+
+*Document created: March 2026*
+*Last updated: March 2026*
+*Author: System Documentation*

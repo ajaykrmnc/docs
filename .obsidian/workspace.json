@@ -11,14 +11,10 @@
             "id": "585d2a10ad55eb8b",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "wlan-drivers/codebase_structure.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "codebase_structure"
+              "title": "New tab"
             }
           }
         ]
@@ -156,13 +152,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "wlan-drivers/codebase_structure.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of codebase_structure"
+              "title": "Outline"
             }
           }
         ],
@@ -183,33 +178,43 @@
       "bases:Create new base": false
     }
   },
-  "active": "c4cf197a9034e855",
+  "active": "585d2a10ad55eb8b",
   "lastOpenFiles": [
-    "telescope-live-grep-glob-patterns.md",
-    "telescope-live-grep-with-normal-grep.md",
-    "signals.md",
-    "wlan-drivers/ar_meta_cache_patch_analysis_SPF12.2_vs_SPF12.5.md",
-    "wlan-drivers/ar_meta_cache.md",
-    "programming-languages/cpp-vtables-guide.md",
-    "networking/socket-internals.md",
-    "uid-gid-essentials.md",
-    "systemd-guide.md",
-    "interrupts.md",
-    "semaphores.md",
-    "interprocess-communication.md",
-    "io-subsystem.md",
-    "memory-management-policies.md",
-    "process-scheduling-and-time.md",
-    "process-control.md",
-    "process-structure.md",
-    "java/01-jvm-internals-memory-model.md",
-    "zero-copy-mechanisms.md",
-    "docs/Welcome.md",
-    "build-and-tooling/git-concepts-guide.md",
-    "build-and-tooling/Cross_Compilation_Guide.md",
-    "build-and-tooling/CLANGD_TCP_SETUP_GUIDE.md",
-    "architecture/PROTOBUF_GRPC_VS_HTTPS.md",
-    "architecture/internet-business-ownership-guide.md",
-    "architecture/blob.md"
+    "aristadocs/GITLAB_PAGES_SETUP.md",
+    "aristadocs/public/PROTOBUF_GRPC_VS_HTTPS.html",
+    "aristadocs/public/build-and-tooling/Repository_Analysis_Rebuild_Estimation.html",
+    "aristadocs/public/build-and-tooling/MAKEFILE_COMMANDS.html",
+    "aristadocs/public/build-and-tooling/Cross_Compilation_Guide.html",
+    "aristadocs/public/build-and-tooling/ARM_vs_x86_Architecture_Guide.html",
+    "aristadocs/public/build-and-tooling",
+    "aristadocs/public/assets/chunks/theme.CvOKXBH0.js",
+    "aristadocs/public/assets/chunks/framework.BZohXCq9.js",
+    "aristadocs/public/assets/chunks/VPLocalSearchBox.C6btgN7E.js",
+    "aristadocs/public/assets/chunks/@localSearchIndexroot.Z3cFWPwT.js",
+    "aristadocs/node_modules/vitepress/README.md",
+    "aristadocs/node_modules/vitepress/template/markdown-examples.md",
+    "aristadocs/node_modules/vitepress/template/index.md",
+    "aristadocs/node_modules/vitepress/template/api-examples.md",
+    "aristadocs/node_modules/@types/markdown-it/README.md",
+    "aristadocs/node_modules/preact/README.md",
+    "aristadocs/node_modules/@vueuse/integrations/README.md",
+    "aristadocs/node_modules/focus-trap/SECURITY.md",
+    "aristadocs/node_modules/focus-trap/README.md",
+    "aristadocs/node_modules/focus-trap/CHANGELOG.md",
+    "aristadocs/node_modules/mark.js/ISSUE_TEMPLATE.md",
+    "aristadocs/node_modules/mark.js/CONTRIBUTING.md",
+    "aristadocs/node_modules/mark.js/README.md",
+    "aristadocs/node_modules/@vue/shared/README.md",
+    "aristadocs/node_modules/@docsearch/react/README.md",
+    "aristadocs/node_modules/@algolia/autocomplete-preset-algolia/README.md",
+    "aristadocs/node_modules/@vue/devtools-shared/README.md",
+    "aristadocs/node_modules/algoliasearch/README.md",
+    "aristadocs/node_modules/minisearch/README.md",
+    "aristadocs/node_modules/minisearch/CHANGELOG.md",
+    "aristadocs/node_modules/@algolia/autocomplete-core/README.md",
+    "aristadocs/node_modules/@algolia/ingestion/README.md",
+    "aristadocs/node_modules/search-insights/README.md",
+    "aristadocs/node_modules/search-insights/LICENSE.md",
+    "aristadocs/node_modules/@algolia/autocomplete-plugin-algolia-insights/README.md"
   ]
 }
