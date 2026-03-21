@@ -1,0 +1,23 @@
+{
+  "name": "technical-docs",
+  "version": "1.0.0",
+  "description": "Technical Documentation Repository",
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.0.0"
+  },
+  "keywords": [
+    "documentation",
+    "technical",
+    "systems-programming",
+    "distributed-systems"
+  ],
+  "author": "Ajay Kumar",
+  "license": "MIT"
+}
+

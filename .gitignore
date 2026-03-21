@@ -78,4 +78,9 @@ logs/
 *.temp
 .cache/
 
+# VitePress
+.vitepress/cache
+.vitepress/dist
+
+# Arista proprietary documentation
 aristadocs/

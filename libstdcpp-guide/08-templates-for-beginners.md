@@ -711,7 +711,7 @@ int main() {
 }
 ```
 
-### Mistake 4: Forgetting <Type> for Classes
+### Mistake 4: Forgetting `<Type>` for Classes
 
 ```cpp
 template<typename T>

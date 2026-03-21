@@ -542,8 +542,8 @@ Architecture:
 ```
 Sliding window with sorted set:
 
-ZADD user:123:requests <timestamp> <request_id>
-ZREMRANGEBYSCORE user:123:requests 0 <timestamp - window>
+ZADD user:123:requests {timestamp} {request_id}
+ZREMRANGEBYSCORE user:123:requests 0 {timestamp - window}
 ZCARD user:123:requests
 
 If count > limit → reject
