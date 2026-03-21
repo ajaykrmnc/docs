@@ -1,0 +1,40 @@
+# GitLab Pages Pipeline Configuration
+# This pipeline deploys your documentation to GitLab Pages
+
+# Use Node.js LTS image for building
+image: node:lts
+
+# Define pipeline stages
+stages:
+  - deploy
+
+# The "pages" job is required by GitLab Pages (must be named exactly "pages")
+pages:
+  stage: deploy
+  
+  # Install dependencies before building
+  before_script:
+    - npm ci
+  
+  # Build your documentation site
+  script:
+    - npm run build
+  
+  # Specify the artifacts to be published
+  artifacts:
+    paths:
+      - public  # GitLab Pages serves content from the "public" directory
+    expire_in: 1 week
+  
+  # Only deploy on pushes to the default branch (main/master)
+  rules:
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+  
+  # Cache node_modules for faster builds
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+

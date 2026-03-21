@@ -1,0 +1,22 @@
+{
+  "name": "aristadocs",
+  "version": "1.0.0",
+  "description": "Arista Documentation",
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview",
+    "build": "vitepress build && cp -r .vitepress/dist public"
+  },
+  "devDependencies": {
+    "vitepress": "^1.0.0"
+  },
+  "keywords": [
+    "documentation",
+    "arista"
+  ],
+  "author": "",
+  "license": "ISC"
+}
+
