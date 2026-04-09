@@ -523,6 +523,418 @@ This document follows the structure established by Maurice Bach, proceeding from
 │   │                                                                     │ │
 │   └─────────────────────────────────────────────────────────────────────┘ │
 │                                                                            │
+│   WHERE DOES MUTEX OWNERSHIP COME FROM?                                    │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   The ownership concept is NOT inherent to semaphores—it comes     │ │
+│   │   from ADDITIONAL METADATA and ENFORCEMENT in mutex implementations.│ │
+│   │                                                                     │ │
+│   │   BINARY SEMAPHORE STRUCTURE (Simplified):                          │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   struct semaphore {                                        │   │ │
+│   │   │       int value;              /* 0 or 1 */                  │   │ │
+│   │   │       wait_queue_t waiters;   /* Blocked processes */       │   │ │
+│   │   │       spinlock_t lock;        /* Protects structure */      │   │ │
+│   │   │   };                                                        │   │ │
+│   │   │                                                             │   │ │
+│   │   │   ❌ NO OWNER TRACKING!                                      │   │ │
+│   │   │   ❌ sem_post() doesn't check who calls it                   │   │ │
+│   │   │   ✅ Any thread can release it (useful for signaling)       │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   │   MUTEX STRUCTURE (pthread_mutex_t):                                │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   struct pthread_mutex {                                    │   │ │
+│   │   │       int locked;             /* 0 or 1 */                  │   │ │
+│   │   │       pthread_t owner;        /* ← THE KEY DIFFERENCE! */   │   │ │
+│   │   │       int recursion_count;    /* For recursive mutexes */   │   │ │
+│   │   │       int protocol;           /* Priority inheritance */    │   │ │
+│   │   │       wait_queue_t waiters;   /* Blocked threads */         │   │ │
+│   │   │       spinlock_t lock;        /* Protects structure */      │   │ │
+│   │   │   };                                                        │   │ │
+│   │   │                                                             │   │ │
+│   │   │   ✅ OWNER FIELD stores thread ID!                          │   │ │
+│   │   │   ✅ pthread_mutex_unlock() ENFORCES ownership              │   │ │
+│   │   │   ✅ Enables priority inheritance, deadlock detection       │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   HOW OWNERSHIP IS ENFORCED:                                               │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   BINARY SEMAPHORE (No Enforcement):                                │ │
+│   │   ────────────────────────────────────                              │ │
+│   │                                                                     │ │
+│   │   Thread A:                    Thread B:                            │ │
+│   │   sem_wait(&sem);              // (blocked, waiting)                │ │
+│   │   /* critical section */                                            │ │
+│   │                                sem_post(&sem);  ✅ ALLOWED!          │ │
+│   │                                // B can release A's semaphore!      │ │
+│   │                                                                     │ │
+│   │   This is LEGAL and sometimes DESIRED (signaling pattern):          │ │
+│   │   - Thread A waits for event                                        │ │
+│   │   - Thread B signals event occurred                                 │ │
+│   │                                                                     │ │
+│   │   ─────────────────────────────────────────────────────────────     │ │
+│   │                                                                     │ │
+│   │   MUTEX (Strict Enforcement):                                       │ │
+│   │   ────────────────────────────                                      │ │
+│   │                                                                     │ │
+│   │   Thread A:                    Thread B:                            │ │
+│   │   pthread_mutex_lock(&mtx);    // (blocked, waiting)                │ │
+│   │   // mtx.owner = Thread_A_ID                                        │ │
+│   │   /* critical section */                                            │ │
+│   │                                pthread_mutex_unlock(&mtx);          │ │
+│   │                                // ❌ ERROR: EPERM                    │ │
+│   │                                // B is not the owner!               │ │
+│   │                                                                     │ │
+│   │   pthread_mutex_unlock() implementation:                            │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   int pthread_mutex_unlock(pthread_mutex_t *mtx) {          │   │ │
+│   │   │       pthread_t self = pthread_self();                      │   │ │
+│   │   │                                                             │   │ │
+│   │   │       if (mtx->owner != self) {                             │   │ │
+│   │   │           return EPERM;  /* Not the owner! */               │   │ │
+│   │   │       }                                                     │   │ │
+│   │   │                                                             │   │ │
+│   │   │       mtx->locked = 0;                                      │   │ │
+│   │   │       mtx->owner = 0;    /* Clear owner */                  │   │ │
+│   │   │       wake_one_waiter(&mtx->waiters);                       │   │ │
+│   │   │       return 0;                                             │   │ │
+│   │   │   }                                                         │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   WHY OWNERSHIP MATTERS - FEATURES ENABLED:                                │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   1. PRIORITY INHERITANCE:                                          │ │
+│   │      ┌─────────────────────────────────────────────────────────┐    │ │
+│   │      │  High-priority thread H blocks on mutex held by         │    │ │
+│   │      │  low-priority thread L.                                 │    │ │
+│   │      │                                                         │    │ │
+│   │      │  Because kernel KNOWS L owns the mutex, it can:         │    │ │
+│   │      │  • Temporarily boost L's priority to H's priority       │    │ │
+│   │      │  • Prevent priority inversion                           │    │ │
+│   │      │  • Restore L's original priority after unlock           │    │ │
+│   │      │                                                         │    │ │
+│   │      │  ❌ Impossible with semaphores (no owner tracking)       │    │ │
+│   │      └─────────────────────────────────────────────────────────┘    │ │
+│   │                                                                     │ │
+│   │   2. RECURSIVE LOCKING:                                             │ │
+│   │      ┌─────────────────────────────────────────────────────────┐    │ │
+│   │      │  pthread_mutex_lock(&mtx);                              │    │ │
+│   │      │  function_that_also_locks();                            │    │ │
+│   │      │      pthread_mutex_lock(&mtx);  // Same thread!         │    │ │
+│   │      │                                                         │    │ │
+│   │      │  With PTHREAD_MUTEX_RECURSIVE:                          │    │ │
+│   │      │  • Check if (mtx->owner == self)                        │    │ │
+│   │      │  • If yes: increment recursion_count, return success    │    │ │
+│   │      │  • Unlock must be called same number of times           │    │ │
+│   │      │                                                         │    │ │
+│   │      │  ❌ Impossible with semaphores (would deadlock)          │    │ │
+│   │      └─────────────────────────────────────────────────────────┘    │ │
+│   │                                                                     │ │
+│   │   3. DEADLOCK DETECTION:                                            │ │
+│   │      ┌─────────────────────────────────────────────────────────┐    │ │
+│   │      │  Kernel can build ownership graph:                      │    │ │
+│   │      │                                                         │    │ │
+│   │      │  Thread A owns Mutex 1, waits for Mutex 2               │    │ │
+│   │      │  Thread B owns Mutex 2, waits for Mutex 1               │    │ │
+│   │      │                                                         │    │ │
+│   │      │  Ownership tracking enables cycle detection!            │    │ │
+│   │      │  Some systems can detect and break deadlocks.           │    │ │
+│   │      └─────────────────────────────────────────────────────────┘    │ │
+│   │                                                                     │ │
+│   │   4. ROBUST MUTEXES (Process Death Recovery):                      │ │
+│   │      ┌─────────────────────────────────────────────────────────┐    │ │
+│   │      │  pthread_mutexattr_setrobust(&attr, PTHREAD_MUTEX_       │    │ │
+│   │      │                               ROBUST);                  │    │ │
+│   │      │                                                         │    │ │
+│   │      │  If thread dies while holding mutex:                    │    │ │
+│   │      │  • Kernel knows which mutex (via owner field)           │    │ │
+│   │      │  • Marks mutex as "not recoverable"                     │    │ │
+│   │      │  • Next pthread_mutex_lock() returns EOWNERDEAD          │    │ │
+│   │      │  • Application can recover or abandon                   │    │ │
+│   │      │                                                         │    │ │
+│   │      │  ❌ POSIX semaphores have NO equivalent!                 │    │ │
+│   │      │     (Process death leaves semaphore locked forever)     │    │ │
+│   │      └─────────────────────────────────────────────────────────┘    │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   SUMMARY:                                                                 │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   Ownership comes from:                                             │ │
+│   │   • EXTRA METADATA: owner field in mutex structure                  │ │
+│   │   • ENFORCEMENT LOGIC: lock/unlock check owner thread ID            │ │
+│   │   • KERNEL SUPPORT: tracking, priority inheritance, deadlock detect │ │
+│   │                                                                     │ │
+│   │   Binary semaphores DON'T have ownership because:                   │ │
+│   │   • Designed for SIGNALING (one thread signals, another waits)      │ │
+│   │   • Simpler implementation (no owner tracking overhead)             │ │
+│   │   • Flexibility: any thread can post()                              │ │
+│   │                                                                     │ │
+│   │   Mutexes HAVE ownership because:                                   │ │
+│   │   • Designed for MUTUAL EXCLUSION (same thread locks/unlocks)       │ │
+│   │   • Enables advanced features (priority inheritance, recursion)     │ │
+│   │   • Prevents programming errors (wrong thread unlocking)            │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   DO MUTEXES WASTE CPU CYCLES? (BLOCKING vs SPINNING)                     │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   SHORT ANSWER: Modern mutexes are SMART—they use HYBRID approach: │ │
+│   │   • Spin briefly (busy-wait) for short waits                        │ │
+│   │   • Block (sleep) for longer waits                                  │ │
+│   │   • This MINIMIZES CPU waste while maintaining low latency          │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   TWO BLOCKING STRATEGIES:                                                 │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   1. SPINLOCK (Busy-Wait):                                          │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   while (lock->locked) {                                    │   │ │
+│   │   │       /* Keep checking in a loop */                         │   │ │
+│   │   │       cpu_relax();  // Hint to CPU (pause instruction)      │   │ │
+│   │   │   }                                                         │   │ │
+│   │   │   lock->locked = 1;                                         │   │ │
+│   │   │                                                             │   │ │
+│   │   │   ✅ PROS:                                                   │   │ │
+│   │   │   • No context switch overhead                              │   │ │
+│   │   │   • Very low latency (nanoseconds)                          │   │ │
+│   │   │   • Great for SHORT critical sections                       │   │ │
+│   │   │                                                             │   │ │
+│   │   │   ❌ CONS:                                                   │   │ │
+│   │   │   • WASTES CPU CYCLES continuously                          │   │ │
+│   │   │   • Prevents other threads from running on that CPU         │   │ │
+│   │   │   • Terrible for LONG waits                                 │   │ │
+│   │   │   • Power inefficient (CPU at 100%)                         │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   │   2. BLOCKING LOCK (Sleep-Wait):                                    │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   if (lock->locked) {                                       │   │ │
+│   │   │       add_to_wait_queue(&lock->waiters, current_thread);    │   │ │
+│   │   │       schedule();  // Give up CPU, go to sleep              │   │ │
+│   │   │   }                                                         │   │ │
+│   │   │   // Woken up by unlock()                                   │   │ │
+│   │   │   lock->locked = 1;                                         │   │ │
+│   │   │                                                             │   │ │
+│   │   │   ✅ PROS:                                                   │   │ │
+│   │   │   • NO CPU waste (thread sleeps)                            │   │ │
+│   │   │   • Other threads can use the CPU                           │   │ │
+│   │   │   • Great for LONG waits                                    │   │ │
+│   │   │   • Power efficient                                         │   │ │
+│   │   │                                                             │   │ │
+│   │   │   ❌ CONS:                                                   │   │ │
+│   │   │   • Context switch overhead (~1-10 microseconds)            │   │ │
+│   │   │   • Higher latency                                          │   │ │
+│   │   │   • Overkill for SHORT critical sections                    │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   MODERN SOLUTION: ADAPTIVE/HYBRID MUTEXES                                 │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   pthread_mutex (glibc), futex (Linux), and most modern mutexes    │ │
+│   │   use a HYBRID approach to get the best of both worlds:            │ │
+│   │                                                                     │ │
+│   │   ALGORITHM:                                                        │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   pthread_mutex_lock(mutex):                                │   │ │
+│   │   │                                                             │   │ │
+│   │   │   1. Try to acquire immediately (atomic CAS)                │   │ │
+│   │   │      if (success) return;  // Fast path! No waiting         │   │ │
+│   │   │                                                             │   │ │
+│   │   │   2. SPIN for a short time (adaptive)                       │   │ │
+│   │   │      for (i = 0; i < SPIN_COUNT; i++) {                     │   │ │
+│   │   │          if (try_lock()) return;  // Got it!                │   │ │
+│   │   │          cpu_relax();                                       │   │ │
+│   │   │      }                                                      │   │ │
+│   │   │                                                             │   │ │
+│   │   │   3. If still locked, BLOCK (sleep)                         │   │ │
+│   │   │      futex_wait(&mutex->futex);  // Sleep until woken       │   │ │
+│   │   │                                                             │   │ │
+│   │   │   SPIN_COUNT is adaptive:                                   │   │ │
+│   │   │   • If lock holder is RUNNING on another CPU: spin more     │   │ │
+│   │   │   • If lock holder is SLEEPING: block immediately           │   │ │
+│   │   │   • Learns from history (was spinning effective?)           │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   VISUAL COMPARISON:                                                       │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   PURE SPINLOCK (Wastes CPU):                                       │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   Thread A holds lock for 10ms                              │   │ │
+│   │   │   Thread B spins for entire 10ms:                           │   │ │
+│   │   │                                                             │   │ │
+│   │   │   CPU Usage:  ████████████████████████  100%                │   │ │
+│   │   │   Useful Work: ████░░░░░░░░░░░░░░░░░░░  20%                 │   │ │
+│   │   │   Wasted:      ░░░░████████████████████  80% ← BAD!         │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   │   BLOCKING MUTEX (No CPU Waste):                                    │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   Thread A holds lock for 10ms                              │   │ │
+│   │   │   Thread B sleeps for 10ms:                                 │   │ │
+│   │   │                                                             │   │ │
+│   │   │   CPU Usage:  ████░░░░░░░░░░░░░░░░░░░░  20%                 │   │ │
+│   │   │   Useful Work: ████░░░░░░░░░░░░░░░░░░░░  20%                 │   │ │
+│   │   │   Wasted:      ░░░░░░░░░░░░░░░░░░░░░░░░  0% ← GOOD!         │   │ │
+│   │   │   (Other threads can use the 80% freed CPU)                 │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   │   HYBRID MUTEX (Best of Both):                                      │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   Thread A holds lock for 10ms                              │   │ │
+│   │   │   Thread B spins 100μs, then sleeps:                        │   │ │
+│   │   │                                                             │   │ │
+│   │   │   Spin Phase:  █ (100μs) ← Low latency if lock freed soon  │   │ │
+│   │   │   Sleep Phase: ░░░░░░░░░░ (9.9ms) ← No CPU waste            │   │ │
+│   │   │                                                             │   │ │
+│   │   │   Gets low latency AND efficiency! ← BEST!                  │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   LINUX FUTEX (Fast Userspace Mutex):                                     │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   The secret behind efficient pthread_mutex on Linux:               │ │
+│   │                                                                     │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   UNCONTENDED CASE (No waiting):                            │   │ │
+│   │   │   ────────────────────────────────                          │   │ │
+│   │   │   • Lock/unlock happens ENTIRELY in userspace               │   │ │
+│   │   │   • Just atomic CAS instruction (LOCK CMPXCHG)              │   │ │
+│   │   │   • NO system call, NO kernel involvement                   │   │ │
+│   │   │   • Extremely fast: ~20-50 nanoseconds                      │   │ │
+│   │   │                                                             │   │ │
+│   │   │   pthread_mutex_lock():                                     │   │ │
+│   │   │       if (atomic_cas(&mutex->lock, 0, 1) == 0)              │   │ │
+│   │   │           return 0;  // Got it! No kernel call!             │   │ │
+│   │   │       // else: contended, go to slow path...                │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   CONTENDED CASE (Someone waiting):                         │   │ │
+│   │   │   ──────────────────────────────                            │   │ │
+│   │   │   • Spin briefly in userspace                               │   │ │
+│   │   │   • If still locked: syscall futex(FUTEX_WAIT)              │   │ │
+│   │   │   • Kernel puts thread to sleep (NO CPU waste)              │   │ │
+│   │   │   • When unlocked: futex(FUTEX_WAKE) wakes one waiter       │   │ │
+│   │   │                                                             │   │ │
+│   │   │   pthread_mutex_lock():                                     │   │ │
+│   │   │       // Try immediate acquire                              │   │ │
+│   │   │       if (atomic_cas(&mutex->lock, 0, 1) == 0)              │   │ │
+│   │   │           return 0;                                         │   │ │
+│   │   │                                                             │   │ │
+│   │   │       // Spin briefly                                       │   │ │
+│   │   │       for (i = 0; i < SPIN_COUNT; i++) {                    │   │ │
+│   │   │           if (atomic_cas(&mutex->lock, 0, 1) == 0)          │   │ │
+│   │   │               return 0;                                     │   │ │
+│   │   │           cpu_relax();                                      │   │ │
+│   │   │       }                                                     │   │ │
+│   │   │                                                             │   │ │
+│   │   │       // Still locked: sleep                                │   │ │
+│   │   │       syscall(SYS_futex, &mutex->lock, FUTEX_WAIT, ...);    │   │ │
+│   │   │       // Kernel blocks thread, NO CPU WASTE                 │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   PERFORMANCE NUMBERS (Typical):                                           │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   Operation                          │  Time         │  CPU Waste   │ │
+│   │   ─────────────────────────────────  ┼───────────────┼────────────  │ │
+│   │   Uncontended mutex lock/unlock      │  20-50 ns     │  0%          │ │
+│   │   Spinlock (short wait, <1μs)        │  50-500 ns    │  ~50%        │ │
+│   │   Mutex with brief spin (1-10μs)     │  1-10 μs      │  ~10%        │ │
+│   │   Mutex block/wake (>10μs wait)      │  1-10 μs      │  0%          │ │
+│   │   Context switch overhead            │  1-10 μs      │  N/A         │ │
+│   │                                                                     │ │
+│   │   KEY INSIGHT: Hybrid approach wastes minimal CPU while            │ │
+│   │   maintaining low latency for common cases.                        │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   WHEN EACH APPROACH IS USED:                                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   USE SPINLOCK WHEN:                                                │ │
+│   │   • Critical section is VERY short (<1 microsecond)                 │ │
+│   │   • In kernel space (can't sleep)                                   │ │
+│   │   • Protecting per-CPU data structures                              │ │
+│   │   • Real-time systems with predictable timing                       │ │
+│   │                                                                     │ │
+│   │   USE BLOCKING MUTEX WHEN:                                          │ │
+│   │   • Critical section is LONG (>10 microseconds)                     │ │
+│   │   • In userspace applications (default choice)                      │ │
+│   │   • Want to minimize CPU usage                                      │ │
+│   │   • Don't need absolute minimum latency                             │ │
+│   │                                                                     │ │
+│   │   USE HYBRID (pthread_mutex) WHEN:                                  │ │
+│   │   • General-purpose userspace locking (DEFAULT!)                    │ │
+│   │   • Mix of short and long critical sections                         │ │
+│   │   • Want both efficiency and low latency                            │ │
+│   │   • This is what you should use 99% of the time                     │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   SUMMARY:                                                                 │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   ❌ MYTH: "Mutexes waste CPU cycles"                               │ │
+│   │   ✅ REALITY: Modern mutexes are SMART:                             │ │
+│   │                                                                     │ │
+│   │   • Uncontended: Pure userspace, ~20ns, zero waste                  │ │
+│   │   • Short contention: Brief spin, minimal waste                     │ │
+│   │   • Long contention: Sleep, ZERO waste                              │ │
+│   │                                                                     │ │
+│   │   pthread_mutex and futex give you the BEST of both worlds:         │ │
+│   │   • Low latency when possible (spin)                                │ │
+│   │   • Zero CPU waste when needed (sleep)                              │ │
+│   │   • Automatic adaptation to workload                                │ │
+│   │                                                                     │ │
+│   │   Semaphores use the SAME blocking strategy (sleep when waiting),   │ │
+│   │   so they have the same efficiency characteristics!                 │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -2135,6 +2547,235 @@ This document follows the structure established by Maurice Bach, proceeding from
 │   │                                                                     │ │
 │   └─────────────────────────────────────────────────────────────────────┘ │
 │                                                                            │
+│   ⚠️  PROBLEM WITH SOLUTIONS 1 & 2: NOT STARVATION-FREE!                   │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   Both solutions prevent DEADLOCK but can still cause STARVATION:   │ │
+│   │                                                                     │ │
+│   │   • Solution 1: If 4 philosophers keep eating in rotation,          │ │
+│   │     the 5th philosopher might never get a chance                    │ │
+│   │                                                                     │ │
+│   │   • Solution 2: Asymmetric ordering prevents deadlock but           │ │
+│   │     doesn't guarantee fairness - some philosophers might            │ │
+│   │     repeatedly lose the race for forks                              │ │
+│   │                                                                     │ │
+│   │   STARVATION = A process waits indefinitely, never making progress  │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   SOLUTION 3: STARVATION-FREE with State Tracking (Tanenbaum's Solution)   │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   Track each philosopher's state: THINKING, HUNGRY, or EATING       │ │
+│   │   A philosopher can only eat if BOTH neighbors are NOT eating       │ │
+│   │                                                                     │ │
+│   │   #define N 5                                                       │ │
+│   │   #define LEFT  (i + N - 1) % N                                     │ │
+│   │   #define RIGHT (i + 1) % N                                         │ │
+│   │                                                                     │ │
+│   │   typedef enum { THINKING, HUNGRY, EATING } state_t;                │ │
+│   │   state_t state[N];                                                 │ │
+│   │   sem_t mutex = 1;        /* Protects state array */                │ │
+│   │   sem_t s[N];             /* One per philosopher, all init to 0 */  │ │
+│   │                                                                     │ │
+│   │   void test(int i) {                                                │ │
+│   │       /* Can philosopher i eat? */                                  │ │
+│   │       if (state[i] == HUNGRY &&                                     │ │
+│   │           state[LEFT] != EATING &&                                  │ │
+│   │           state[RIGHT] != EATING) {                                 │ │
+│   │           state[i] = EATING;                                        │ │
+│   │           sem_post(&s[i]);  /* Signal: you can eat now */           │ │
+│   │       }                                                             │ │
+│   │   }                                                                 │ │
+│   │                                                                     │ │
+│   │   void take_forks(int i) {                                          │ │
+│   │       sem_wait(&mutex);                                             │ │
+│   │       state[i] = HUNGRY;                                            │ │
+│   │       test(i);              /* Try to acquire both forks */         │ │
+│   │       sem_post(&mutex);                                             │ │
+│   │       sem_wait(&s[i]);      /* Block if forks not available */      │ │
+│   │   }                                                                 │ │
+│   │                                                                     │ │
+│   │   void put_forks(int i) {                                           │ │
+│   │       sem_wait(&mutex);                                             │ │
+│   │       state[i] = THINKING;                                          │ │
+│   │       test(LEFT);           /* See if left neighbor can eat now */  │ │
+│   │       test(RIGHT);          /* See if right neighbor can eat now */ │ │
+│   │       sem_post(&mutex);                                             │ │
+│   │   }                                                                 │ │
+│   │                                                                     │ │
+│   │   void philosopher(int i) {                                         │ │
+│   │       while (1) {                                                   │ │
+│   │           think();                                                  │ │
+│   │           take_forks(i);                                            │ │
+│   │           eat();                                                    │ │
+│   │           put_forks(i);                                             │ │
+│   │       }                                                             │ │
+│   │   }                                                                 │ │
+│   │                                                                     │ │
+│   │   ✅ Deadlock-free: No circular wait                                │ │
+│   │   ⚠️  Still NOT fully starvation-free!                              │ │
+│   │      (Depends on semaphore fairness - FIFO queue needed)            │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   SOLUTION 4: TRULY STARVATION-FREE (Chandy-Misra Algorithm)               │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   The Chandy-Misra solution (1984) guarantees BOTH deadlock-freedom │ │
+│   │   AND starvation-freedom using "dirty" and "clean" fork tokens.     │ │
+│   │                                                                     │ │
+│   │   KEY IDEAS:                                                        │ │
+│   │   • Each fork is either CLEAN or DIRTY                              │ │
+│   │   • Forks start DIRTY and distributed to philosophers               │ │
+│   │   • A philosopher can REQUEST a fork from neighbor                  │ │
+│   │   • Must give up DIRTY fork when requested                          │ │
+│   │   • Clean fork after using it (becomes dirty)                       │ │
+│   │   • Only give up fork if it's DIRTY                                 │ │
+│   │                                                                     │ │
+│   │   ALGORITHM:                                                        │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   typedef struct {                                          │   │ │
+│   │   │       int holder;      /* Which philosopher has it */       │   │ │
+│   │   │       bool dirty;      /* Is it dirty? */                   │   │ │
+│   │   │       bool requested;  /* Has neighbor requested it? */     │   │ │
+│   │   │   } fork_t;                                                 │   │ │
+│   │   │                                                             │   │ │
+│   │   │   fork_t forks[N];                                          │   │ │
+│   │   │                                                             │   │ │
+│   │   │   /* Initialization: Distribute forks to break symmetry */  │   │ │
+│   │   │   void init() {                                             │   │ │
+│   │   │       for (int i = 0; i < N; i++) {                         │   │ │
+│   │   │           forks[i].holder = i;  /* Lower-numbered phil */   │   │ │
+│   │   │           forks[i].dirty = true;                            │   │ │
+│   │   │           forks[i].requested = false;                       │   │ │
+│   │   │       }                                                     │   │ │
+│   │   │   }                                                         │   │ │
+│   │   │                                                             │   │ │
+│   │   │   void philosopher(int i) {                                 │   │ │
+│   │   │       while (1) {                                           │   │ │
+│   │   │           think();                                          │   │ │
+│   │   │                                                             │   │ │
+│   │   │           /* Request forks I don't have */                  │   │ │
+│   │   │           if (!have_fork(i, LEFT))                          │   │ │
+│   │   │               send_request(LEFT, i);                        │   │ │
+│   │   │           if (!have_fork(i, RIGHT))                         │   │ │
+│   │   │               send_request(RIGHT, i);                       │   │ │
+│   │   │                                                             │   │ │
+│   │   │           /* Wait until I have both forks */                │   │ │
+│   │   │           wait_for_both_forks(i);                           │   │ │
+│   │   │                                                             │   │ │
+│   │   │           eat();                                            │   │ │
+│   │   │                                                             │   │ │
+│   │   │           /* Mark forks as dirty after eating */            │   │ │
+│   │   │           forks[LEFT].dirty = true;                         │   │ │
+│   │   │           forks[RIGHT].dirty = true;                        │   │ │
+│   │   │                                                             │   │ │
+│   │   │           /* If neighbor requested, give up dirty fork */   │   │ │
+│   │   │           if (forks[LEFT].requested) {                      │   │ │
+│   │   │               send_fork(LEFT, i);                           │   │ │
+│   │   │               forks[LEFT].dirty = false;                    │   │ │
+│   │   │           }                                                 │   │ │
+│   │   │           if (forks[RIGHT].requested) {                     │   │ │
+│   │   │               send_fork(RIGHT, i);                          │   │ │
+│   │   │               forks[RIGHT].dirty = false;                   │   │ │
+│   │   │           }                                                 │   │ │
+│   │   │       }                                                     │   │ │
+│   │   │   }                                                         │   │ │
+│   │   │                                                             │   │ │
+│   │   │   /* On receiving request for fork */                       │   │ │
+│   │   │   void on_request(int fork_id, int requester) {             │   │ │
+│   │   │       if (forks[fork_id].dirty) {                           │   │ │
+│   │   │           /* Give up dirty fork immediately */              │   │ │
+│   │   │           send_fork(fork_id, requester);                    │   │ │
+│   │   │           forks[fork_id].holder = requester;                │   │ │
+│   │   │           forks[fork_id].dirty = false;                     │   │ │
+│   │   │       } else {                                              │   │ │
+│   │   │           /* Mark as requested, give up after eating */     │   │ │
+│   │   │           forks[fork_id].requested = true;                  │   │ │
+│   │   │       }                                                     │   │ │
+│   │   │   }                                                         │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   │   WHY THIS IS STARVATION-FREE:                                      │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   1. If philosopher P is hungry and requests a fork:        │   │ │
+│   │   │      • Neighbor N will eventually finish eating             │   │ │
+│   │   │      • Fork becomes DIRTY after N eats                      │   │ │
+│   │   │      • N MUST give up dirty fork when requested             │   │ │
+│   │   │      • P will eventually get the fork                       │   │ │
+│   │   │                                                             │   │ │
+│   │   │   2. No philosopher can hoard forks indefinitely:           │   │ │
+│   │   │      • After eating, forks become dirty                     │   │ │
+│   │   │      • Dirty forks must be given up when requested          │   │ │
+│   │   │                                                             │   │ │
+│   │   │   3. No circular waiting:                                   │   │ │
+│   │   │      • Initial asymmetric distribution breaks symmetry      │   │ │
+│   │   │      • Request/grant protocol prevents cycles               │   │ │
+│   │   │                                                             │   │ │
+│   │   │   ✅ Deadlock-free                                           │   │ │
+│   │   │   ✅ Starvation-free                                         │   │ │
+│   │   │   ✅ Maximum concurrency (no artificial limits)             │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   SOLUTION 5: SIMPLE STARVATION-FREE with Ticket/Token                    │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   Use a single TOKEN that circulates around the table.              │ │
+│   │   Only the philosopher holding the token can eat.                   │ │
+│   │                                                                     │ │
+│   │   sem_t forks[N];  /* All = 1 */                                    │ │
+│   │   sem_t token = 1; /* Only one token */                             │ │
+│   │                                                                     │ │
+│   │   void philosopher(int i) {                                         │ │
+│   │       while (1) {                                                   │ │
+│   │           think();                                                  │ │
+│   │                                                                     │ │
+│   │           sem_wait(&token);        /* Get the token */              │ │
+│   │           sem_wait(&forks[i]);                                      │ │
+│   │           sem_wait(&forks[(i+1)%N]);                                │ │
+│   │                                                                     │ │
+│   │           eat();                                                    │ │
+│   │                                                                     │ │
+│   │           sem_post(&forks[i]);                                      │ │
+│   │           sem_post(&forks[(i+1)%N]);                                │ │
+│   │           sem_post(&token);        /* Pass the token */             │ │
+│   │       }                                                             │ │
+│   │   }                                                                 │ │
+│   │                                                                     │ │
+│   │   ✅ Deadlock-free: Token prevents circular wait                    │ │
+│   │   ✅ Starvation-free: If semaphore has FIFO queue                   │ │
+│   │   ❌ Low concurrency: Only 1 philosopher eats at a time             │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   COMPARISON OF SOLUTIONS:                                                 │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   Solution          │ Deadlock │ Starvation │ Concurrency │ Complex │ │
+│   │   ──────────────────┼──────────┼────────────┼─────────────┼─────────│ │
+│   │   Naive             │    ❌     │     ❌      │    High     │  Low    │ │
+│   │   Limit to 4        │    ✅     │     ❌      │    Medium   │  Low    │ │
+│   │   Asymmetric        │    ✅     │     ❌      │    High     │  Low    │ │
+│   │   State tracking    │    ✅     │     ⚠️      │    High     │  Medium │ │
+│   │   Chandy-Misra      │    ✅     │     ✅      │    High     │  High   │ │
+│   │   Token/Ticket      │    ✅     │     ✅*     │    Low      │  Low    │ │
+│   │                                                                     │ │
+│   │   * Requires FIFO semaphore queue (POSIX doesn't guarantee this!)  │ │
+│   │                                                                     │ │
+│   │   RECOMMENDATION:                                                   │ │
+│   │   • For learning: Asymmetric (simple, prevents deadlock)            │ │
+│   │   • For production: State tracking with FIFO semaphores             │ │
+│   │   • For research: Chandy-Misra (theoretically optimal)              │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -2341,6 +2982,194 @@ This document follows the structure established by Maurice Bach, proceeding from
 │   │   • Waiting for a complex condition                                 │ │
 │   │   • Producer-consumer with pthread_mutex                            │ │
 │   │   • Need to broadcast to multiple waiters                           │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   WHY DO WE NEED CONDITION VARIABLES?                                      │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   PROBLEM: Waiting for a condition while holding a mutex            │ │
+│   │                                                                     │ │
+│   │   Imagine you want to wait for "buffer not empty" condition:        │ │
+│   │                                                                     │ │
+│   │   ❌ WRONG APPROACH (Busy-Wait):                                     │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   pthread_mutex_lock(&mutex);                               │   │ │
+│   │   │   while (buffer_empty) {                                    │   │ │
+│   │   │       /* Busy-wait - WASTES CPU! */                         │   │ │
+│   │   │   }                                                         │   │ │
+│   │   │   item = buffer[--count];                                   │   │ │
+│   │   │   pthread_mutex_unlock(&mutex);                             │   │ │
+│   │   │                                                             │   │ │
+│   │   │   Problem: Spinning while holding lock!                     │   │ │
+│   │   │   • Wastes CPU cycles                                       │   │ │
+│   │   │   • Producer can't add items (mutex is locked!)             │   │ │
+│   │   │   • DEADLOCK if single CPU!                                 │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   │   ❌ WRONG APPROACH (Unlock and Sleep):                             │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   pthread_mutex_lock(&mutex);                               │   │ │
+│   │   │   if (buffer_empty) {                                       │   │ │
+│   │   │       pthread_mutex_unlock(&mutex);                         │   │ │
+│   │   │       sleep(1);  /* Wait a bit */                           │   │ │
+│   │   │       pthread_mutex_lock(&mutex);                           │   │ │
+│   │   │   }                                                         │   │ │
+│   │   │   item = buffer[--count];                                   │   │ │
+│   │   │   pthread_mutex_unlock(&mutex);                             │   │ │
+│   │   │                                                             │   │ │
+│   │   │   Problems:                                                 │   │ │
+│   │   │   • RACE CONDITION between unlock and sleep!                │   │ │
+│   │   │   • Producer might add item after unlock but before sleep   │   │ │
+│   │   │   • Consumer sleeps anyway, missing the signal              │   │ │
+│   │   │   • Arbitrary sleep time (too short = CPU waste,            │   │ │
+│   │   │     too long = high latency)                                │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   │   THE RACE CONDITION PROBLEM:                                       │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   Time   Consumer Thread          Producer Thread           │   │ │
+│   │   │   ────   ────────────────────     ─────────────────────     │   │ │
+│   │   │   t1     lock(mutex)                                        │   │ │
+│   │   │   t2     if (buffer_empty)                                  │   │ │
+│   │   │   t3     unlock(mutex)                                      │   │ │
+│   │   │   t4                               lock(mutex)              │   │ │
+│   │   │   t5                               add_item()               │   │ │
+│   │   │   t6                               unlock(mutex)            │   │ │
+│   │   │   t7     sleep(1)  ← MISSED THE ITEM!                       │   │ │
+│   │   │                                                             │   │ │
+│   │   │   Consumer sleeps even though buffer is no longer empty!    │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   │   ✅ CORRECT APPROACH: Condition Variable                           │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   pthread_mutex_lock(&mutex);                               │   │ │
+│   │   │   while (buffer_empty) {                                    │   │ │
+│   │   │       pthread_cond_wait(&cond, &mutex);                     │   │ │
+│   │   │       /* ATOMICALLY: unlock mutex AND sleep */              │   │ │
+│   │   │       /* When woken: ATOMICALLY: reacquire mutex */         │   │ │
+│   │   │   }                                                         │   │ │
+│   │   │   item = buffer[--count];                                   │   │ │
+│   │   │   pthread_mutex_unlock(&mutex);                             │   │ │
+│   │   │                                                             │   │ │
+│   │   │   Producer:                                                 │   │ │
+│   │   │   pthread_mutex_lock(&mutex);                               │   │ │
+│   │   │   buffer[count++] = item;                                   │   │ │
+│   │   │   pthread_cond_signal(&cond);  /* Wake one waiter */        │   │ │
+│   │   │   pthread_mutex_unlock(&mutex);                             │   │ │
+│   │   │                                                             │   │ │
+│   │   │   KEY: pthread_cond_wait() is ATOMIC:                       │   │ │
+│   │   │   1. Unlock mutex                                           │   │ │
+│   │   │   2. Sleep (wait for signal)                                │   │ │
+│   │   │   3. Wake up                                                │   │ │
+│   │   │   4. Reacquire mutex                                        │   │ │
+│   │   │   Steps 1-2 happen atomically - NO RACE CONDITION!          │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   WHAT CONDITION VARIABLES SOLVE:                                          │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   1. ATOMIC UNLOCK-AND-SLEEP:                                       │ │
+│   │      ┌─────────────────────────────────────────────────────────┐    │ │
+│   │      │  pthread_cond_wait() atomically:                        │    │ │
+│   │      │  • Releases the mutex                                   │    │ │
+│   │      │  • Puts thread to sleep                                 │    │ │
+│   │      │  • Prevents race condition window                       │    │ │
+│   │      │                                                         │    │ │
+│   │      │  This is IMPOSSIBLE to implement correctly with         │    │ │
+│   │      │  separate mutex unlock + sleep operations!              │    │ │
+│   │      └─────────────────────────────────────────────────────────┘    │ │
+│   │                                                                     │ │
+│   │   2. WAITING FOR COMPLEX CONDITIONS:                                │ │
+│   │      ┌─────────────────────────────────────────────────────────┐    │ │
+│   │      │  while (count < MIN || count > MAX || !ready) {         │    │ │
+│   │      │      pthread_cond_wait(&cond, &mutex);                  │    │ │
+│   │      │  }                                                      │    │ │
+│   │      │                                                         │    │ │
+│   │      │  Can wait for arbitrary boolean conditions!             │    │ │
+│   │      │  Semaphores only count - can't express complex logic    │    │ │
+│   │      └─────────────────────────────────────────────────────────┘    │ │
+│   │                                                                     │ │
+│   │   3. BROADCAST TO MULTIPLE WAITERS:                                 │ │
+│   │      ┌─────────────────────────────────────────────────────────┐    │ │
+│   │      │  pthread_cond_broadcast(&cond);                         │    │ │
+│   │      │  /* Wake ALL waiting threads at once */                 │    │ │
+│   │      │                                                         │    │ │
+│   │      │  Example: "Barrier" synchronization                     │    │ │
+│   │      │  • N threads wait at barrier                            │    │ │
+│   │      │  • Last thread arrives: broadcast()                     │    │ │
+│   │      │  • ALL threads wake up and proceed                      │    │ │
+│   │      │                                                         │    │ │
+│   │      │  With semaphores: Need to post() N times!               │    │ │
+│   │      └─────────────────────────────────────────────────────────┘    │ │
+│   │                                                                     │ │
+│   │   4. SPURIOUS WAKEUPS HANDLING:                                     │ │
+│   │      ┌─────────────────────────────────────────────────────────┐    │ │
+│   │      │  while (condition_not_met) {  /* ALWAYS use while! */   │    │ │
+│   │      │      pthread_cond_wait(&cond, &mutex);                  │    │ │
+│   │      │  }                                                      │    │ │
+│   │      │                                                         │    │ │
+│   │      │  Thread might wake up even without signal (spurious)    │    │ │
+│   │      │  while loop re-checks condition after waking            │    │ │
+│   │      │  This pattern is SAFE and CORRECT                       │    │ │
+│   │      └─────────────────────────────────────────────────────────┘    │ │
+│   │                                                                     │ │
+│   └─────────────────────────────────────────────────────────────────────┘ │
+│                                                                            │
+│   CONDITION VARIABLE INTERNALS:                                            │
+│   ┌─────────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │   struct pthread_cond {                                             │ │
+│   │       wait_queue_t waiters;  /* Threads waiting on this condvar */  │ │
+│   │       spinlock_t lock;       /* Protects the wait queue */          │ │
+│   │   };                                                                │ │
+│   │                                                                     │ │
+│   │   pthread_cond_wait(&cond, &mutex) implementation:                  │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   1. Lock condvar's internal spinlock                       │   │ │
+│   │   │   2. Add current thread to condvar's wait queue             │   │ │
+│   │   │   3. Unlock the mutex (passed as parameter)                 │   │ │
+│   │   │   4. Sleep (schedule() - give up CPU)                       │   │ │
+│   │   │   5. Unlock condvar's spinlock                              │   │ │
+│   │   │      ────────────────────────────────────────               │   │ │
+│   │   │      Steps 1-5 are ATOMIC from caller's perspective!        │   │ │
+│   │   │      ────────────────────────────────────────               │   │ │
+│   │   │   6. (Woken up by signal/broadcast)                         │   │ │
+│   │   │   7. Reacquire the mutex                                    │   │ │
+│   │   │   8. Return to caller                                       │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   │   pthread_cond_signal(&cond):                                       │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   1. Lock condvar's internal spinlock                       │   │ │
+│   │   │   2. Remove ONE thread from wait queue                      │   │ │
+│   │   │   3. Wake that thread (mark as runnable)                    │   │ │
+│   │   │   4. Unlock condvar's spinlock                              │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
+│   │                                                                     │ │
+│   │   pthread_cond_broadcast(&cond):                                    │ │
+│   │   ┌─────────────────────────────────────────────────────────────┐   │ │
+│   │   │                                                             │   │ │
+│   │   │   1. Lock condvar's internal spinlock                       │   │ │
+│   │   │   2. Remove ALL threads from wait queue                     │   │ │
+│   │   │   3. Wake all of them                                       │   │ │
+│   │   │   4. Unlock condvar's spinlock                              │   │ │
+│   │   │                                                             │   │ │
+│   │   └─────────────────────────────────────────────────────────────┘   │ │
 │   │                                                                     │ │
 │   └─────────────────────────────────────────────────────────────────────┘ │
 │                                                                            │

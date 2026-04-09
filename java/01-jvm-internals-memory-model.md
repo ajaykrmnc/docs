@@ -1,6 +1,7 @@
 # JVM Internals and Java Memory Model - Deep Dive
 
 ## Table of Contents
+
 1. [JVM Architecture Overview](#jvm-architecture-overview)
 2. [Class Loading Mechanism](#class-loading-mechanism)
 3. [Runtime Data Areas](#runtime-data-areas)
@@ -14,7 +15,8 @@
 
 ## JVM Architecture Overview
 
-The Java Virtual Machine is an abstract computing machine that enables a computer to run Java programs. Understanding its internals is crucial for writing efficient code and debugging complex issues.
+The Java Virtual Machine is an abstract computing machine that enables a computer to run Java programs.
+Understanding its internals is crucial for writing efficient code and debugging complex issues.
 
 ### JVM Components
 
@@ -80,7 +82,7 @@ class A {
     static {
         System.out.println("Class A static initializer");
     }
-    
+
     {
         System.out.println("Class A instance initializer");
     }
@@ -126,7 +128,7 @@ class A {
 protected Class<?> loadClass(String name, boolean resolve) {
     // 1. Check if class already loaded
     Class<?> c = findLoadedClass(name);
-    
+
     if (c == null) {
         try {
             // 2. Delegate to parent first (Parent Delegation)
@@ -138,13 +140,13 @@ protected Class<?> loadClass(String name, boolean resolve) {
         } catch (ClassNotFoundException e) {
             // Parent couldn't find it
         }
-        
+
         if (c == null) {
             // 3. If parent fails, try to load ourselves
             c = findClass(name);
         }
     }
-    
+
     if (resolve) {
         resolveClass(c);
     }
@@ -522,15 +524,15 @@ volatile semantics:
 
 ### Q1: What is the difference between stack and heap memory?
 
-| Stack | Heap |
-|-------|------|
-| Per-thread, private | Shared across threads |
-| LIFO order | No particular order |
-| Stores primitives, references | Stores objects |
-| Fast allocation (bump pointer) | Slower (GC managed) |
-| Auto-deallocated on method exit | GC deallocates |
-| Fixed size (-Xss) | Dynamic size (-Xmx) |
-| StackOverflowError if exhausted | OutOfMemoryError |
+| Stack                           | Heap                  |
+| ------------------------------- | --------------------- |
+| Per-thread, private             | Shared across threads |
+| LIFO order                      | No particular order   |
+| Stores primitives, references   | Stores objects        |
+| Fast allocation (bump pointer)  | Slower (GC managed)   |
+| Auto-deallocated on method exit | GC deallocates        |
+| Fixed size (-Xss)               | Dynamic size (-Xmx)   |
+| StackOverflowError if exhausted | OutOfMemoryError      |
 
 ### Q2: Explain class loading with code example
 
@@ -575,6 +577,7 @@ G1 maintains a priority queue of regions sorted by "garbage first" - regions wit
 ### Q4: What causes a Full GC and how to avoid it?
 
 **Causes:**
+
 1. Old Generation full
 2. Metaspace exhaustion
 3. Humongous allocation failure
@@ -582,10 +585,9 @@ G1 maintains a priority queue of regions sorted by "garbage first" - regions wit
 5. Promotion failure
 
 **Avoidance:**
+
 1. Size heap appropriately
 2. Tune young generation size
 3. Avoid creating large objects
 4. Use -XX:+DisableExplicitGC
 5. Monitor and tune GC parameters
-
-

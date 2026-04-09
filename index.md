@@ -34,6 +34,10 @@ features:
     details: Process control, signals, systemd, memory management, interrupts, and system programming
     link: /kernel-and-system/process-control
   
+  - title: 🏛️ High-Level Design
+    details: System design for URL shorteners, chat systems, video streaming, payment systems, distributed storage, and more
+    link: /hld/01-url-shortener
+  
   - title: 🎨 Low-Level Design
     details: Design patterns for rate limiters, caches, task schedulers, pub-sub systems, and distributed locks
     link: /lld/01-rate-limiter

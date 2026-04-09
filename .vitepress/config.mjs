@@ -21,7 +21,10 @@ export default defineConfig({
       { text: 'Distributed Systems', link: '/distributed-systems/01-cap-theorem-and-foundations' },
       { text: 'Java', link: '/java/01-jvm-internals-memory-model' },
       { text: 'Networking', link: '/networking/socket-internals' },
-      { text: 'Kernel & System', link: '/kernel-and-system/process-control' }
+      { text: 'Kernel & System', link: '/kernel-and-system/process-control' },
+      { text: 'DDIA', link: '/ddia/01-reliable-scalable-maintainable' },
+      { text: 'HLD', link: '/hld/01-url-shortener' },
+      { text: 'LLD', link: '/lld/01-rate-limiter' }
     ],
 
     sidebar: {
@@ -150,6 +153,47 @@ export default defineConfig({
         }
       ],
 
+      '/ddia/': [
+        {
+          text: 'Designing Data-Intensive Applications',
+          items: [
+            { text: '01. Reliable, Scalable, Maintainable', link: '/ddia/01-reliable-scalable-maintainable' },
+            { text: '02. Data Models & Query Languages', link: '/ddia/02-data-models-and-query-languages' },
+            { text: '03. Storage & Retrieval', link: '/ddia/03-storage-and-retrieval' },
+            { text: '04. Encoding & Evolution', link: '/ddia/04-encoding-and-evolution' },
+            { text: '05. Replication', link: '/ddia/05-replication' },
+            { text: '06. Partitioning', link: '/ddia/06-partitioning' },
+            { text: '07. Transactions', link: '/ddia/07-transactions' },
+            { text: '08. Trouble with Distributed Systems', link: '/ddia/08-trouble-with-distributed-systems' },
+            { text: '09. Consistency & Consensus', link: '/ddia/09-consistency-and-consensus' },
+            { text: '10. Batch Processing', link: '/ddia/10-batch-processing' },
+            { text: '11. Stream Processing', link: '/ddia/11-stream-processing' },
+            { text: '12. Future of Data Systems', link: '/ddia/12-future-of-data-systems' }
+          ]
+        }
+      ],
+      '/hld/': [
+        {
+          text: 'High-Level Design',
+          items: [
+            { text: '01. URL Shortener', link: '/hld/01-url-shortener' },
+            { text: '02. Rate Limiter', link: '/hld/02-rate-limiter' },
+            { text: '03. Chat Messaging', link: '/hld/03-chat-messaging' },
+            { text: '04. News Feed', link: '/hld/04-news-feed' },
+            { text: '05. Video Streaming', link: '/hld/05-video-streaming' },
+            { text: '06. Notification System', link: '/hld/06-notification-system' },
+            { text: '07. Search Engine', link: '/hld/07-search-engine' },
+            { text: '08. Distributed Cache', link: '/hld/08-distributed-cache' },
+            { text: '09. Object Storage', link: '/hld/09-object-storage' },
+            { text: '10. Ride Sharing', link: '/hld/10-ride-sharing' },
+            { text: '11. Payment System', link: '/hld/11-payment-system' },
+            { text: '12. Ticket Booking', link: '/hld/12-ticket-booking' },
+            { text: '13. Typeahead Suggestion', link: '/hld/13-typeahead-suggestion' },
+            { text: '14. Key-Value Store', link: '/hld/14-key-value-store' },
+            { text: '15. Metrics & Monitoring', link: '/hld/15-metrics-monitoring' }
+          ]
+        }
+      ],
       '/lld/': [
         {
           text: 'Low-Level Design',

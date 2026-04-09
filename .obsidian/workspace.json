@@ -11,13 +11,30 @@
             "id": "585d2a10ad55eb8b",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "database/01-introduction-and-overview.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "01-introduction-and-overview"
+            }
+          },
+          {
+            "id": "f70cf2b7d05b9463",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.12.4"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.12.4"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -178,8 +195,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "585d2a10ad55eb8b",
+  "active": "f70cf2b7d05b9463",
   "lastOpenFiles": [
+    "aristadocs/GITHUB_PAGES_SETUP.md",
     "aristadocs/GITLAB_PAGES_SETUP.md",
     "aristadocs/public/PROTOBUF_GRPC_VS_HTTPS.html",
     "aristadocs/public/build-and-tooling/Repository_Analysis_Rebuild_Estimation.html",
@@ -214,7 +232,6 @@
     "aristadocs/node_modules/@algolia/autocomplete-core/README.md",
     "aristadocs/node_modules/@algolia/ingestion/README.md",
     "aristadocs/node_modules/search-insights/README.md",
-    "aristadocs/node_modules/search-insights/LICENSE.md",
-    "aristadocs/node_modules/@algolia/autocomplete-plugin-algolia-insights/README.md"
+    "aristadocs/node_modules/search-insights/LICENSE.md"
   ]
 }

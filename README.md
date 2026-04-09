@@ -1,203 +1,106 @@
-# Technical Documentation Repository
+# Developer Documentation Index
 
-A comprehensive collection of technical documentation covering systems programming, distributed systems, databases, networking, and software engineering topics.
+## C/C++ Code Formatting & Jenkins
 
----
+### Quick Access Guide:
 
-## 📁 Repository Structure
+1. **🚨 Jenkins Failed? Start Here:**
+   - [clang-format Quick Reference](./clang-format-quick-reference.md)
+   - Fast fixes for common formatting errors
+   - Copy-paste commands to fix issues
 
-### `architecture/`
-Software architecture patterns and design:
-- CDN architecture
-- Client-server architecture
-- Internet business ownership
-- Nginx architecture
-- Blob storage
+2. **📖 Deep Dive - Understanding Everything:**
+   - [Complete clang-format & Jenkins Guide](./clang-format-jenkins-guide.md)
+   - Line-by-line .clang-format explanation
+   - How Jenkins validates your code
+   - Error message interpretation
 
-### `database/`
-Database internals and distributed data systems:
-- B-tree fundamentals and variants
-- Transaction processing and recovery
-- Concurrency control and locking
-- Log-structured storage
-- Distributed systems concepts
-- Replication and consistency
-- Consensus algorithms (Paxos, Raft)
-- Leader election and failure detection
-
-### `distributed-systems/`
-Distributed computing concepts:
-- CAP theorem and foundations
-- Consensus algorithms
-- Distributed storage and replication
-- Distributed transactions
-- Clocks and time synchronization
-- Fault tolerance and resilience
-- Distributed messaging
-- Service discovery and coordination
-- Distributed caching
-
-### `java/`
-Java programming deep dives:
-- JVM internals and memory model
-- Collections framework internals
-- Concurrency and multithreading
-- Data structures and algorithms
-- OOP and design patterns
-- Generics, reflection, annotations
-- I/O, NIO, and networking
-- Performance optimization
-- JIT compilation
-
-### `lld/` (Low-Level Design)
-System design interview questions with detailed solutions:
-- Rate limiter, cache, pub-sub system
-- Task scheduler, file system
-- Connection pool, logging framework
-- Elevator system, parking lot
-- Library management, online chess
-- Notification system, API gateway
-- URL shortener, order management
-- Movie ticket booking, vending machine
-- Distributed lock, collaborative editor
-
-### `networking/`
-Network protocols and concepts:
-- OSI layers and packet flow
-- DNS and TLS
-- Sockets and IPC
-- Network virtualization
-- IP categorization
-- Blocking/non-blocking I/O
-- Zero-copy mechanisms
-- WebSockets
-- Unix pipes and sockets
-
-### `kernel-and-system/`
-Linux kernel and system programming:
-- Process structure and control
-- Process scheduling and time
-- Memory management policies
-- Signals and semaphores
-- Interrupts and I/O subsystem
-- File modes and permissions
-- UID/GID essentials
-- systemd guide
-- strace comprehensive guide
-- Man pages guide
-
-### `build-and-tooling/`
-Development tools and build systems:
-- Docker comprehensive guide
-- Git concepts and internals
-- Git push comparison
-- Git topo-order analysis
-- Tar file optimization
-- clangd TCP setup
-- compile_commands setup
-- Telescope live grep patterns
-
-### `libstdcpp-guide/`
-C++ standard library deep dive:
-- Introduction and overview
-- Navigating source code
-- Understanding containers
-- Algorithms and iterators
-- Template syntax guides
-- Cache-friendly code
-- Competitive programming guide
-- Quant dev optimization
-
-### `programming-languages/`
-Language-specific guides:
-- C language for systems programming
-- C++ vtables guide
-- Header files and binary libraries
-- JVM internals
-- Python path setup
-
-### `testing/`
-Testing frameworks and methodologies:
-- Playwright deep dive architecture
-- Playwright stubbing
-- Playwright presentation
-
-### `threading/`
-Multithreading and concurrency:
-- C++ threading examples
-- Python threading examples
-- Threading explanations
-
-### `rpi/` (Raspberry Pi)
-Raspberry Pi projects and concepts:
-- Setup guides
-- Core concepts
-- Project ideas
-- Distributed sync learning
-
-### `scripts/`
-Utility scripts:
-- clangd multi-project setup
-- clangd TCP server
-- Download scripts
-- Markdown to PDF converter
-
-### `docs/`
-Additional documentation
+3. **🤖 Augment AI Rules (Auto-Applied):**
+   - Global Rules: `~/.augment/rules/c-cpp-formatting.md`
+   - These rules are automatically used by Augment AI when writing C/C++ code
 
 ---
 
-## 🌐 Live Documentation Site
+## Document Summary
 
-This repository is published as a documentation website using GitHub Pages:
-
-**🔗 [View Live Site](https://ajaykrmnc.github.io/docs/)**
-
-The site is automatically built and deployed using VitePress and GitHub Actions whenever changes are pushed to the `master` branch.
-
-For setup instructions, see [`aristadocs/GITHUB_PAGES_SETUP.md`](aristadocs/GITHUB_PAGES_SETUP.md).
+| Document | Size | Purpose |
+|----------|------|---------|
+| `clang-format-quick-reference.md` | 4.7 KB | Quick fixes, checklists, common issues |
+| `clang-format-jenkins-guide.md` | 11 KB | Complete guide with detailed explanations |
+| `~/.augment/rules/c-cpp-formatting.md` | 5.3 KB | Global AI coding rules (auto-applied) |
 
 ---
 
-## 🔒 Proprietary Content
+## Most Common Issues & Quick Fixes
 
-**Note:** Arista Networks proprietary documentation has been moved to the `aristadocs/` directory. This includes:
-- WiFi driver development (QCA integration)
-- Kernel patches (ar_meta cache)
-- Arista AP-specific networking
-- Internal build systems
+### Issue 1: Extra Spaces in Macros
+```bash
+# Auto-fix:
+clang-format -i -style=file <file>
+```
 
-See `aristadocs/README.md` for details.
+### Issue 2: Function Brace Placement
+```bash
+# Auto-fix all modified files:
+git diff --name-only | grep -E '\.(c|h)$' | xargs clang-format -i -style=file
+```
 
----
-
-## 🎯 Topics Covered
-
-- **Systems Programming**: C/C++, kernel development, memory management
-- **Distributed Systems**: Consensus, replication, fault tolerance, CAP theorem
-- **Databases**: B-trees, transactions, concurrency control, distributed databases
-- **Networking**: TCP/IP, sockets, protocols, network virtualization
-- **Software Design**: Architecture patterns, low-level design, design patterns
-- **Programming Languages**: Java, C++, Python, Go
-- **DevOps**: Docker, Git, build systems, CI/CD
-- **Performance**: Optimization, caching, zero-copy, JIT compilation
+### Issue 3: Multi-Statement Inline Functions
+```bash
+# Auto-fix:
+clang-format -i -style=file <file>
+```
 
 ---
 
-## 📚 How to Use This Repository
+## Your Project's Key Settings
 
-1. **Learning**: Use as a reference for understanding complex technical topics
-2. **Interview Prep**: Review LLD questions and distributed systems concepts
-3. **Development**: Reference guides for specific technologies and tools
-4. **Teaching**: Share knowledge with team members
-
----
-
-## 🤝 Contributing
-
-This is a personal documentation repository. Feel free to fork and adapt for your own use.
+- **Style Base**: Google C++ Style Guide
+- **Column Limit**: 120 characters
+- **Indentation**: 2 spaces
+- **Function Braces**: New line (`AfterFunction: true`)
+- **Control Braces**: Same line (`AfterControlStatement: false`)
 
 ---
 
-**Last Updated:** March 2026
+## Useful Commands
 
+```bash
+# Format all modified C/C++ files (MOST USEFUL)
+git diff --name-only | grep -E '\.(c|h)$' | xargs clang-format -i -style=file
+
+# Check if file is correctly formatted
+clang-format -style=file <file> | diff <file> - && echo "✅ OK" || echo "❌ NEEDS FORMATTING"
+
+# Run full linter check (same as Jenkins)
+make check_linters
+
+# Format specific file
+clang-format -i -style=file ap/src/wlan-drivers/ar/os_if/ar_os_if_ar_meta.h
+```
+
+---
+
+## Setup Auto-Format in Your IDE
+
+### VSCode
+1. Install "C/C++" extension by Microsoft
+2. Settings → Editor: Format On Save → Enable
+3. Settings → C_Cpp: Clang_format_style → "file"
+
+### CLion/IntelliJ IDEA
+1. Settings → Editor → Code Style → C/C++
+2. Click "Import Scheme" → ClangFormat
+3. Enable "Format on Save"
+
+### Vim
+```vim
+" Add to .vimrc
+Plugin 'rhysd/vim-clang-format'
+let g:clang_format#auto_format = 1
+```
+
+---
+
+**Last Updated**: 2026-03-26  
+**Project**: wifi-ap (Arista Networks)

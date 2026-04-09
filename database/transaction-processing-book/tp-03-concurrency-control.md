@@ -2,7 +2,9 @@
 
 ## Overview
 
-Concurrency control is the mechanism that ensures correct results when multiple transactions execute simultaneously. Jim Gray's work established the theoretical foundations and practical techniques used in all modern database systems.
+Concurrency control is the mechanism that ensures correct results when multiple transactions execute 
+simultaneously. Jim Gray's work established the theoretical foundations and practical techniques used in all 
+modern database systems.
 
 ---
 
@@ -21,8 +23,8 @@ Without concurrency control, interleaved transaction execution can lead to:
 ```
 SERIAL EXECUTION (Correct but slow):
 T1: ████████████████
-                    T2: ████████████████
-                                        T3: ████████████████
+T2: ████████████████
+T3: ████████████████
 
 CONCURRENT EXECUTION (Fast but needs control):
 T1: ████████████████
@@ -36,7 +38,8 @@ T3:         ████████████████
 
 ### Schedule Definition
 
-A schedule S is an ordering of operations from a set of transactions that preserves the order of operations within each transaction.
+A schedule S is an ordering of operations from a set of transactions that preserves the order of operations 
+within each transaction.
 
 ### Notation
 
@@ -68,19 +71,20 @@ Two operations conflict if:
 
 ```
 CONFLICT MATRIX:
-              T2
-           Read   Write
-    Read    No     Yes
+T2
+Read   Write
+Read    No     Yes
 T1  Write   Yes    Yes
 ```
 
 ### Conflict Serializability
 
-A schedule is conflict serializable if it can be transformed into a serial schedule by swapping non-conflicting adjacent operations.
+A schedule is conflict serializable if it can be transformed into a serial schedule by swapping 
+non-conflicting adjacent operations.
 
 ```
 Conflict Serializable Schedule:
-     T1          T2
+T1          T2
 1.   r[x]
 2.               r[y]
 3.   w[x]
@@ -98,7 +102,7 @@ Used to test for conflict serializability:
 
 ```
 For each conflict between Ti and Tj where Ti's operation comes first:
-    Add edge Ti → Tj
+Add edge Ti → Tj
 
 Schedule is conflict serializable ⟺ Precedence graph is acyclic
 ```
@@ -144,8 +148,8 @@ Result: NOT conflict serializable
 
 ```
 T1: lock-X(A) r(A) w(A) lock-X(B) r(B) w(B) commit unlock(A) unlock(B)
-                                                    ↑
-                                          All unlocks at commit
+↑
+All unlocks at commit
 
 Benefits:
 - No cascading aborts (committed data always read)
@@ -168,20 +172,20 @@ Each transaction gets a timestamp (TS) at start. Operations ordered by timestamp
 
 ```
 READ(X) by transaction T:
-    IF TS(T) < W-TS(X):
-        ABORT T (trying to read old value)
-    ELSE:
-        Execute read
-        R-TS(X) = max(R-TS(X), TS(T))
+IF TS(T) < W-TS(X):
+ABORT T (trying to read old value)
+ELSE:
+Execute read
+R-TS(X) = max(R-TS(X), TS(T))
 
 WRITE(X) by transaction T:
-    IF TS(T) < R-TS(X):
-        ABORT T (trying to overwrite value already read)
-    ELSE IF TS(T) < W-TS(X):
-        Thomas Write Rule: Skip write (older write ignored)
-    ELSE:
-        Execute write
-        W-TS(X) = TS(T)
+IF TS(T) < R-TS(X):
+ABORT T (trying to overwrite value already read)
+ELSE IF TS(T) < W-TS(X):
+Thomas Write Rule: Skip write (older write ignored)
+ELSE:
+Execute write
+W-TS(X) = TS(T)
 ```
 
 ### Thomas Write Rule
@@ -196,7 +200,7 @@ T1 later commits...       ← Would overwrite T2's newer value!
 
 With Thomas Write Rule:
 T1(TS=10): w[x]           ← T1 wants to write, but TS(T1) < W-TS(x)=20
-                          ← Skip T1's write (outdated anyway)
+← Skip T1's write (outdated anyway)
 Result: x has T2's value (correct!)
 ```
 
@@ -236,20 +240,20 @@ For transaction T validating against committed transaction Ti:
 
 ```
 Rule 1: Ti completes before T starts
-        Ti: |-------|
-        T:           |-------|
-        Always valid
+Ti: |-------|
+T:           |-------|
+Always valid
 
 Rule 2: Ti completes before T's write phase
-        Ti: |-------|
-        T:      |-------|
-        Valid if: WriteSet(Ti) ∩ ReadSet(T) = ∅
+Ti: |-------|
+T:      |-------|
+Valid if: WriteSet(Ti) ∩ ReadSet(T) = ∅
 
 Rule 3: Ti completes write phase before T enters validation
-        Ti: |-------|
-        T:    |-------|
-        Valid if: WriteSet(Ti) ∩ ReadSet(T) = ∅
-              AND WriteSet(Ti) ∩ WriteSet(T) = ∅
+Ti: |-------|
+T:    |-------|
+Valid if: WriteSet(Ti) ∩ ReadSet(T) = ∅
+AND WriteSet(Ti) ∩ WriteSet(T) = ∅
 ```
 
 ### OCC Example
@@ -259,7 +263,7 @@ T1 starts at t=0, reads A and B
 T2 starts at t=1, reads A, writes A
 T2 validates at t=2: No conflicts, commits
 T1 validates at t=3:
-    - T2 committed during T1's execution
+- T2 committed during T1's execution
     - T2 wrote A, T1 read A
     - WriteSet(T2) ∩ ReadSet(T1) = {A} ≠ ∅
     - ABORT T1
@@ -294,13 +298,13 @@ Data Item X:
 
 ```
 READ(X) by transaction T with TS(T) = 25:
-    Find version Xi where:
-        W-TS(Xi) ≤ TS(T) < W-TS(Xi+1)
+Find version Xi where:
+W-TS(Xi) ≤ TS(T) < W-TS(Xi+1)
 
-    For X with versions at TS = 5, 10, 15, 20:
-        T(TS=25) reads X_v4 (TS=20)
-        T(TS=12) reads X_v2 (TS=10)
-        T(TS=8)  reads X_v1 (TS=5)
+For X with versions at TS = 5, 10, 15, 20:
+T(TS=25) reads X_v4 (TS=20)
+T(TS=12) reads X_v2 (TS=10)
+T(TS=8)  reads X_v1 (TS=5)
 ```
 
 ### Snapshot Isolation (SI)
@@ -311,11 +315,11 @@ A popular MVCC implementation:
 Transaction sees snapshot of database at start time
 
 T1 starts at t=100:
-    - Sees all committed values as of t=100
+- Sees all committed values as of t=100
     - Doesn't see T2's changes (started at t=105)
 
 Write-Write Conflict:
-    - First committer wins
+- First committer wins
     - Second transaction aborts
 ```
 
@@ -327,12 +331,12 @@ Constraint: x + y ≥ 0
 Initial: x = 50, y = 50
 
 T1: READ x → 50
-    READ y → 50
-    WRITE x = x - 100 = -50
+READ y → 50
+WRITE x = x - 100 = -50
 
 T2: READ x → 50
-    READ y → 50
-    WRITE y = y - 100 = -50
+READ y → 50
+WRITE y = y - 100 = -50
 
 Both commit (no write-write conflict)
 Final: x = -50, y = -50
@@ -421,15 +425,15 @@ GROWING PHASE                    SHRINKING PHASE
 └─────────────────┘             └─────────────────┘
 
 Transaction:
-   Locks held
-        ^
-        │     ****
-        │   **    **
-        │  *        *
-        │ *          *
-        │*            *
-        └──────────────────► Time
-        Growing    Shrinking
-         Phase       Phase
+Locks held
+^
+│     ****
+│   **    **
+│  *        *
+│ *          *
+│*            *
+└──────────────────► Time
+Growing    Shrinking
+Phase       Phase
 ```
 

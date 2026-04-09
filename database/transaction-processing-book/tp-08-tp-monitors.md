@@ -2,7 +2,9 @@
 
 ## Overview
 
-Transaction Processing (TP) monitors are middleware systems that manage the execution of transactions across distributed resources. Jim Gray's work extensively documented TP monitors like IBM's CICS and BEA's Tuxedo, which process billions of transactions daily in banking, airline reservations, and retail systems.
+Transaction Processing (TP) monitors are middleware systems that manage the execution of transactions across
+distributed resources. Jim Gray's work extensively documented TP monitors like IBM's CICS and BEA's Tuxedo,
+which process billions of transactions daily in banking, airline reservations, and retail systems.
 
 ---
 
@@ -135,6 +137,7 @@ Transaction Processing (TP) monitors are middleware systems that manage the exec
 
 
 ---
+```
 
 ## Server Process Models
 
@@ -323,4 +326,3 @@ Modern Application Servers inherit TP Monitor concepts:
 - IBM CICS Transaction Server Documentation
 - Oracle Tuxedo Documentation
 - Bernstein, P. & Newcomer, E. (2009). "Principles of Transaction Processing"
-
