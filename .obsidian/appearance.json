@@ -1,1 +1,7 @@
-{}
+{
+  "monospaceFontFamily": "JetBrains Mono",
+  "textFontFamily": "JetBrains Mono",
+  "theme": "system",
+  "cssTheme": "Catppuccin",
+  "showRibbon": false
+}

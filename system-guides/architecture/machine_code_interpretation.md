@@ -43,6 +43,252 @@ x86-64 provides 16 general-purpose 64-bit registers:
 | %r10-%r11 | Caller-saved | No |
 | %r12-%r15 | Callee-saved | Yes |
 
+#### 2.1.1 Understanding Register Roles
+
+The table above defines the **x86-64 System V ABI calling convention** used on Linux and Unix systems. Each column has important implications:
+
+##### Register Names
+
+The `%` prefix is AT&T syntax (used in Linux/GNU assemblers). Intel syntax omits the `%`. All registers are 64-bit, but you can access smaller portions:
+- **64-bit**: `%rax` (full register)
+- **32-bit**: `%eax` (lower 32 bits, zeros upper 32 bits when written)
+- **16-bit**: `%ax` (lower 16 bits)
+- **8-bit**: `%al` (lower 8 bits), `%ah` (bits 8-15, only for %rax-%rdx)
+
+##### Register Purposes
+
+###### Argument Passing Registers
+
+When calling a function, the first six integer/pointer arguments are passed in registers:
+
+```c
+// C code
+long func(long a, long b, long c, long d, long e, long f);
+func(1, 2, 3, 4, 5, 6);
+```
+
+```asm
+# Assembly
+movq $1, %rdi               # 1st argument: a
+movq $2, %rsi               # 2nd argument: b
+movq $3, %rdx               # 3rd argument: c
+movq $4, %rcx               # 4th argument: d
+movq $5, %r8                # 5th argument: e
+movq $6, %r9                # 6th argument: f
+call func
+```
+
+Arguments 7 and beyond are passed on the stack in reverse order.
+
+###### Return Value Register
+
+**%rax** holds the return value when a function completes:
+
+```asm
+# Inside function
+movq $42, %rax              # Prepare return value
+ret                         # Return with value in %rax
+```
+
+For returning structures larger than 64 bits, `%rdx` may hold the second 64-bit portion.
+
+###### Special Purpose Registers
+
+**%rsp (Stack Pointer)** - Always points to the top of the stack (lowest address in use). Critical rules:
+- Must always be valid
+- Must be 16-byte aligned before `call` instruction
+- Grows downward (decrements when pushing, increments when popping)
+
+```asm
+pushq %rax                  # %rsp -= 8, then store %rax at (%rsp)
+popq %rbx                   # Load (%rsp) into %rbx, then %rsp += 8
+```
+
+**%rbp (Base Pointer)** - Optionally used to mark the base of the current stack frame:
+
+```asm
+# Function prologue (traditional)
+pushq %rbp                  # Save old base pointer
+movq %rsp, %rbp             # Set new base pointer
+subq $32, %rsp              # Allocate 32 bytes for locals
+
+# Access local variables relative to %rbp
+movq -8(%rbp), %rax         # Load local variable
+movq %rdx, -16(%rbp)        # Store local variable
+
+# Function epilogue
+movq %rbp, %rsp             # Restore stack pointer
+popq %rbp                   # Restore old base pointer
+ret
+```
+
+Modern compilers often omit the frame pointer (`-fomit-frame-pointer`) to free up %rbp for general use.
+
+##### Preserved Across Calls
+
+This column is **critical** for understanding who is responsible for saving/restoring register values.
+
+###### Callee-Saved Registers (Preserved = Yes)
+
+**%rbx, %r12-%r15, %rbp, %rsp** must be preserved by the **called function (callee)**.
+
+**Contract**: If a function uses these registers, it must save them first and restore them before returning.
+
+```asm
+my_function:
+    # Prologue: Save callee-saved registers
+    pushq %rbx
+    pushq %r12
+
+    # Function body: Now we can use %rbx and %r12
+    movq %rdi, %rbx         # Use %rbx freely
+    movq $100, %r12         # Use %r12 freely
+    # ... computation ...
+
+    # Epilogue: Restore callee-saved registers
+    popq %r12               # Restore in reverse order
+    popq %rbx
+    ret
+```
+
+**Why it matters**: If you call a function and have values in %rbx, you can trust they'll still be there when the function returns.
+
+```c
+// C example
+long caller() {
+    long important = 42;    // Compiler might keep in %rbx
+    some_function();        // Call another function
+    return important;       // %rbx still has 42
+}
+```
+
+###### Caller-Saved Registers (Preserved = No)
+
+**%rax, %rdi, %rsi, %rdx, %rcx, %r8-%r11** can be **freely modified** by the called function.
+
+**Contract**: If the caller needs these values after a function call, the caller must save them before calling.
+
+```asm
+caller:
+    movq $123, %r10         # Store value in caller-saved register
+
+    # Need to preserve %r10 across call
+    pushq %r10              # Caller saves it
+    call some_function      # Function may trash %r10
+    popq %r10               # Caller restores it
+
+    addq %r10, %rax         # Now can use %r10 safely
+    ret
+```
+
+**Why it matters**: Functions can use these registers without overhead of saving/restoring them.
+
+```asm
+some_function:
+    # No need to save %r10, %r11
+    movq %rdi, %r10         # Use %r10 as temporary
+    movq %rsi, %r11         # Use %r11 as temporary
+    addq %r10, %r11
+    movq %r11, %rax         # Return value
+    ret                     # Don't restore %r10, %r11
+```
+
+##### Register Usage Strategy
+
+**For short-lived temporaries**: Use caller-saved registers (%r10, %r11, %rax, etc.)
+- No save/restore overhead within a function
+- Doesn't work across function calls
+
+**For values that live across function calls**: Use callee-saved registers (%rbx, %r12-%r15)
+- Pay save/restore cost once at function entry/exit
+- Value preserved across any function calls
+
+**Example comparing both:**
+
+```asm
+# Bad: Using caller-saved for value across call
+bad_function:
+    movq %rdi, %r10         # Store in caller-saved
+    call helper             # Oops! %r10 may be destroyed
+    addq %r10, %rax         # Bug! %r10 might have wrong value
+    ret
+
+# Good: Using callee-saved for value across call
+good_function:
+    pushq %rbx              # Save callee-saved register
+    movq %rdi, %rbx         # Store in callee-saved
+    call helper             # Safe! %rbx will be preserved
+    addq %rbx, %rax         # Correct! %rbx still has our value
+    popq %rbx               # Restore
+    ret
+
+# Good: Using caller-saved when no call
+efficient_function:
+    movq %rdi, %r10         # Store in caller-saved
+    addq %rsi, %r10         # Computation without calls
+    movq %r10, %rax         # No function calls, so safe!
+    ret                     # No save/restore overhead
+```
+
+##### Complete Example
+
+Here's how it all works together:
+
+```c
+// C code
+long add_and_multiply(long a, long b, long c) {
+    long sum = a + b;
+    long product = sum * c;
+    return product;
+}
+
+long caller() {
+    long result = add_and_multiply(10, 20, 3);
+    return result + 1;
+}
+```
+
+```asm
+# Assembly for add_and_multiply
+add_and_multiply:
+    # Arguments arrive in registers:
+    # a in %rdi (1st arg)
+    # b in %rsi (2nd arg)
+    # c in %rdx (3rd arg)
+
+    addq %rsi, %rdi         # sum = a + b (result in %rdi)
+    movq %rdi, %rax         # Move sum to %rax
+    imulq %rdx, %rax        # product = sum * c
+    ret                     # Return product in %rax
+    # No callee-saved registers used, no save/restore needed
+
+# Assembly for caller
+caller:
+    # Prologue
+    subq $8, %rsp           # Align stack to 16 bytes
+
+    # Set up arguments in registers
+    movq $10, %rdi          # a = 10 (1st arg)
+    movq $20, %rsi          # b = 20 (2nd arg)
+    movq $3, %rdx           # c = 3  (3rd arg)
+
+    call add_and_multiply   # Call function
+    # Return value now in %rax
+
+    addq $1, %rax           # result + 1
+
+    # Epilogue
+    addq $8, %rsp           # Restore stack
+    ret                     # Return with value in %rax
+```
+
+**Key observations:**
+1. Arguments passed in `%rdi`, `%rsi`, `%rdx` (first 3 arguments)
+2. Return value comes back in `%rax`
+3. `add_and_multiply` uses only caller-saved registers, no save/restore overhead
+4. Caller doesn't save registers because it doesn't need them after the call
+5. Stack aligned to 16 bytes before `call`
+
 ### 2.2 Operand Specifiers
 
 Three types of operands:

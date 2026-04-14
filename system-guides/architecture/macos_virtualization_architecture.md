@@ -19,9 +19,11 @@
 
 ### 1.1 What is Virtualization?
 
-Virtualization creates isolated virtual machines (VMs) that run on top of a physical host system. Each VM operates as if it has dedicated hardware, while actually sharing the host's physical resources.
+Virtualization creates isolated virtual machines (VMs) that run on top of a physical host system. Each VM
+operates as if it has dedicated hardware, while actually sharing the host's physical resources.
 
 **Key Components:**
+
 - **Host OS**: The operating system running on physical hardware (macOS)
 - **Hypervisor**: Software layer that manages virtual machines
 - **Guest OS**: Operating system running inside a virtual machine
@@ -30,16 +32,19 @@ Virtualization creates isolated virtual machines (VMs) that run on top of a phys
 ### 1.2 Types of Virtualization
 
 #### Full Virtualization
+
 - Guest OS runs unmodified
 - Hypervisor emulates complete hardware
 - Examples: VMware Fusion, Parallels Desktop
 
 #### Paravirtualization
+
 - Guest OS is aware it's virtualized
 - Modified to use hypervisor APIs
 - Better performance than full virtualization
 
 #### Hardware-Assisted Virtualization
+
 - CPU provides virtualization extensions (Intel VT-x, AMD-V)
 - Hypervisor uses hardware features for better performance
 - Used by modern macOS virtualization
@@ -47,6 +52,7 @@ Virtualization creates isolated virtual machines (VMs) that run on top of a phys
 ### 1.3 macOS Virtualization Evolution
 
 **Timeline:**
+
 - **Pre-2016**: Third-party hypervisors only (VMware, Parallels, VirtualBox)
 - **2016**: Hypervisor.framework introduced (macOS 10.10+)
 - **2020**: Virtualization.framework introduced (macOS 11 Big Sur)
@@ -62,6 +68,7 @@ Virtualization creates isolated virtual machines (VMs) that run on top of a phys
 Apple's low-level hypervisor framework providing direct access to virtualization hardware.
 
 **Architecture:**
+
 ```
 ┌─────────────────────────────────────────┐
 │         User Space Application          │
@@ -90,12 +97,14 @@ Apple's low-level hypervisor framework providing direct access to virtualization
 ```
 
 **Key Features:**
+
 - Direct access to Intel VT-x or Apple Silicon virtualization
 - Minimal overhead
 - User-space hypervisor implementation
 - No kernel extensions required
 
 **API Capabilities:**
+
 ```c
 // Create virtual machine
 hv_vm_create(HV_VM_DEFAULT);
@@ -118,6 +127,7 @@ hv_vm_destroy();
 Higher-level framework introduced in macOS 11, providing easier VM creation and management.
 
 **Architecture Layers:**
+
 ```
 ┌─────────────────────────────────────────┐
 │      Swift/Objective-C Application      │
@@ -142,6 +152,7 @@ Higher-level framework introduced in macOS 11, providing easier VM creation and 
 ```
 
 **Advantages:**
+
 - High-level API (Swift/Objective-C)
 - Built-in device emulation
 - Automatic resource management
@@ -149,6 +160,7 @@ Higher-level framework introduced in macOS 11, providing easier VM creation and 
 - Rosetta 2 integration for x86_64 on Apple Silicon
 
 **Example Configuration:**
+
 ```swift
 import Virtualization
 
@@ -184,24 +196,28 @@ vm.start { result in
 ### 2.3 Third-Party Hypervisors
 
 #### VMware Fusion
+
 - Uses Hypervisor.framework on modern macOS
 - Full x86_64 virtualization
 - Supports Windows, Linux, macOS guests
 - Advanced networking features
 
 #### Parallels Desktop
+
 - Optimized for macOS
 - Coherence mode (seamless integration)
 - Uses Hypervisor.framework
 - Apple Silicon support with Rosetta
 
 #### VirtualBox
+
 - Open-source hypervisor
 - Cross-platform
 - Limited macOS support on Apple Silicon
 - Uses kernel extensions (older versions)
 
 #### Docker Desktop for Mac
+
 - Uses Hypervisor.framework
 - Lightweight Linux VM for containers
 - Optimized for container workloads
@@ -213,6 +229,7 @@ vm.start { result in
 ### 3.1 Type 1 vs Type 2 Hypervisors
 
 **Type 1 (Bare Metal):**
+
 ```
 ┌──────────┬──────────┬──────────┐
 │  Guest 1 │  Guest 2 │  Guest 3 │
@@ -226,9 +243,11 @@ vm.start { result in
 │      Physical Hardware          │
 └─────────────────────────────────┘
 ```
+
 Examples: VMware ESXi, Xen, Hyper-V
 
 **Type 2 (Hosted):**
+
 ```
 ┌──────────┬──────────┬──────────┐
 │  Guest 1 │  Guest 2 │  Guest 3 │
@@ -246,9 +265,11 @@ Examples: VMware ESXi, Xen, Hyper-V
 │      Physical Hardware          │
 └─────────────────────────────────┘
 ```
+
 Examples: VMware Fusion, Parallels, VirtualBox on macOS
 
 **macOS Hypervisor.framework is hybrid:**
+
 - Runs in user space (Type 2 characteristic)
 - Direct hardware access via kernel (Type 1 characteristic)
 - Best of both worlds
@@ -258,12 +279,14 @@ Examples: VMware Fusion, Parallels, VirtualBox on macOS
 #### Intel VT-x (x86_64 Macs)
 
 **Hardware Features:**
+
 - **VMX (Virtual Machine Extensions)**: CPU instructions for virtualization
 - **EPT (Extended Page Tables)**: Hardware-assisted memory virtualization
 - **VPID (Virtual Processor ID)**: TLB tagging for multiple address spaces
 - **VT-d**: I/O device virtualization
 
 **CPU Modes:**
+
 ```
 ┌─────────────────────────────────────────┐
 │          VMX Root Mode                  │
@@ -282,6 +305,7 @@ Examples: VMware Fusion, Parallels, VirtualBox on macOS
 ```
 
 **VM Exit Reasons:**
+
 - I/O operations
 - Privileged instructions
 - Interrupts
@@ -292,12 +316,14 @@ Examples: VMware Fusion, Parallels, VirtualBox on macOS
 #### Apple Silicon Virtualization
 
 **Hardware Features:**
+
 - **EL2 (Exception Level 2)**: Hypervisor privilege level
 - **Stage 2 Translation**: Guest physical to host physical address translation
 - **Virtual interrupts**: Hardware-assisted interrupt virtualization
 - **Performance counters**: Per-VM performance monitoring
 
 **Exception Levels:**
+
 ```
 EL3: Secure Monitor (not accessible)
   ↓
@@ -311,6 +337,7 @@ EL0: User Space (Guest applications)
 ### 3.3 Virtual CPU (vCPU) Management
 
 **vCPU States:**
+
 ```
 ┌──────────┐
 │  Created │
@@ -330,12 +357,14 @@ EL0: User Space (Guest applications)
 ```
 
 **vCPU Scheduling:**
+
 - Each vCPU is a thread in the host OS
 - macOS scheduler treats vCPUs like normal threads
 - Can be pinned to physical CPUs for performance
 - Subject to host CPU scheduling policies
 
 **Example - vCPU Creation:**
+
 ```c
 // Hypervisor.framework example
 hv_vcpu_t vcpu;
@@ -418,16 +447,19 @@ Memory virtualization is one of the most complex aspects of virtualization, invo
 EPT provides hardware support for GPA to HPA translation.
 
 **Without EPT (Software-based):**
+
 - Hypervisor maintains shadow page tables
 - Every guest page table update requires VM exit
 - High overhead
 
 **With EPT:**
+
 - Hardware performs two-level translation automatically
 - Guest can modify its page tables without VM exit
 - Significant performance improvement
 
 **EPT Structure:**
+
 ```
 GPA Translation:
 ┌──────────────────────────────────────┐
@@ -455,6 +487,7 @@ Similar to EPT but uses ARM's two-stage translation.
 ### 4.3 Memory Mapping in Hypervisor.framework
 
 **Mapping Guest Memory:**
+
 ```c
 // Allocate host memory
 size_t memory_size = 4ULL * 1024 * 1024 * 1024; // 4 GB
@@ -475,6 +508,7 @@ hv_vm_unmap(0x0, memory_size);
 ```
 
 **Memory Protection:**
+
 ```c
 // Change memory permissions
 hv_vm_protect(guest_addr, size, HV_MEMORY_READ); // Read-only
@@ -499,6 +533,7 @@ Allocating more memory to VMs than physically available.
 4. **Swapping**: Swap guest memory to disk
 
 **macOS Implementation:**
+
 ```c
 // Allocate memory on demand
 void *host_memory = mmap(NULL, memory_size,
@@ -515,6 +550,7 @@ void *host_memory = mmap(NULL, memory_size,
 Guest cooperates with hypervisor to reclaim memory.
 
 **How it works:**
+
 ```
 1. Host needs memory
    ↓
@@ -530,6 +566,7 @@ Guest cooperates with hypervisor to reclaim memory.
 ```
 
 **Balloon Driver Communication:**
+
 ```
 ┌─────────────────────────────────┐
 │         Guest OS                │
@@ -552,16 +589,19 @@ Guest cooperates with hypervisor to reclaim memory.
 Using larger page sizes reduces TLB misses.
 
 **Standard Pages:**
+
 - 4 KB pages
 - More TLB entries needed
 - More page table levels
 
 **Huge Pages:**
+
 - 2 MB or 1 GB pages
 - Fewer TLB entries needed
 - Better performance for large memory workloads
 
 **macOS Support:**
+
 ```c
 // Request huge pages (2 MB)
 void *memory = mmap(NULL, size,
@@ -575,6 +615,7 @@ void *memory = mmap(NULL, size,
 On multi-socket systems, memory access latency varies.
 
 **NUMA Architecture:**
+
 ```
 ┌─────────────┐         ┌─────────────┐
 │   CPU 0     │         │   CPU 1     │
@@ -593,6 +634,7 @@ On multi-socket systems, memory access latency varies.
 ```
 
 **Best Practice:**
+
 - Pin vCPUs to CPUs on same NUMA node
 - Allocate VM memory from same NUMA node
 - Reduces remote memory access latency
@@ -600,6 +642,7 @@ On multi-socket systems, memory access latency varies.
 ### 4.6 Memory Virtualization in Virtualization.framework
 
 **High-Level Memory Configuration:**
+
 ```swift
 import Virtualization
 
@@ -615,6 +658,7 @@ config.memorySize = 8 * 1024 * 1024 * 1024 // 8 GB
 ```
 
 **Memory Balloon Device:**
+
 ```swift
 // Configure memory balloon for dynamic memory management
 let balloonDevice = VZVirtioTraditionalMemoryBalloonDeviceConfiguration()
@@ -631,11 +675,13 @@ vm.memoryBalloonDevices[0].target = 4 * 1024 * 1024 * 1024 // 4 GB
 Each VM has completely separate address space.
 
 **Security Properties:**
+
 - Guest cannot access host memory
 - Guest cannot access other VM's memory
 - Enforced by hardware (EPT/Stage-2)
 
 **Memory Encryption (Future):**
+
 - AMD SEV (Secure Encrypted Virtualization)
 - Intel TDX (Trust Domain Extensions)
 - Encrypts VM memory, protects from host
@@ -643,6 +689,7 @@ Each VM has completely separate address space.
 #### Memory Integrity
 
 **Protecting Guest Memory:**
+
 ```c
 // Map memory as read-only for code sections
 hv_vm_map(code_memory, guest_code_addr, code_size,
@@ -693,11 +740,13 @@ Guest uses private IP, hypervisor translates to host IP.
 ```
 
 **Advantages:**
+
 - Simple configuration
 - Guest doesn't need external IP
 - Host firewall protects guest
 
 **Disadvantages:**
+
 - Incoming connections difficult
 - Performance overhead from NAT
 
@@ -725,11 +774,13 @@ Guest appears as separate device on physical network.
 ```
 
 **Advantages:**
+
 - Guest fully accessible on network
 - No NAT overhead
 - Behaves like physical machine
 
 **Disadvantages:**
+
 - Requires DHCP or manual IP configuration
 - Less isolated from network
 
@@ -759,6 +810,7 @@ VMs can communicate with host and each other, but not external network.
 ```
 
 **Use Cases:**
+
 - Development environments
 - Testing isolated networks
 - Security-sensitive workloads
@@ -770,6 +822,7 @@ VMs can communicate with host and each other, but not external network.
 Paravirtualized network device for high performance.
 
 **Architecture:**
+
 ```
 ┌─────────────────────────────────────────┐
 │           Guest OS                      │
@@ -792,6 +845,7 @@ Paravirtualized network device for high performance.
 ```
 
 **Virtqueue Communication:**
+
 ```
 Guest Driver                    Hypervisor Backend
      │                                │
@@ -811,6 +865,7 @@ Guest Driver                    Hypervisor Backend
 ```
 
 **Performance Features:**
+
 - Zero-copy packet transfer
 - Batching multiple packets
 - Interrupt coalescing
@@ -821,6 +876,7 @@ Guest Driver                    Hypervisor Backend
 Full hardware emulation (e1000, rtl8139, etc.)
 
 **Characteristics:**
+
 - Works with unmodified guest OS
 - Lower performance than virtio
 - Higher CPU overhead
@@ -849,6 +905,7 @@ config.networkDevices = [networkDevice]
 ```
 
 **NAT Network Details:**
+
 - Guest gets IP via DHCP (typically 192.168.64.x)
 - Host accessible at gateway IP (192.168.64.1)
 - Outbound connections work automatically
@@ -876,6 +933,7 @@ config.networkDevices = [networkDevice]
 ```
 
 **Requirements:**
+
 - Requires elevated privileges
 - Guest needs IP configuration (DHCP or static)
 - Guest appears on physical network
@@ -977,6 +1035,7 @@ Guest:
 ```
 
 **Benefits:**
+
 - Parallel packet processing
 - Better CPU utilization
 - Higher throughput
@@ -984,15 +1043,18 @@ Guest:
 #### TCP Offloading
 
 **TSO (TCP Segmentation Offload):**
+
 - Guest sends large TCP segments
 - Host/NIC splits into MTU-sized packets
 - Reduces guest CPU usage
 
 **GSO (Generic Segmentation Offload):**
+
 - Similar to TSO but protocol-agnostic
 - Works for TCP, UDP, etc.
 
 **Checksum Offload:**
+
 - Host calculates TCP/UDP/IP checksums
 - Guest doesn't need to compute them
 
@@ -1001,6 +1063,7 @@ Guest:
 #### Isolation
 
 **Network Namespace Isolation:**
+
 ```
 ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
 │   VM 1      │  │   VM 2      │  │   VM 3      │
@@ -1020,6 +1083,7 @@ Guest:
 #### Filtering and Firewalling
 
 **Host-Level Filtering:**
+
 ```bash
 # macOS packet filter (pf)
 # Block traffic between VMs
@@ -1030,6 +1094,7 @@ pass from 192.168.64.0/24 to any
 ```
 
 **Guest-Level Filtering:**
+
 - Each guest runs its own firewall
 - Independent security policies
 - Defense in depth
@@ -1037,6 +1102,7 @@ pass from 192.168.64.0/24 to any
 #### Traffic Shaping
 
 **Bandwidth Limiting:**
+
 ```swift
 // Conceptual - not directly available in Virtualization.framework
 // Would be implemented in custom network backend
@@ -1094,6 +1160,7 @@ Hypervisor emulates complete hardware device.
 ```
 
 **Characteristics:**
+
 - Works with unmodified guest
 - High overhead (many VM exits)
 - Accurate hardware behavior
@@ -1123,6 +1190,7 @@ Guest uses special drivers aware of virtualization.
 ```
 
 **Characteristics:**
+
 - Requires guest driver support
 - Much better performance
 - Simpler implementation
@@ -1147,6 +1215,7 @@ Guest has direct access to physical device.
 ```
 
 **Characteristics:**
+
 - Best performance (native speed)
 - Device exclusive to one VM
 - Requires IOMMU (VT-d/AMD-Vi)
@@ -1157,6 +1226,7 @@ Guest has direct access to physical device.
 #### Virtual Disk Formats
 
 **Raw Disk Image:**
+
 ```
 ┌────────────────────────────────────┐
 │  Guest sees: 10 GB disk            │
@@ -1169,6 +1239,7 @@ Guest has direct access to physical device.
 ```
 
 **Sparse/Dynamic Disk:**
+
 ```
 ┌────────────────────────────────────┐
 │  Guest sees: 10 GB disk            │
@@ -1182,6 +1253,7 @@ Guest has direct access to physical device.
 ```
 
 **QCOW2 (QEMU Copy-On-Write):**
+
 - Supports snapshots
 - Compression
 - Encryption
@@ -1209,6 +1281,7 @@ config.storageDevices = [blockDevice]
 ```
 
 **Creating Disk Image:**
+
 ```bash
 # Create 20 GB raw disk image
 dd if=/dev/zero of=disk.img bs=1m count=20480
@@ -1288,12 +1361,14 @@ config.directorySharingDevices = [sharingDevice]
 ```
 
 **Guest Access (Linux):**
+
 ```bash
 # Mount shared directory in guest
 mount -t virtiofs share_tag /mnt/shared
 ```
 
 **Performance Characteristics:**
+
 - Near-native file I/O performance
 - Supports POSIX semantics
 - Handles file locking
@@ -1332,11 +1407,13 @@ void pin_vcpu_to_cpu(pthread_t thread, int cpu_id) {
 Running more vCPUs than physical CPUs.
 
 **Guidelines:**
+
 - **Light workloads**: 2:1 or 3:1 ratio acceptable
 - **CPU-intensive**: 1:1 ratio recommended
 - **Mixed workloads**: Monitor and adjust
 
 **Monitoring:**
+
 ```bash
 # Check CPU usage
 top -pid $(pgrep -f "VirtualMachine")
@@ -1350,6 +1427,7 @@ vm_stat 1
 #### Memory Allocation Strategies
 
 **Pre-allocation:**
+
 ```c
 // Allocate all memory upfront
 void *memory = mmap(NULL, size,
@@ -1365,6 +1443,7 @@ hv_vm_map(memory, 0, size, HV_MEMORY_READ | HV_MEMORY_WRITE);
 ```
 
 **Lazy Allocation:**
+
 ```c
 // Allocate on demand
 void *memory = mmap(NULL, size,
@@ -1379,6 +1458,7 @@ hv_vm_map(memory, 0, size, HV_MEMORY_READ | HV_MEMORY_WRITE);
 #### Memory Pressure Handling
 
 **Host Memory Pressure:**
+
 ```swift
 // Monitor memory pressure
 let source = DispatchSource.makeMemoryPressureSource(
@@ -1403,12 +1483,14 @@ source.resume()
 #### Disk I/O Optimization
 
 **Direct I/O:**
+
 ```c
 // Bypass host page cache for better performance
 int fd = open("/path/to/disk.img", O_RDWR | O_DIRECT);
 ```
 
 **Asynchronous I/O:**
+
 ```c
 // Use async I/O for better concurrency
 #include <aio.h>
@@ -1429,6 +1511,7 @@ aio_suspend(&cb, 1, NULL);
 ```
 
 **I/O Scheduling:**
+
 - Use appropriate I/O scheduler in guest
 - Consider workload (random vs sequential)
 - Tune queue depths
@@ -1436,6 +1519,7 @@ aio_suspend(&cb, 1, NULL);
 #### Network I/O Optimization
 
 **Batching:**
+
 ```c
 // Process multiple packets before VM exit
 #define BATCH_SIZE 32
@@ -1455,6 +1539,7 @@ void process_network_packets() {
 ```
 
 **Zero-Copy Networking:**
+
 ```c
 // Share memory between host and guest
 // Guest writes directly to host buffers
@@ -1495,12 +1580,14 @@ iperf3 -c host_ip -t 60 -P 4
 #### Profiling Tools
 
 **Instruments (macOS):**
+
 ```bash
 # Profile VM process
 instruments -t "Time Profiler" -p $(pgrep VirtualMachine)
 ```
 
 **DTrace:**
+
 ```bash
 # Trace VM exits
 sudo dtrace -n 'fbt::hv_vcpu_run:return { @[arg1] = count(); }'
@@ -1515,16 +1602,19 @@ sudo dtrace -n 'fbt::hv_vcpu_run:return { @[arg1] = count(); }'
 #### Hardware Isolation
 
 **CPU Isolation:**
+
 - Separate execution contexts (VMX non-root mode)
 - Guest cannot execute privileged host instructions
 - Hardware enforces privilege separation
 
 **Memory Isolation:**
+
 - EPT/Stage-2 prevents guest from accessing host memory
 - Each VM has isolated address space
 - DMA protection via IOMMU
 
 **I/O Isolation:**
+
 - Guest I/O operations trapped by hypervisor
 - Hypervisor validates all I/O requests
 - Prevents unauthorized device access
@@ -1532,6 +1622,7 @@ sudo dtrace -n 'fbt::hv_vcpu_run:return { @[arg1] = count(); }'
 #### Software Isolation
 
 **Process Isolation:**
+
 ```
 ┌─────────────────────────────────────┐
 │         macOS Kernel                │
@@ -1556,6 +1647,7 @@ sudo dtrace -n 'fbt::hv_vcpu_run:return { @[arg1] = count(); }'
 Guest attempts to break out and execute code on host.
 
 **Mitigation:**
+
 - Minimize hypervisor code
 - Careful input validation
 - Fuzzing and security audits
@@ -1564,10 +1656,12 @@ Guest attempts to break out and execute code on host.
 #### Side-Channel Attacks
 
 **Cache Timing Attacks:**
+
 - Spectre/Meltdown variants
 - Guest can infer host data from cache timing
 
 **Mitigation:**
+
 ```c
 // Flush cache on VM exit
 void vm_exit_handler() {
@@ -1581,6 +1675,7 @@ void vm_exit_handler() {
 ```
 
 **CPU Microarchitecture:**
+
 - Disable hyperthreading for sensitive workloads
 - Use CPU with hardware mitigations
 - Keep macOS updated
@@ -1646,6 +1741,7 @@ hdiutil create -size 20g -encryption AES-256 \
 ```
 
 **In Virtualization.framework:**
+
 ```swift
 // Disk encryption handled by macOS
 // Use encrypted APFS container
@@ -1672,6 +1768,7 @@ let attachment = try VZDiskImageStorageDeviceAttachment(
 ```
 
 **Best Practice:**
+
 - Use TLS/SSL in guest applications
 - VPN for sensitive communications
 - Don't rely on network isolation alone
@@ -1953,6 +2050,7 @@ class VMSnapshotManager {
 #### VM Won't Start
 
 **Symptoms:**
+
 - VM fails to start
 - Error messages during initialization
 
@@ -1980,6 +2078,7 @@ do {
 ```
 
 **Common Causes:**
+
 1. Missing entitlements
 2. Invalid configuration
 3. Insufficient host resources
@@ -1989,6 +2088,7 @@ do {
 #### Poor Performance
 
 **Symptoms:**
+
 - Slow guest OS
 - High CPU usage on host
 - Laggy UI
@@ -2010,6 +2110,7 @@ sudo dtrace -n 'fbt::hv_vcpu_run:return { @exits = count(); }'
 ```
 
 **Solutions:**
+
 1. Reduce vCPU count
 2. Allocate less memory
 3. Use virtio devices instead of emulated
@@ -2019,6 +2120,7 @@ sudo dtrace -n 'fbt::hv_vcpu_run:return { @exits = count(); }'
 #### Network Connectivity Issues
 
 **Symptoms:**
+
 - Guest can't reach network
 - Slow network performance
 - Intermittent connectivity
@@ -2043,6 +2145,7 @@ sudo pfctl -s all
 ```
 
 **Solutions:**
+
 1. Verify network device configuration
 2. Check NAT/bridge settings
 3. Verify firewall rules
@@ -2254,6 +2357,7 @@ nettop -p $(pgrep VirtualMachine)
 Moving a running VM from one host to another without downtime.
 
 **Challenges on macOS:**
+
 - Limited support in Virtualization.framework
 - Requires custom implementation
 - Network state synchronization
@@ -2289,11 +2393,13 @@ Source Host                    Destination Host
 Running a hypervisor inside a VM.
 
 **Requirements:**
+
 - CPU support (Intel VT-x with EPT, nested paging)
 - Hypervisor support for exposing virtualization extensions
 - Performance overhead (multiple translation layers)
 
 **Status on macOS:**
+
 - Limited support
 - Primarily for development/testing
 - Not recommended for production
@@ -2359,6 +2465,7 @@ graphicsDevice.scanouts = [
 ```
 
 **Integration Points:**
+
 - Shared filesystem (virtio-fs)
 - Network forwarding
 - Resource limits
@@ -2371,23 +2478,27 @@ graphicsDevice.scanouts = [
 ### 12.1 Resource Allocation
 
 **CPU:**
+
 - Don't overcommit for CPU-intensive workloads
 - Leave cores for host OS
 - Use even number of vCPUs for NUMA systems
 
 **Memory:**
+
 - Allocate based on workload
 - Leave 20-30% for host OS
 - Monitor memory pressure
 - Use memory ballooning for dynamic allocation
 
 **Storage:**
+
 - Use SSD for VM disks
 - Separate OS and data disks
 - Regular backups
 - Monitor disk space
 
 **Network:**
+
 - Use virtio-net for best performance
 - NAT for simple setups
 - Bridged for server workloads
@@ -2396,6 +2507,7 @@ graphicsDevice.scanouts = [
 ### 12.2 Security Hardening
 
 **Principle of Least Privilege:**
+
 ```swift
 // Minimal configuration
 let config = VZVirtualMachineConfiguration()
@@ -2413,12 +2525,14 @@ let osAttachment = try VZDiskImageStorageDeviceAttachment(
 ```
 
 **Regular Updates:**
+
 - Keep macOS updated
 - Update guest OS
 - Update applications
 - Patch vulnerabilities promptly
 
 **Monitoring:**
+
 - Log all VM activities
 - Monitor resource usage
 - Alert on anomalies
@@ -2476,12 +2590,14 @@ find "$BACKUP_DIR" -name "$VM_NAME-*.tar.gz" \
 macOS virtualization has evolved significantly with the introduction of Hypervisor.framework and Virtualization.framework. These technologies provide:
 
 **Key Benefits:**
+
 - **Native performance**: Hardware-assisted virtualization
 - **Security**: Strong isolation between host and guests
 - **Ease of use**: High-level APIs for VM management
 - **Integration**: Seamless macOS integration
 
 **Core Concepts:**
+
 - **Memory virtualization**: EPT/Stage-2 translation, memory management
 - **Network virtualization**: NAT, bridged, virtio-net
 - **I/O virtualization**: Paravirtualized devices, passthrough
@@ -2490,6 +2606,7 @@ macOS virtualization has evolved significantly with the introduction of Hypervis
 ### 13.2 Future Directions
 
 **Emerging Technologies:**
+
 - Enhanced Apple Silicon support
 - Better GPU virtualization
 - Improved live migration
@@ -2497,6 +2614,7 @@ macOS virtualization has evolved significantly with the introduction of Hypervis
 - Better container integration
 
 **Trends:**
+
 - Shift to ARM-based virtualization
 - Cloud-native workloads
 - Edge computing
@@ -2505,17 +2623,20 @@ macOS virtualization has evolved significantly with the introduction of Hypervis
 ### 13.3 Resources
 
 **Official Documentation:**
+
 - [Apple Virtualization Framework](https://developer.apple.com/documentation/virtualization)
 - [Hypervisor Framework](https://developer.apple.com/documentation/hypervisor)
 - [WWDC Sessions on Virtualization](https://developer.apple.com/videos/)
 
 **Community Resources:**
+
 - Open-source VM implementations
 - Performance tuning guides
 - Security best practices
 - Troubleshooting forums
 
 **Tools:**
+
 - Instruments for profiling
 - Console for logging
 - Activity Monitor for resource monitoring
@@ -2526,6 +2647,7 @@ macOS virtualization has evolved significantly with the introduction of Hypervis
 Understanding virtualization at a deep level—from hardware support through kernel management to network and memory handling—is essential for system programmers and administrators working with macOS. The layered architecture, from physical hardware through the hypervisor to guest operating systems, provides both powerful capabilities and complex challenges.
 
 By mastering these concepts, you can:
+
 - Build efficient virtualization solutions
 - Troubleshoot complex issues
 - Optimize performance
@@ -2539,5 +2661,3 @@ The future of virtualization on macOS is bright, with continued improvements in 
 **Document Version**: 1.0
 **Last Updated**: 2026-03-26
 **Target Audience**: System programmers, DevOps engineers, virtualization administrators
-
-

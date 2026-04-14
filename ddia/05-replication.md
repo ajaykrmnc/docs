@@ -131,7 +131,8 @@ The most common approach: **leader-based replication** (also: master-slave, acti
 
 ## Setting Up New Followers
 
-You can't just copy data files — the data is constantly changing. You can't lock the database (violates availability goals). The standard process:
+You can't just copy data files — the data is constantly changing. You can't lock the database (violates
+availability goals). The standard process:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -163,7 +164,8 @@ You can't just copy data files — the data is constantly changing. You can't lo
 
 ### Follower Failure: Catch-Up Recovery
 
-Each follower keeps a log of changes received from the leader. On restart, the follower knows the last transaction it processed, connects to the leader, and requests all changes since that point.
+Each follower keeps a log of changes received from the leader. On restart, the follower knows the last
+transaction it processed, connects to the leader, and requests all changes since that point.
 
 ### Leader Failure: Failover
 
@@ -371,7 +373,8 @@ With asynchronous replication, followers can be behind. This **replication lag**
 
 ## Leaderless Replication
 
-No leader at all. Clients send writes to **several replicas directly** (or via a coordinator node that doesn't enforce ordering).
+No leader at all. Clients send writes to **several replicas directly** (or via a coordinator node that doesn't
+enforce ordering).
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -455,7 +458,8 @@ No leader at all. Clients send writes to **several replicas directly** (or via a
 
 ### Version Vectors
 
-To detect concurrent writes vs. causally-ordered writes, leaderless systems use **version vectors** (generalization of version clocks):
+To detect concurrent writes vs. causally-ordered writes, leaderless systems use **version vectors**
+(generalization of version clocks):
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -490,26 +494,45 @@ To detect concurrent writes vs. causally-ordered writes, leaderless systems use 
 
 ### Q1: Compare single-leader, multi-leader, and leaderless replication.
 
-**Single-leader**: All writes go to one leader, replicated to followers. Simple, no write conflicts, but leader is a bottleneck and single point of failure. **Multi-leader**: Multiple nodes accept writes; changes replicated between leaders. Better for multi-datacenter setups but introduces write conflicts that must be resolved. **Leaderless**: No leader; clients write to multiple replicas using quorums (w + r > n). High availability, no failover needed, but complex conflict resolution and weaker consistency guarantees.
+**Single-leader**: All writes go to one leader, replicated to followers. Simple, no write conflicts, but
+leader is a bottleneck and single point of failure. **Multi-leader**: Multiple nodes accept writes; changes
+replicated between leaders. Better for multi-datacenter setups but introduces write conflicts that must be
+resolved. **Leaderless**: No leader; clients write to multiple replicas using quorums (w + r > n). High
+availability, no failover needed, but complex conflict resolution and weaker consistency guarantees.
 
 ### Q2: What is the quorum condition and why is it important?
 
-The quorum condition is **w + r > n**, where n = total replicas, w = write quorum, r = read quorum. It ensures that the set of nodes read from and the set of nodes written to **overlap** — at least one node in every read has the latest write. This provides a probabilistic guarantee of reading up-to-date data without requiring a leader. However, it's not foolproof: sloppy quorums, concurrent writes, and network partitions can still cause stale reads.
+The quorum condition is **w + r > n**, where n = total replicas, w = write quorum, r = read quorum. It ensures
+that the set of nodes read from and the set of nodes written to **overlap** — at least one node in every read
+has the latest write. This provides a probabilistic guarantee of reading up-to-date data without requiring a
+leader. However, it's not foolproof: sloppy quorums, concurrent writes, and network partitions can still cause
+stale reads.
 
 ### Q3: Explain three problems caused by replication lag.
 
-1. **Read-after-write**: User writes data, then reads from a stale follower and doesn't see their own write. Fix: read own data from leader.
-2. **Non-monotonic reads**: User reads from a fresh follower, then a stale one, and sees data "go back in time." Fix: always read from the same replica.
-3. **Consistent prefix reads**: Causally related writes appear in wrong order because different partitions replicate at different speeds. Fix: ensure causal writes go to the same partition.
+1. **Read-after-write**: User writes data, then reads from a stale follower and doesn't see their own write.
+   Fix: read own data from leader.
+2. **Non-monotonic reads**: User reads from a fresh follower, then a stale one, and sees data "go back in
+   time." Fix: always read from the same replica.
+3. **Consistent prefix reads**: Causally related writes appear in wrong order because different partitions
+   replicate at different speeds. Fix: ensure causal writes go to the same partition.
 
 ### Q4: How does leader failover work, and what can go wrong?
 
-Failover detects leader failure (via timeout), elects a follower as the new leader, and reconfigures clients and other followers. Problems: (1) **Data loss**: async replication means the new leader may be missing some writes. (2) **Split brain**: two nodes both believe they're leader, both accept writes → data corruption. (3) **Wrong timeout**: too short causes unnecessary failovers; too long means longer downtime. GitHub's 2012 incident showed how stale auto-increment counters after failover caused duplicate primary keys and data leaks.
+Failover detects leader failure (via timeout), elects a follower as the new leader, and reconfigures clients
+and other followers. Problems: (1) **Data loss**: async replication means the new leader may be missing some
+writes. (2) **Split brain**: two nodes both believe they're leader, both accept writes → data corruption. (3)
+**Wrong timeout**: too short causes unnecessary failovers; too long means longer downtime. GitHub's 2012
+incident showed how stale auto-increment counters after failover caused duplicate primary keys and data leaks.
 
 ### Q5: What are CRDTs and when are they useful?
 
-**Conflict-free Replicated Data Types** are data structures designed to be merged automatically without conflicts. Examples: G-Counter (grow-only counter), PN-Counter (increment/decrement), G-Set (grow-only set), OR-Set (observed-remove set). They're useful in multi-leader and leaderless systems where concurrent writes to the same data are common. CRDTs guarantee eventual convergence regardless of the order in which updates are applied. Used by Riak for distributed counters and sets.
+**Conflict-free Replicated Data Types** are data structures designed to be merged automatically without
+conflicts. Examples: G-Counter (grow-only counter), PN-Counter (increment/decrement), G-Set (grow-only set),
+OR-Set (observed-remove set). They're useful in multi-leader and leaderless systems where concurrent writes to
+the same data are common. CRDTs guarantee eventual convergence regardless of the order in which updates are
+applied. Used by Riak for distributed counters and sets.
 
 ---
 
-*Based on Chapter 5 of "Designing Data-Intensive Applications" by Martin Kleppmann*
+_Based on Chapter 5 of "Designing Data-Intensive Applications" by Martin Kleppmann_

@@ -1,16 +1,4 @@
-# Chapter 1: sk_buff Structure and Memory Layout
 
-> **Kernel version reference:** Linux 6.x series. Field offsets and sizes may vary across
-> versions; the conceptual layout has been stable since approximately 2.6.22.
-
----
-
-## 1. Introduction
-
-### 1.1 What sk_buff Is and Why It Exists
-
-The `struct sk_buff` (socket buffer) is the single most important data structure in the
-Linux networking stack. Every packet -- whether inbound from a NIC, outbound from a
 socket, forwarded between interfaces, or synthesized internally -- is represented by
 exactly one `sk_buff` instance throughout its lifetime in the kernel.
 
