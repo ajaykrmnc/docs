@@ -5,7 +5,8 @@
 
 ## Problem Statement
 
-Design an in-memory file system that supports Unix-like operations including files, directories, symbolic links, permissions, and file watching.
+Design an in-memory file system that supports Unix-like operations including files, directories, symbolic 
+links, permissions, and file watching.
 
 ---
 

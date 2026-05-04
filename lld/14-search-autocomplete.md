@@ -5,7 +5,8 @@
 
 ## Problem Statement
 
-Design a search autocomplete/typeahead system that provides real-time suggestions as users type, with ranking based on frequency, recency, and personalization.
+Design a search autocomplete/typeahead system that provides real-time suggestions as users type, with ranking 
+based on frequency, recency, and personalization.
 
 ---
 

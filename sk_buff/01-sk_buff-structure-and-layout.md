@@ -526,10 +526,7 @@ tail ──► ├────────────────────�
          │     Tailroom        │
 end  ──► ├─────────────────────┤
          │  skb_shared_info    │
-         └─────────────────────┘
-
-  skb->len is reduced by 14
-  skb->mac_header still references the Ethernet header
+         └─────────────────────┘ skb->len is reduced by 14 skb->mac_header still references the Ethernet header
 
 
 Step 3: ip_rcv() processes IP header
@@ -1114,11 +1111,11 @@ if (skb_is_gso(skb)) {
 Every `sk_buff` carries three header offsets that record where each protocol layer's
 header begins within the linear data buffer:
 
-| Field              | Type   | Points To                        |
-|--------------------|--------|----------------------------------|
-| `mac_header`       | `__u16`| Start of Layer 2 (Ethernet) header |
-| `network_header`   | `__u16`| Start of Layer 3 (IP) header     |
-| `transport_header` | `__u16`| Start of Layer 4 (TCP/UDP) header|
+| Field              | Type    | Points To                          |
+| ------------------ | ------- | ---------------------------------- |
+| `mac_header`       | `__u16` | Start of Layer 2 (Ethernet) header |
+| `network_header`   | `__u16` | Start of Layer 3 (IP) header       |
+| `transport_header` | `__u16` | Start of Layer 4 (TCP/UDP) header  |
 
 These are **offsets from `skb->head`**, not absolute pointers. This design was introduced
 in kernel 2.6.22 (commit by Arnaldo Carvalho de Melo). Before that, they were direct
