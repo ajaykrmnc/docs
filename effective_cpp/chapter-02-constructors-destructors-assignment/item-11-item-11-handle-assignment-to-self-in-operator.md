@@ -1,5 +1,52 @@
 # Item 11: Handle Assignment to Self in `operator=`
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│             ITEM 11: HANDLE ASSIGNMENT TO SELF IN `OPERATOR=`             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. x = x or aliasing assignment -> source and destination may be same     │
+│ object.                                                                   │
+│ 2. Delete old resource first -> source data may be destroyed before       │
+│ copy.                                                                     │
+│ 3. Guard check -> if this == &rhs, return *this.                          │
+│ 4. Stronger path -> copy-and-swap handles self-assignment and exceptions  │
+│ together.                                                                 │
+│ 5. Meaning: assignment must survive aliases and partial failure.          │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                       NAIVE SELF-ASSIGNMENT FAILURE                       │
+├───────────────────────────────────────────────────────────────────────────┤
+│ w = w                                                                     │
+│                                     ▼                                     │
+│ delete this->resource                                                     │
+│                                     ▼                                     │
+│ rhs.resource points to the same deleted object                            │
+│                                     ▼                                     │
+│ copy reads destroyed memory -> undefined behavior                         │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        COPY-AND-SWAP SUCCESS PATH                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Make full copy of rhs first                                               │
+│                                     ▼                                     │
+│ If copy fails, current object is unchanged                                │
+│                                     ▼                                     │
+│ Swap current state with copy                                              │
+│                                     ▼                                     │
+│ Temporary destroys old state safely                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 Self-assignment (`a = a`) happens more often than you might think, and it can be catastrophic if your 

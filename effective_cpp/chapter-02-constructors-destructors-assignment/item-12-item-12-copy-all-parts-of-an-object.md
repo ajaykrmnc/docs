@@ -1,5 +1,49 @@
 # Item 12: Copy All Parts of an Object
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                   ITEM 12: COPY ALL PARTS OF AN OBJECT                    │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Copy operation runs -> every meaningful member and base subobject      │
+│ must be copied.                                                           │
+│ 2. Add new member later -> old copy code silently omits it.               │
+│ 3. Derived copy -> call base copy constructor/assignment explicitly.      │
+│ 4. Avoid duplication -> share copy logic via helper, not by one copy op   │
+│ calling another.                                                          │
+│ 5. Meaning: partial copies create objects that look valid but carry       │
+│ stale state.                                                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          COPY COMPLETENESS CHECK                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Copy every data member                                                    │
+│ Copy every base class subobject                                           │
+│ Update copy code when new members are added                               │
+│ Do not let derived copy forget the base part                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           PARTIAL COPY BUG FLOW                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ New member added to class                                                 │
+│                                     ▼                                     │
+│ Copy constructor/assignment not updated                                   │
+│                                     ▼                                     │
+│ Copied object keeps default/stale member                                  │
+│                                     ▼                                     │
+│ Invariant break appears later                                             │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 When you write your own copy constructor or copy assignment operator, you are taking full responsibility for 

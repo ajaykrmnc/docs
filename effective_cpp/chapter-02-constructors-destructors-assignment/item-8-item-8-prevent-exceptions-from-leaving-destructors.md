@@ -1,5 +1,49 @@
 # Item 8: Prevent Exceptions from Leaving Destructors
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│            ITEM 8: PREVENT EXCEPTIONS FROM LEAVING DESTRUCTORS            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Destructor runs during cleanup -> another exception may already be     │
+│ active.                                                                   │
+│ 2. Destructor throws -> program may terminate immediately.                │
+│ 3. Option A -> catch/log/swallow when cleanup cannot be fixed by caller.  │
+│ 4. Option B -> expose close()/commit() so caller handles failure before   │
+│ destruction.                                                              │
+│ 5. Meaning: destructors release; explicit operations report errors.       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         DESTRUCTOR THROW FAILURE                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Stack unwinding already active                                            │
+│                                     ▼                                     │
+│ Destructor emits another exception                                        │
+│                                     ▼                                     │
+│ C++ cannot safely continue unwinding                                      │
+│                                     ▼                                     │
+│ std::terminate may run                                                    │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          ERROR REPORTING DESIGN                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Destructor                        | Explicit close/commit                 │
+│ ----------------------------------+-------------------------------------  │
+│ Release resource                  | May report failure                    │
+│ Catch/log if needed               | Caller can react                      │
+│ Do not throw                      | Run before destruction                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 Destructors should **never** emit exceptions. If an exception escapes a destructor while another exception is 

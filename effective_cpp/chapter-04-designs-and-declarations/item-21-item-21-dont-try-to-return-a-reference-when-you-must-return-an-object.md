@@ -1,5 +1,20 @@
 # Item 21: Don't Try to Return a Reference When You Must Return an Object
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│  ITEM 21: DON'T TRY TO RETURN A REFERENCE WHEN YOU MUST RETURN AN OBJECT  │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Need a result value -> ask where the referenced object would live.     │
+│ 2. Local object -> reference dangles after return.                        │
+│ 3. Heap object -> caller must delete; leak risk.                          │
+│ 4. Static object -> shared mutable state and wrong repeated results.      │
+│ 5. Return by value -> compiler can optimize with RVO/move.                │
+│ 6. Meaning: references are aliases, not storage for new results.          │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 Once programmers learn about the efficiency costs of pass-by-value (Item 20), they sometimes
 become crusaders, determined to eliminate all pass-by-value from their code -- including in
 contexts where returning by reference leads to disaster. The result: returning references to
@@ -8,6 +23,34 @@ objects that no longer exist.
 The key insight: **a reference is just a name for an existing object.** Whenever you see a
 reference, you should ask yourself what object it is another name for. If there is no such
 object, the reference is dangling and the program has undefined behavior.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           BAD REFERENCE TARGETS                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Where result lives                | Failure mode                          │
+│ ----------------------------------+-------------------------------------  │
+│ Local variable                    | Dangling reference                    │
+│ Heap allocation                   | Who deletes it?                       │
+│ Static object                     | Shared overwritten state              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             RETURN VALUE FLOW                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Operation creates a new logical value                                     │
+│                                     ▼                                     │
+│ Return object by value                                                    │
+│                                     ▼                                     │
+│ Compiler applies RVO/move when possible                                   │
+│                                     ▼                                     │
+│ Caller receives valid independent result                                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### The Rational Number Example
 

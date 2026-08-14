@@ -8,6 +8,27 @@
 
 ## Overview
 
+## Visual Reading Map
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         EFFECTIVE C++ READING FLOW                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│  1. Language rules        -> const, initialization, compiler-generated code│
+│  2. Object lifetime       -> constructors, destructors, assignment         │
+│  3. Resource ownership    -> RAII, smart pointers, new/delete pairing      │
+│  4. Interface design      -> hard-to-misuse APIs and encapsulation         │
+│  5. Implementation safety -> casts, handles, exceptions, dependencies      │
+│  6. Inheritance choices   -> is-a, composition, virtual dispatch, MI       │
+│  7. Templates             -> compile-time interfaces, traits, TMP          │
+│  8. Allocation hooks      -> new-handler, custom new/delete, placement new │
+│  9. Ecosystem habits      -> warnings, standard library, Boost             │
+│                                                                           │
+│  Read each item as:                                                        │
+│  Problem -> Rule -> Failure Mode -> Safer Design -> Code Details           │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 This guide provides an extensive, in-depth coverage of every item in Scott Meyers' seminal C++ book. Each chapter file contains detailed explanations, real-world code examples, pitfall demonstrations, and practical guidelines.
 
 ## Chapters

@@ -1,5 +1,50 @@
 # Item 52: Write Placement delete If You Write Placement new
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│        ITEM 52: WRITE PLACEMENT DELETE IF YOU WRITE PLACEMENT NEW         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Placement new called -> memory allocation succeeds, constructor then   │
+│ runs.                                                                     │
+│ 2. Constructor throws -> compiler looks for matching placement delete.    │
+│ 3. No matching placement delete -> allocated storage may leak.            │
+│ 4. Provide delete with same extra parameters as placement new.            │
+│ 5. Meaning: placement new needs matching cleanup for construction         │
+│ failure.                                                                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        PLACEMENT NEW FAILURE FLOW                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Custom placement new allocates storage                                    │
+│                                     ▼                                     │
+│ Constructor starts                                                        │
+│                                     ▼                                     │
+│ Constructor throws                                                        │
+│                                     ▼                                     │
+│ Compiler searches matching placement delete                               │
+│                                     ▼                                     │
+│ If missing, storage can leak                                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                               MATCHING RULE                               │
+├───────────────────────────────────────────────────────────────────────────┤
+│ operator new(size_t, Extra...)                                            │
+│ must pair with                                                            │
+│ operator delete(void*, Extra...)                                          │
+│ Extra parameter list must match exactly                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 This item addresses a subtle but critical requirement: **if you write a placement version of `operator new`, you must also write the corresponding placement version of `operator delete`**. Failing to do so causes memory leaks when constructors throw exceptions. Understanding why requires understanding the relationship between `new` expressions and `operator new` functions.

@@ -1,5 +1,50 @@
 # Item 14: Think carefully about copying behavior in resource-managing classes
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│ITEM 14: THINK CAREFULLY ABOUT COPYING BEHAVIOR IN RESOURCE-MANAGING CLASSE│
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. RAII class owns a resource -> copying asks: what happens to            │
+│ ownership?                                                                │
+│ 2. Forbid copy -> unique ownership.                                       │
+│ 3. Reference count -> shared ownership.                                   │
+│ 4. Deep copy -> independent resources with same value.                    │
+│ 5. Transfer/move -> source gives up ownership explicitly.                 │
+│ 6. Meaning: copying policy is part of the resource contract.              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           RESOURCE COPY POLICY                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Policy                            | Meaning                               │
+│ ----------------------------------+-------------------------------------  │
+│ Forbid copy                       | Unique owner                          │
+│ Reference count                   | Shared owner                          │
+│ Deep copy                         | Independent resource                  │
+│ Move transfer                     | Explicit handoff                      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          WRONG COPY POLICY FLOW                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ RAII object copied                                                        │
+│                                     ▼                                     │
+│ Both objects believe same ownership story                                 │
+│                                     ▼                                     │
+│ One destructor releases resource                                          │
+│                                     ▼                                     │
+│ Other object now holds invalid handle                                     │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Beyond Heap Memory
 
 Not all resources live on the heap. For non-heap resources, smart pointers like `shared_ptr`

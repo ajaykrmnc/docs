@@ -1,5 +1,49 @@
 # Item 3: Use `const` Whenever Possible
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                   ITEM 3: USE `CONST` WHENEVER POSSIBLE                   │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. You know something should not change -> say it with const.             │
+│ 2. Pointer constness -> decide whether pointer, pointee, or both are      │
+│ fixed.                                                                    │
+│ 3. Member function const -> callable on const objects and promises no     │
+│ logical change.                                                           │
+│ 4. Return/parameter const -> blocks accidental writes and documents       │
+│ ownership.                                                                │
+│ 5. Meaning: const turns design intent into compile-time checking.         │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            CONST PLACEMENT MAP                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ const T* p -> object is read-only through p                               │
+│ T* const p -> pointer cannot be reseated                                  │
+│ const T* const p -> both pointer and object view are fixed                │
+│ T::f() const -> member function promises logical non-mutation             │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             CONST DESIGN FLOW                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Know what must not change                                                 │
+│                                     ▼                                     │
+│ Put const in the type or member function signature                        │
+│                                     ▼                                     │
+│ Compiler rejects accidental mutation                                      │
+│                                     ▼                                     │
+│ Callers learn intent from the interface                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 `const` is one of C++'s most powerful and versatile tools. It allows you to communicate and enforce the 

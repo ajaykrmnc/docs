@@ -1,5 +1,20 @@
 # Chapter 3: Resource Management
 
+## Chapter Flow
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                      CHAPTER 3: RESOURCE MANAGEMENT                       │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Item 13 -> acquire resource into RAII object immediately.                 │
+│ Item 14 -> define copy behavior for resource owners.                      │
+│ Item 15 -> expose raw handles only as borrowed access.                    │
+│ Item 16 -> pair new/delete forms exactly.                                 │
+│ Item 17 -> put newed objects into smart pointers in standalone            │
+│ statements.                                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 C++ programs manage many kinds of resources: dynamically allocated memory, file descriptors,
 mutex locks, database connections, network sockets, GUI fonts and brushes. Regardless of the
 resource type, the fundamental challenge is the same: once you acquire a resource, you must

@@ -1,4 +1,4 @@
-# Effective C++: Comprehensive Guide with Examples
+Gggffective C++: Comprehensive Guide with Examples
 ## Based on Scott Meyers' "Effective C++" Third Edition
 
 ---

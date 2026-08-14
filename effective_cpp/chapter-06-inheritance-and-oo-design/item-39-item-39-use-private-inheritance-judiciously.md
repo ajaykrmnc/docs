@@ -1,5 +1,49 @@
 # Item 39: Use private inheritance judiciously
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│               ITEM 39: USE PRIVATE INHERITANCE JUDICIOUSLY                │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. private inheritance -> implemented-in-terms-of, not is-a.              │
+│ 2. Composition usually expresses this with less coupling.                 │
+│ 3. Use private inheritance when you need protected access or virtual      │
+│ override hooks.                                                           │
+│ 4. Empty base optimization can be a special storage reason.               │
+│ 5. Meaning: private inheritance is an implementation tool, not a public   │
+│ model.                                                                    │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                    PRIVATE INHERITANCE VS COMPOSITION                     │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Composition                       | Private inheritance                   │
+│ ----------------------------------+-------------------------------------  │
+│ Default choice                    | Need protected access                 │
+│ Lower coupling                    | Need virtual override hook            │
+│ Clear has-a/use-a                 | Maybe empty base optimization         │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        PRIVATE INHERITANCE MEANING                        │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Derived privately inherits Base                                           │
+│                                     ▼                                     │
+│ Users cannot treat Derived as Base                                        │
+│                                     ▼                                     │
+│ Base is implementation detail                                             │
+│                                     ▼                                     │
+│ Relationship means implemented-in-terms-of                                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### What Private Inheritance Means
 
 Private inheritance means "is-implemented-in-terms-of." It has nothing to do with "is-a." If `Derived` privately inherits from `Base`:

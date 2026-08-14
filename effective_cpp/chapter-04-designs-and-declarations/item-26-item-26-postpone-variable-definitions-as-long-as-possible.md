@@ -1,9 +1,56 @@
 # Item 26: Postpone Variable Definitions as Long as Possible
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│        ITEM 26: POSTPONE VARIABLE DEFINITIONS AS LONG AS POSSIBLE         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Define variable early -> constructor/destructor cost paid even if      │
+│ unused.                                                                   │
+│ 2. Early definition before validation -> exceptions/returns waste work.   │
+│ 3. Define at first meaningful value -> avoids default construction plus   │
+│ assignment.                                                               │
+│ 4. Loops -> choose inside or outside based on cost and needed lifetime.   │
+│ 5. Meaning: give variables the smallest useful lifetime and best initial  │
+│ value.                                                                    │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 Whenever you define a variable of a type with a constructor and destructor, you incur
 the cost of construction when control reaches the variable's definition, and the cost
 of destruction when the variable leaves scope. This cost is wasted if the variable is
 never used -- and that happens more often than you might think.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            EARLY VARIABLE COST                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Variable constructed before it is needed                                  │
+│                                     ▼                                     │
+│ Validation fails or branch returns early                                  │
+│                                     ▼                                     │
+│ Constructor/destructor work was wasted                                    │
+│                                     ▼                                     │
+│ Default construction plus assignment may also occur                       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         LATE INITIALIZATION FLOW                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Reach point where value is actually needed                                │
+│                                     ▼                                     │
+│ Construct with final intended value                                       │
+│                                     ▼                                     │
+│ Keep lifetime narrow                                                      │
+│                                     ▼                                     │
+│ Reduce cost and accidental misuse                                         │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### The Obvious Case: Variables Before Early Returns
 

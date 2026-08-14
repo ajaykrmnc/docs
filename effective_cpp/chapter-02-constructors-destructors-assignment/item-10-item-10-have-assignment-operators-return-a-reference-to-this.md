@@ -1,5 +1,46 @@
 # Item 10: Have Assignment Operators Return a Reference to `*this`
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│     ITEM 10: HAVE ASSIGNMENT OPERATORS RETURN A REFERENCE TO `*THIS`      │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Assignment expression executes -> object on left is modified.          │
+│ 2. Return void/value -> breaks normal chaining or adds unnecessary copy.  │
+│ 3. Return *this by reference -> a = b = c works like built-in types.      │
+│ 4. Applies to +=, -=, *= and similar assignment operators.                │
+│ 5. Meaning: user-defined assignment should behave like built-in           │
+│ assignment.                                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           ASSIGNMENT CHAIN FLOW                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ c assigned into b                                                         │
+│                                     ▼                                     │
+│ operator= returns b as reference                                          │
+│                                     ▼                                     │
+│ b assigned into a                                                         │
+│                                     ▼                                     │
+│ a = b = c behaves like built-in assignment                                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             RETURN TYPE RULE                              │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Return Widget& from operator=                                             │
+│ Return *this at the end                                                   │
+│ Apply same rule to +=, -=, *=, /= when they mutate left operand           │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 C++ built-in types support **chained assignment**:

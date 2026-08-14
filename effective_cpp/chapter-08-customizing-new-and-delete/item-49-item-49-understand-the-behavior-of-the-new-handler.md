@@ -1,5 +1,48 @@
 # Item 49: Understand the Behavior of the new-handler
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│            ITEM 49: UNDERSTAND THE BEHAVIOR OF THE NEW-HANDLER            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. operator new fails to allocate -> checks current new-handler.          │
+│ 2. Handler may free memory, install another handler, uninstall itself,    │
+│ throw, or abort.                                                          │
+│ 3. If handler returns -> operator new retries allocation.                 │
+│ 4. No handler -> std::bad_alloc is thrown.                                │
+│ 5. Meaning: new-handler is a retry policy hook for allocation failure.    │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          NEW-HANDLER RETRY LOOP                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ operator new cannot allocate                                              │
+│                                     ▼                                     │
+│ Fetch current new-handler                                                 │
+│                                     ▼                                     │
+│ Handler frees memory / changes handler / throws / aborts                  │
+│                                     ▼                                     │
+│ If handler returns, allocation is retried                                 │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           VALID HANDLER ACTIONS                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Make more memory available                                                │
+│ Install a different handler                                               │
+│ Uninstall handler                                                         │
+│ Throw bad_alloc or derived exception                                      │
+│ Terminate/abort program                                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 When `operator new` cannot satisfy a memory allocation request, it does **not** immediately throw `std::bad_alloc`. Instead, it first calls a **new-handler** function — a client-installable error-handling function. Understanding this mechanism is essential because it gives you a last-chance hook to free memory, log diagnostics, or gracefully shut down before allocation failure propagates.

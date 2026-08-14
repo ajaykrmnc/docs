@@ -1,5 +1,49 @@
 # Item 48: Be aware of template metaprogramming
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│               ITEM 48: BE AWARE OF TEMPLATE METAPROGRAMMING               │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Template instantiation can compute types/values at compile time.       │
+│ 2. Benefits -> remove runtime branches, generate optimized code, enforce  │
+│ constraints.                                                              │
+│ 3. Costs -> compile time, diagnostics, complexity.                        │
+│ 4. Use for real generic power, not cleverness.                            │
+│ 5. Meaning: TMP is compile-time programming with a high readability       │
+│ price.                                                                    │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            TMP EXECUTION MODEL                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Template definitions describe computation                                 │
+│                                     ▼                                     │
+│ Compiler instantiates templates recursively/conditionally                 │
+│                                     ▼                                     │
+│ Types/values are computed during compilation                              │
+│                                     ▼                                     │
+│ Generated runtime code can be smaller/faster                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                               TMP TRADEOFF                                │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Benefit                           | Cost                                  │
+│ ----------------------------------+-------------------------------------  │
+│ No runtime branch                 | Slow compilation                      │
+│ Static checks                     | Hard errors                           │
+│ Type-specific optimization        | Higher complexity                     │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### What is template metaprogramming?
 
 Template metaprogramming (TMP) is the process of writing programs that execute during compilation. The C++ template system is Turing-complete -- it can compute anything that a general-purpose computer can compute (given enough resources). TMP programs are written in C++ template syntax but run at compile time, producing constants, types, or code as their output.

@@ -1,5 +1,47 @@
 # Item 36: Never redefine an inherited non-virtual function
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│         ITEM 36: NEVER REDEFINE AN INHERITED NON-VIRTUAL FUNCTION         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Base non-virtual function -> base says implementation is invariant.    │
+│ 2. Derived redefines same name/signature -> static type decides which     │
+│ body runs.                                                                │
+│ 3. Base pointer calls Base version; Derived object may call Derived       │
+│ version.                                                                  │
+│ 4. Meaning: redefining non-virtual functions breaks substitutability and  │
+│ surprises callers.                                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           STATIC TYPE SURPRISE                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Derived defines same non-virtual function name/signature                  │
+│                                     ▼                                     │
+│ Call through Derived object -> Derived function                           │
+│                                     ▼                                     │
+│ Call through Base pointer/reference -> Base function                      │
+│                                     ▼                                     │
+│ Same object behaves differently by static type                            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                                DESIGN RULE                                │
+├───────────────────────────────────────────────────────────────────────────┤
+│ If behavior must vary by derived type, make it virtual in base            │
+│ If behavior must not vary, do not redefine it in derived                  │
+│ Non-virtual means invariant implementation                                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The Problem
 
 Non-virtual functions are statically bound. The function called depends on the *declared type* of the pointer or reference, not the *actual type* of the object.

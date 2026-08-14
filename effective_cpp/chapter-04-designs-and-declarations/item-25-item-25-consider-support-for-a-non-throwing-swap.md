@@ -1,9 +1,53 @@
 # Item 25: Consider Support for a Non-Throwing Swap
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│             ITEM 25: CONSIDER SUPPORT FOR A NON-THROWING SWAP             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Class owns expensive/resource state -> generic swap may copy too       │
+│ much.                                                                     │
+│ 2. Provide efficient swap -> exchange handles/pointers directly.          │
+│ 3. Mark/specialize as non-throwing -> algorithms and copy-and-swap can    │
+│ rely on it.                                                               │
+│ 4. Use using std::swap then unqualified swap for ADL.                     │
+│ 5. Meaning: good swap is a small hook with large exception-safety         │
+│ payoff.                                                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 `swap` is one of the most important functions in C++. It is central to exception-safe
 programming (see Item 29), to the copy-and-swap idiom for assignment operators, and to
 guarding against self-assignment (see Item 11). This item explains how to write an
 efficient, non-throwing swap for your types.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            FAST SWAP STRUCTURE                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Object stores handle/pointer to representation                            │
+│                                     ▼                                     │
+│ swap exchanges only handles                                               │
+│                                     ▼                                     │
+│ No allocation, no copy, no throwing                                       │
+│                                     ▼                                     │
+│ Algorithms and copy-and-swap become stronger                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           SWAP INTEGRATION RULE                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Provide member swap noexcept                                              │
+│ Provide non-member swap in same namespace                                 │
+│ Inside generic code: using std::swap; swap(a,b);                          │
+│ Let ADL find the best swap                                                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### The Default std::swap
 

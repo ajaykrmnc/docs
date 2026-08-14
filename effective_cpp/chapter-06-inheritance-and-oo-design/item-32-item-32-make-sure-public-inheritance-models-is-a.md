@@ -1,5 +1,48 @@
 # Item 32: Make sure public inheritance models "is-a"
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│            ITEM 32: MAKE SURE PUBLIC INHERITANCE MODELS "IS-A"            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. public Derived : Base -> every Derived must be usable as a Base.       │
+│ 2. If base promises behavior -> derived must honor it for all callers.    │
+│ 3. Square-rectangle style mismatch -> mathematical relation is not        │
+│ enough.                                                                   │
+│ 4. If not true is-a -> use composition or private inheritance.            │
+│ 5. Meaning: public inheritance is a substitutability contract.            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        PUBLIC INHERITANCE CONTRACT                        │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Derived publicly inherits Base                                            │
+│                                     ▼                                     │
+│ Every Base operation must make sense for Derived                          │
+│                                     ▼                                     │
+│ Any Base* or Base& may refer to Derived                                   │
+│                                     ▼                                     │
+│ Derived must preserve Base promises                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            RELATIONSHIP CHOICE                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Use public inheritance            | Use composition                       │
+│ ----------------------------------+-------------------------------------  │
+│ True substitutable is-a           | Has-a                                 │
+│ Base interface applies fully      | Implemented using                     │
+│                                   | Only partial behavior matches         │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The Fundamental Rule
 
 Public inheritance means **"is-a."** Every object of the derived class *is* an object of the base class. The base class represents a more general concept; the derived class represents a more specialized concept. Anywhere the base class can appear, the derived class can appear in its place. This is a direct expression of the **Liskov Substitution Principle (LSP)**.

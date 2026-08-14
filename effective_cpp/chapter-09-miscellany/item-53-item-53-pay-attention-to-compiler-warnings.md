@@ -1,5 +1,47 @@
 # Item 53: Pay Attention to Compiler Warnings
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                ITEM 53: PAY ATTENTION TO COMPILER WARNINGS                │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Compiler warning appears -> compiler found a suspicious construct.     │
+│ 2. Ignoring warnings -> portability and correctness risk accumulates.     │
+│ 3. Fix source cause or document intentional suppression narrowly.         │
+│ 4. Different compilers warn about different bugs.                         │
+│ 5. Meaning: warning-clean code lets real regressions stand out.           │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           WARNING HYGIENE FLOW                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Compiler warns about suspicious construct                                 │
+│                                     ▼                                     │
+│ Fix root cause or document narrow suppression                             │
+│                                     ▼                                     │
+│ Keep build warning-clean                                                  │
+│                                     ▼                                     │
+│ New warning becomes visible regression signal                             │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                              WARNING POLICY                               │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Weak policy                       | Strong policy                         │
+│ ----------------------------------+-------------------------------------  │
+│ Warnings ignored                  | Warnings treated seriously            │
+│ Different compilers surprise you  | Portable clean code                   │
+│ Real bugs hidden in noise         | Signal stays high                     │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 Compiler warnings are not optional noise to be silenced. They represent the compiler's best effort to tell you about code that is **technically legal** but **almost certainly wrong**. Experienced C++ programmers treat warnings as errors. Many of the most insidious bugs in C++ programs are things the compiler warned about and the programmer ignored.

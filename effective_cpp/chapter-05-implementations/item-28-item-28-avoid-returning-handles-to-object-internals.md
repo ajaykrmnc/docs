@@ -1,9 +1,52 @@
 # Item 28: Avoid returning "handles" to object internals
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│          ITEM 28: AVOID RETURNING "HANDLES" TO OBJECT INTERNALS           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Method returns pointer/reference/iterator to private internals.        │
+│ 2. Caller can mutate private state or keep handle after object            │
+│ changes/dies.                                                             │
+│ 3. Const handle helps mutation but not dangling lifetime.                 │
+│ 4. Return value/proxy/operation instead when possible.                    │
+│ 5. Meaning: do not let encapsulation escape through a handle.             │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 A handle is anything that provides access to an object's internals: a
 reference, a pointer, or an iterator. Returning handles to object internals
 undermines encapsulation, can allow const member functions to enable
 modification of object state, and creates the risk of dangling handles.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            HANDLE ESCAPE FLOW                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Object returns reference/pointer/iterator to internals                    │
+│                                     ▼                                     │
+│ Caller stores it                                                          │
+│                                     ▼                                     │
+│ Object mutates or dies                                                    │
+│                                     ▼                                     │
+│ Handle dangles or breaks invariant                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            SAFER ALTERNATIVES                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Instead of                        | Prefer                                │
+│ ----------------------------------+-------------------------------------  │
+│ Return mutable ref                | Return value                          │
+│ Return pointer to member          | Return const view briefly             │
+│ Expose iterator forever           | Provide operation method              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### Problem 1: Encapsulation Violation
 

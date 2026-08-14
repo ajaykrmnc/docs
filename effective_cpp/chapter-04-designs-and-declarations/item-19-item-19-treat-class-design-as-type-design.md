@@ -1,5 +1,22 @@
 # Item 19: Treat Class Design as Type Design
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                ITEM 19: TREAT CLASS DESIGN AS TYPE DESIGN                 │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. New class -> new type in the language of your program.                 │
+│ 2. Decide construction, destruction, copying, comparison, conversion,     │
+│ invariants.                                                               │
+│ 3. Decide performance, exception safety, ownership, and threading         │
+│ assumptions.                                                              │
+│ 4. Only then implement members.                                           │
+│ 5. Meaning: class design is semantic design, not just data plus           │
+│ functions.                                                                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 In C++, defining a new class defines a new type. You are not just a class designer -- you
 are a **type designer**. Overloaded functions and operators, controlling memory allocation and
 deallocation, defining object initialization and finalization -- it's all in your hands. You
@@ -9,6 +26,34 @@ of built-in types.
 Designing good classes is challenging because designing good types is challenging. Good types
 have natural syntax, intuitive semantics, and one or more efficient implementations. Here
 are the questions you should consider every time you design a class:
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           TYPE DESIGN CHECKLIST                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Construction/destruction                                                  │
+│ Copy/move/assignment                                                      │
+│ Valid states and invariants                                               │
+│ Conversions and operators                                                 │
+│ Performance and exception guarantees                                      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             CLASS DESIGN FLOW                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Name the abstraction                                                      │
+│                                     ▼                                     │
+│ Define valid values and operations                                        │
+│                                     ▼                                     │
+│ Decide ownership and copying                                              │
+│                                     ▼                                     │
+│ Only then write representation and member functions                       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### The Comprehensive Design Checklist
 

@@ -1,5 +1,61 @@
 # Item 13: Use objects to manage resources
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                 ITEM 13: USE OBJECTS TO MANAGE RESOURCES                  │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Raw resource acquired -> every exit path must release it.              │
+│ 2. Manual delete/close -> return, exception, or edit can skip cleanup.    │
+│ 3. RAII wrapper constructed -> resource ownership moves into an object.   │
+│ 4. Scope exits any way -> destructor releases automatically.              │
+│ 5. Meaning: bind resource lifetime to object lifetime.                    │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        MANUAL CLEANUP FAILURE FLOW                        │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Resource acquired                                                         │
+│                                     ▼                                     │
+│ Many lines of work run                                                    │
+│                                     ▼                                     │
+│ return / throw / goto skips cleanup                                       │
+│                                     ▼                                     │
+│ Resource leaks or remains locked                                          │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            RAII LIFETIME FLOW                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Acquire resource during object construction                               │
+│                                     ▼                                     │
+│ Use object normally                                                       │
+│                                     ▼                                     │
+│ Any scope exit path occurs                                                │
+│                                     ▼                                     │
+│ Destructor releases resource automatically                                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          SMART POINTER OWNERSHIP                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ unique_ptr                        | shared_ptr                            │
+│ ----------------------------------+-------------------------------------  │
+│ One owner                         | Many owners                           │
+│ Move only                         | Reference counted                     │
+│ Delete at scope exit              | Delete at last owner                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The Problem: Manual Resource Management
 
 Consider a factory function that returns a pointer to a dynamically allocated object:

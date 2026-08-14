@@ -1,10 +1,54 @@
 # Item 20: Prefer Pass-by-Reference-to-const to Pass-by-Value
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│        ITEM 20: PREFER PASS-BY-REFERENCE-TO-CONST TO PASS-BY-VALUE        │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Pass by value -> copy constructor and destructor may run.              │
+│ 2. Large/user-defined object -> cost and slicing risk.                    │
+│ 3. Pass const& -> no copy and no mutation by callee.                      │
+│ 4. Small built-ins/iterators/function objects -> value is often better.   │
+│ 5. Meaning: avoid expensive or lossy copies unless value semantics are    │
+│ intended.                                                                 │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 By default, C++ passes objects to and from functions by value (a trait inherited from C).
 Unless you tell it otherwise, function parameters are initialized with **copies** of the
 actual arguments, and function callers get back a **copy** of the value returned by the
 function. These copies are produced by the objects' copy constructors. This can make
 pass-by-value an expensive operation.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          PASS BY VALUE COST FLOW                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Caller passes object                                                      │
+│                                     ▼                                     │
+│ Copy constructor runs                                                     │
+│                                     ▼                                     │
+│ Possible base slicing if passed as base value                             │
+│                                     ▼                                     │
+│ Destructor runs for copy                                                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             PARAMETER CHOICE                              │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Use value for                     | Use const& for                        │
+│ ----------------------------------+-------------------------------------  │
+│ int/double/pointer                | large objects                         │
+│ small cheap objects               | polymorphic objects                   │
+│ iterators/function objects        | resource owners                       │
+│ need local copy                   | avoid mutation/copy                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### The Cost of Pass-by-Value
 

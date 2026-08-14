@@ -1,5 +1,46 @@
 # Item 6: Explicitly Disallow the Use of Compiler-Generated Functions You Do Not Want
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│ITEM 6: EXPLICITLY DISALLOW THE USE OF COMPILER-GENERATED FUNCTIONS YOU DO │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Class owns identity/resource -> copying may be wrong.                  │
+│ 2. If you say nothing -> compiler may generate copy operations.           │
+│ 3. C++11+ path -> delete unwanted copy/move operations.                   │
+│ 4. Older path -> declare private and do not define.                       │
+│ 5. Meaning: forbidden operations should fail at compile time, not at      │
+│ runtime.                                                                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            UNWANTED COPY FLOW                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Resource/identity object is copied accidentally                           │
+│                                     ▼                                     │
+│ Compiler-generated copy operation exists                                  │
+│                                     ▼                                     │
+│ Two logical owners/identities appear                                      │
+│                                     ▼                                     │
+│ Bug surfaces far from copy site                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             BLOCKING STRATEGY                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Modern C++: T(const T&) = delete; operator= = delete;                     │
+│ Old C++: declare private and leave undefined                              │
+│ Goal: misuse fails during compilation                                     │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 Sometimes copying an object makes no sense. A class representing a unique system resource — a database 

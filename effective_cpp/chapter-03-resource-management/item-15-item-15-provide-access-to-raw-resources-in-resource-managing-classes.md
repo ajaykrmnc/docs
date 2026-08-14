@@ -1,5 +1,49 @@
 # Item 15: Provide access to raw resources in resource-managing classes
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│   ITEM 15: PROVIDE ACCESS TO RAW RESOURCES IN RESOURCE-MANAGING CLASSES   │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. RAII wrapper protects resource -> APIs may still require raw handle.   │
+│ 2. Explicit get() -> caller consciously borrows the raw resource.         │
+│ 3. Implicit conversion -> convenient but can hide lifetime mistakes.      │
+│ 4. Never give ownership accidentally -> raw access should not mean raw    │
+│ ownership.                                                                │
+│ 5. Meaning: expose handles for interoperability while preserving          │
+│ ownership semantics.                                                      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         BORROWED RAW HANDLE FLOW                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ RAII wrapper owns resource                                                │
+│                                     ▼                                     │
+│ Legacy API needs raw pointer/handle                                       │
+│                                     ▼                                     │
+│ wrapper.get() exposes borrowed handle                                     │
+│                                     ▼                                     │
+│ Ownership remains with wrapper                                            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             RAW ACCESS CHOICE                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Explicit get()                    | Implicit conversion                   │
+│ ----------------------------------+-------------------------------------  │
+│ Clear borrowing point             | Convenient                            │
+│ Safer API boundary                | Can hide lifetime bugs                │
+│ Slightly verbose                  | Use sparingly                         │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The Reality of APIs
 
 RAII classes are wonderful, but the world is full of APIs that deal in raw resources. If

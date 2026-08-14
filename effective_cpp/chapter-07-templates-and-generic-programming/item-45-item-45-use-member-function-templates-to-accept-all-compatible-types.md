@@ -1,5 +1,47 @@
 # Item 45: Use member function templates to accept "all compatible types"
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│  ITEM 45: USE MEMBER FUNCTION TEMPLATES TO ACCEPT "ALL COMPATIBLE TYPES"  │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Template class SmartPtr<T> -> compatible SmartPtr<U> conversions may   │
+│ be useful.                                                                │
+│ 2. Normal copy ctor handles only exact same T.                            │
+│ 3. Member function template accepts U when U* converts to T*.             │
+│ 4. Still keep normal copy operations for exact type behavior.             │
+│ 5. Meaning: member templates model families of compatible types.          │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                       COMPATIBLE SMART POINTER FLOW                       │
+├───────────────────────────────────────────────────────────────────────────┤
+│ SmartPtr<Derived> should convert to SmartPtr<Base>                        │
+│                                     ▼                                     │
+│ Ordinary copy ctor handles only exact same T                              │
+│                                     ▼                                     │
+│ Member template accepts SmartPtr<U>                                       │
+│                                     ▼                                     │
+│ Enable only when U* converts to T*                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           MEMBER TEMPLATE USES                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Construct from compatible wrapper type                                    │
+│ Assign from compatible wrapper type                                       │
+│ Preserve normal copy constructor for exact same type                      │
+│ Let type system reject incompatible conversions                           │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The problem: implicit conversions don't work across template instantiations
 
 In a class hierarchy, raw pointers support implicit conversions:

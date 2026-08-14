@@ -1,10 +1,52 @@
 # Item 23: Prefer Non-Member Non-Friend Functions to Member Functions
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│    ITEM 23: PREFER NON-MEMBER NON-FRIEND FUNCTIONS TO MEMBER FUNCTIONS    │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Function needs no private access -> it does not need to be a member.   │
+│ 2. Member function -> increases class surface and coupling.               │
+│ 3. Non-member non-friend -> same capability with better encapsulation.    │
+│ 4. Group related helpers in namespaces/headers for discoverability.       │
+│ 5. Meaning: fewer privileged functions means stronger encapsulation.      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 This item contains one of the most counterintuitive pieces of advice in the book. Many
 programmers believe that putting a function inside a class (making it a member) increases
 encapsulation because the function "belongs" to the class. In fact, the opposite is true:
 in many cases, a **non-member non-friend function** provides **more** encapsulation, **more**
 packaging flexibility, and **more** functional extensibility.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            ENCAPSULATION TEST                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Does function need private data?                                          │
+│                                     ▼                                     │
+│ No -> make non-member non-friend                                          │
+│                                     ▼                                     │
+│ Place in same namespace for discovery                                     │
+│                                     ▼                                     │
+│ Class privileged surface stays small                                      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            FUNCTION PLACEMENT                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Member/friend                     | Non-member                            │
+│ ----------------------------------+-------------------------------------  │
+│ Needs internals                   | Uses public API only                  │
+│ Part of invariant                 | Composes operations                   │
+│ Privileged coupling               | Better encapsulation                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### The Web Browser Example
 

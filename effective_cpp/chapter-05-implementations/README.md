@@ -1,5 +1,19 @@
 # Chapter 5: Implementations
 
+## Chapter Flow
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        CHAPTER 5: IMPLEMENTATIONS                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Item 27 -> treat casts as visible risk markers.                           │
+│ Item 28 -> avoid leaking handles to internals.                            │
+│ Item 29 -> define object state guarantees after exceptions.               │
+│ Item 30 -> inline only when size, stability, and performance justify it.  │
+│ Item 31 -> hide implementation details to reduce rebuild coupling.        │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 Most of the time, coming up with appropriate definitions for your classes and
 declarations for your functions is the lion's share of the battle. Once you have
 those right, the corresponding implementations are largely straightforward. Still,

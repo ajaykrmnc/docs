@@ -1,5 +1,46 @@
 # Item 33: Avoid hiding inherited names
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                   ITEM 33: AVOID HIDING INHERITED NAMES                   │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Derived declares function named f -> base overloads named f become     │
+│ hidden.                                                                   │
+│ 2. Caller expects overload set -> only derived names are visible.         │
+│ 3. using Base::f -> reintroduces base overloads.                          │
+│ 4. Forwarding functions -> expose selected base functions only.           │
+│ 5. Meaning: name lookup is by name first, not by full signature first.    │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             NAME HIDING FLOW                              │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Base has overloads f(int), f(double)                                      │
+│                                     ▼                                     │
+│ Derived declares f(string)                                                │
+│                                     ▼                                     │
+│ Lookup finds Derived::f name first                                        │
+│                                     ▼                                     │
+│ All Base::f overloads are hidden unless reintroduced                      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                                FIX OPTIONS                                │
+├───────────────────────────────────────────────────────────────────────────┤
+│ using Base::f; brings all base overloads back                             │
+│ Forwarding function exposes selected overloads                            │
+│ Avoid accidental same-name declarations when not intended                 │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### How Name Hiding Works in C++
 
 C++ name hiding in inheritance follows the same principle as name hiding in nested scopes: names in an inner scope hide names in an outer scope. The types and parameter lists are irrelevant -- it is purely about the *name*.

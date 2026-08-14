@@ -1,5 +1,49 @@
 # Item 2: Prefer `const`, `enum`, and `inline` to `#define`
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│         ITEM 2: PREFER `CONST`, `ENUM`, AND `INLINE` TO `#DEFINE`         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Macro enters preprocessor -> compiler sees only substituted text.      │
+│ 2. Consequence -> no scope, weak type checking, poor debugger names.      │
+│ 3. Constant value? -> use const or enum so compiler owns the symbol.      │
+│ 4. Function-like macro? -> use inline/template function for one           │
+│ evaluation.                                                               │
+│ 5. Meaning: prefer language constructs because the compiler can protect   │
+│ you.                                                                      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            MACRO FAILURE FLOW                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ #define is expanded before compilation                                    │
+│                                     ▼                                     │
+│ Compiler loses symbol name, scope, and type information                   │
+│                                     ▼                                     │
+│ Debugger/error messages point at substituted text                         │
+│                                     ▼                                     │
+│ Side effects may run more than once                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                              REPLACEMENT MAP                              │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Old habit                         | Safer construct                       │
+│ ----------------------------------+-------------------------------------  │
+│ #define VALUE                     | const / constexpr                     │
+│ #define F(x)                      | inline function/template              │
+│ Magic integer in class            | enum or static const member           │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 "Prefer the compiler to the preprocessor." `#define` operates before the compiler even sees your code, leading 

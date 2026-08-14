@@ -1,5 +1,51 @@
 # Item 50: Understand When It Makes Sense to Replace new and delete
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│     ITEM 50: UNDERSTAND WHEN IT MAKES SENSE TO REPLACE NEW AND DELETE     │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Default allocator is general-purpose.                                  │
+│ 2. Replace new/delete only for clear goals: speed, memory overhead,       │
+│ debugging, locality, alignment.                                           │
+│ 3. Wrong replacement -> broken conventions, poor threading, worse         │
+│ performance.                                                              │
+│ 4. Measure before and after.                                              │
+│ 5. Meaning: custom allocation is an engineering tradeoff, not a default   │
+│ optimization.                                                             │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         CUSTOM ALLOCATOR MOTIVES                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Good reasons                      | Bad reasons                           │
+│ ----------------------------------+-------------------------------------  │
+│ profiling/debugging               | assume faster                         │
+│ fixed-size pool                   | copy random allocator                 │
+│ alignment/locality                | ignore threading                      │
+│ reduced overhead                  | skip measurement                      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         ALLOCATION DECISION FLOW                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Measure allocation problem                                                │
+│                                     ▼                                     │
+│ Define exact goal                                                         │
+│                                     ▼                                     │
+│ Implement standard-compliant replacement                                  │
+│                                     ▼                                     │
+│ Benchmark and validate under real workload                                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 The default implementations of `operator new` and `operator delete` provided by the C++ runtime are designed for **general-purpose** use. They must handle allocation patterns ranging from a single `int` to millions of heterogeneous objects. This generality comes at a cost. There are several legitimate reasons to replace them with custom versions.

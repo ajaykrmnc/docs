@@ -1,5 +1,46 @@
 # Item 47: Use traits classes for information about types
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│          ITEM 47: USE TRAITS CLASSES FOR INFORMATION ABOUT TYPES          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Generic algorithm needs type-specific facts.                           │
+│ 2. Traits class maps type -> compile-time properties/tags.                │
+│ 3. Algorithm dispatches by tag or constexpr condition.                    │
+│ 4. Specialize traits for new types without rewriting algorithm.           │
+│ 5. Meaning: traits move type knowledge into reusable compile-time         │
+│ metadata.                                                                 │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           TRAITS DISPATCH FLOW                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Generic algorithm receives iterator/type T                                │
+│                                     ▼                                     │
+│ traits<T> exposes category/properties                                     │
+│                                     ▼                                     │
+│ Algorithm selects optimized implementation by tag                         │
+│                                     ▼                                     │
+│ New types specialize traits, not the algorithm                            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                               TRAITS SHAPE                                │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Input type -> traits class -> compile-time metadata                       │
+│ Examples: value_type, iterator_category, is_pointer, is_integral          │
+│ Purpose: ask questions about types without runtime cost                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The need for type information at compile time
 
 Consider writing an `advance` function that moves an iterator forward by `n` positions:

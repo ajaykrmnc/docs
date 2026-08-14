@@ -1,9 +1,54 @@
 # Item 18: Make Interfaces Easy to Use Correctly and Hard to Use Incorrectly
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│ITEM 18: MAKE INTERFACES EASY TO USE CORRECTLY AND HARD TO USE INCORRECTLY │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Caller sees API -> wrong usage should be hard to express.              │
+│ 2. Ambiguous primitive parameters -> easy to swap or pass invalid         │
+│ values.                                                                   │
+│ 3. Strong types, factories, RAII -> encode valid states and ownership.    │
+│ 4. Consistent behavior -> match built-in and standard library             │
+│ expectations.                                                             │
+│ 5. Meaning: good interfaces prevent bugs before tests run.                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 Good interfaces are a joy to use. Bad interfaces lead to bugs that compile without warnings and
 blow up at runtime. The cardinal rule of interface design: if a client can use your interface
 incorrectly, the interface shares at least part of the blame. You should design interfaces that
 **prevent** misuse rather than merely documenting correct usage.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                              INTERFACE SHAPE                              │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Easy to misuse                    | Hard to misuse                        │
+│ ----------------------------------+-------------------------------------  │
+│ int month, int day                | Month/Day types                       │
+│ raw pointer ownership             | smart pointer/RAII                    │
+│ bool flags                        | enum class options                    │
+│ invalid states allowed            | factory validates state               │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             API DESIGN FILTER                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Can caller pass arguments in wrong order?                                 │
+│                                     ▼                                     │
+│ Can caller forget cleanup?                                                │
+│                                     ▼                                     │
+│ Can object represent invalid state?                                       │
+│                                     ▼                                     │
+│ Move those rules into the type/interface                                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### The Date Constructor Problem
 

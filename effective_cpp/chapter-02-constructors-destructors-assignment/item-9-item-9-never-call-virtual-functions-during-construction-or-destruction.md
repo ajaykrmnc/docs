@@ -1,5 +1,51 @@
 # Item 9: Never Call Virtual Functions During Construction or Destruction
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│  ITEM 9: NEVER CALL VIRTUAL FUNCTIONS DURING CONSTRUCTION OR DESTRUCTION  │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Base constructor runs -> derived part is not constructed yet.          │
+│ 2. Virtual call here -> dispatches as base, not derived.                  │
+│ 3. Base destructor runs -> derived part is already gone.                  │
+│ 4. Need customization -> pass data to base constructor or use             │
+│ non-virtual hooks after construction.                                     │
+│ 5. Meaning: virtual dispatch is unsafe while object identity is           │
+│ changing.                                                                 │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                      CONSTRUCTION DISPATCH TIMELINE                       │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Base constructor starts                                                   │
+│                                     ▼                                     │
+│ Derived members are not initialized yet                                   │
+│                                     ▼                                     │
+│ Virtual call dispatches to Base version                                   │
+│                                     ▼                                     │
+│ Derived override cannot safely run                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                       DESTRUCTION DISPATCH TIMELINE                       │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Derived destructor finishes first                                         │
+│                                     ▼                                     │
+│ Derived part is gone                                                      │
+│                                     ▼                                     │
+│ Base destructor runs                                                      │
+│                                     ▼                                     │
+│ Virtual call dispatches to Base version                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 During base class construction, virtual functions **do not** behave polymorphically. When a base class 

@@ -1,5 +1,50 @@
 # Item 4: Make Sure That Objects Are Initialized Before They're Used
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│    ITEM 4: MAKE SURE THAT OBJECTS ARE INITIALIZED BEFORE THEY'RE USED     │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Object storage appears -> members/bases must receive valid starting    │
+│ values.                                                                   │
+│ 2. Assignment inside constructor body -> default first, then overwrite.   │
+│ 3. Initialization list -> construct directly with intended value.         │
+│ 4. Non-local statics across files -> order is uncertain.                  │
+│ 5. Meaning: initialize at construction point; use function-local statics  │
+│ for order safety.                                                         │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                   CONSTRUCTOR BODY VS INITIALIZER LIST                    │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Constructor body                  | Initializer list                      │
+│ ----------------------------------+-------------------------------------  │
+│ Default-construct member          | Construct member directly             │
+│ Assign new value later            | One operation                         │
+│ May be impossible for const/ref   | Required for const/ref/base           │
+│ Can waste work                    | Preferred default                     │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        STATIC INITIALIZATION RISK                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ File A non-local static uses object from File B                           │
+│                                     ▼                                     │
+│ Cross-file initialization order is unspecified                            │
+│                                     ▼                                     │
+│ Object may be used before construction                                    │
+│                                     ▼                                     │
+│ Use function-local static to initialize on first use                      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 Reading uninitialized values yields **undefined behavior** — anything can happen. C++ is inconsistent about 

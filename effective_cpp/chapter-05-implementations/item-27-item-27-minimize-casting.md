@@ -1,11 +1,57 @@
 # Item 27: Minimize casting
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         ITEM 27: MINIMIZE CASTING                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Cast appears -> compiler protections are being bypassed.               │
+│ 2. C-style cast -> hides const/static/reinterpret behavior.               │
+│ 3. static_cast/dynamic_cast/const_cast/reinterpret_cast -> expose exact   │
+│ intent.                                                                   │
+│ 4. Design smell? -> prefer virtual functions, overloads, or better        │
+│ types.                                                                    │
+│ 5. Meaning: casts are sometimes necessary, but each one is a local risk   │
+│ marker.                                                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 The rules of C++ are designed to guarantee that type errors are impossible.
 In theory, if your program compiles cleanly, it is not trying to perform any
 unsafe or nonsensical operations on any objects. This guarantee is valuable, and
 you should not lightly abandon it. Unfortunately, casts subvert the type system.
 That can lead to trouble of all kinds, some easy to recognize, some insidiously
 subtle.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                               CAST MEANINGS                               │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Cast                              | Meaning                               │
+│ ----------------------------------+-------------------------------------  │
+│ const_cast                        | remove constness                      │
+│ static_cast                       | known safe conversion                 │
+│ dynamic_cast                      | checked downcast                      │
+│ reinterpret_cast                  | raw bit-level reinterpretation        │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             CAST SMELL CHECK                              │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Need a cast                                                               │
+│                                     ▼                                     │
+│ Ask why type system cannot express this                                   │
+│                                     ▼                                     │
+│ Prefer virtual function/overload/better type if possible                  │
+│                                     ▼                                     │
+│ Keep remaining cast narrow and explicit                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### The Old C-Style Casts
 

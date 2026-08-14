@@ -1,5 +1,48 @@
 # Item 42: Understand the two meanings of typename
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│             ITEM 42: UNDERSTAND THE TWO MEANINGS OF TYPENAME              │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Template parameter list -> typename means type parameter.              │
+│ 2. Nested dependent name -> compiler cannot know if name is type or       │
+│ value.                                                                    │
+│ 3. Use typename T::value_type -> tell compiler it is a type.              │
+│ 4. Base class lists and mem-init lists have special rules.                │
+│ 5. Meaning: typename sometimes declares a type parameter, sometimes       │
+│ disambiguates a dependent type.                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             TYPENAME MEANINGS                             │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Location                          | Meaning                               │
+│ ----------------------------------+-------------------------------------  │
+│ template<typename T>              | T is a type parameter                 │
+│ typename T::iterator              | dependent nested name is a type       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          DEPENDENT NAME PROBLEM                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Compiler sees T::x inside template                                        │
+│                                     ▼                                     │
+│ T is unknown during parsing                                               │
+│                                     ▼                                     │
+│ x could be type or static value                                           │
+│                                     ▼                                     │
+│ typename tells compiler: treat x as a type                                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Meaning 1: declaring template type parameters
 
 In a template parameter list, `typename` and `class` are interchangeable:

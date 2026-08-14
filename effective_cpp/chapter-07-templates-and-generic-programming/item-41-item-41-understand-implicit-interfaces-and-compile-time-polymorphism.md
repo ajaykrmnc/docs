@@ -1,5 +1,48 @@
 # Item 41: Understand implicit interfaces and compile-time polymorphism
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│   ITEM 41: UNDERSTAND IMPLICIT INTERFACES AND COMPILE-TIME POLYMORPHISM   │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Runtime polymorphism -> explicit base interface + virtual dispatch.    │
+│ 2. Template polymorphism -> implicit expression requirements on T.        │
+│ 3. Compiler instantiates code -> checks whether T supports required       │
+│ operations.                                                               │
+│ 4. No vtable needed -> decisions happen at compile time.                  │
+│ 5. Meaning: templates define interfaces by what code does with the type.  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          TWO POLYMORPHISM MODELS                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Runtime                           | Compile-time                          │
+│ ----------------------------------+-------------------------------------  │
+│ Base class interface              | Expressions required of T             │
+│ virtual dispatch                  | template instantiation                │
+│ One compiled body                 | Specialized compiled body             │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          TEMPLATE INTERFACE FLOW                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Template uses expressions on T                                            │
+│                                     ▼                                     │
+│ Compiler instantiates with actual type                                    │
+│                                     ▼                                     │
+│ Expressions must compile for that T                                       │
+│                                     ▼                                     │
+│ The expression set is the implicit interface                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The two worlds of polymorphism
 
 Object-oriented programming revolves around **explicit interfaces** and **runtime polymorphism**:

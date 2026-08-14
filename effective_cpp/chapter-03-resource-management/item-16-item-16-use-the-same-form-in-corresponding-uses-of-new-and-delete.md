@@ -1,5 +1,47 @@
 # Item 16: Use the same form in corresponding uses of new and delete
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│    ITEM 16: USE THE SAME FORM IN CORRESPONDING USES OF NEW AND DELETE     │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. new T -> one object constructed -> delete T destroys one object.       │
+│ 2. new T[n] -> n objects constructed plus array bookkeeping.              │
+│ 3. delete[] required -> destroys every element and uses right             │
+│ deallocation form.                                                        │
+│ 4. Mismatch -> undefined behavior, leaks, or corrupted heap metadata.     │
+│ 5. Meaning: allocation form and deallocation form are a matched pair.     │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                             ALLOCATION PAIRS                              │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Allocation                        | Deallocation                          │
+│ ----------------------------------+-------------------------------------  │
+│ new T                             | delete p                              │
+│ new T[n]                          | delete[] p                            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           MISMATCH FAILURE FLOW                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Array allocation stores element count/bookkeeping                         │
+│                                     ▼                                     │
+│ Plain delete does not know array form                                     │
+│                                     ▼                                     │
+│ Some destructors may not run                                              │
+│                                     ▼                                     │
+│ Heap metadata can be corrupted                                            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The Rule
 
 This item has the simplest guideline in the chapter, yet violations cause some of the most

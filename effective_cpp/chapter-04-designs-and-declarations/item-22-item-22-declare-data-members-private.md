@@ -1,8 +1,52 @@
 # Item 22: Declare Data Members Private
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                   ITEM 22: DECLARE DATA MEMBERS PRIVATE                   │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Public data -> every caller depends on representation.                 │
+│ 2. Need validation/lazy computation/thread safety later -> impossible     │
+│ without breaking users.                                                   │
+│ 3. Private data + accessors -> stable interface around changing           │
+│ internals.                                                                │
+│ 4. Protected data also leaks representation to derived classes.           │
+│ 5. Meaning: encapsulation preserves your ability to change                │
+│ implementation.                                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 This item is about encapsulation. It argues that data members should **always** be `private`.
 The reasoning is based on access control, flexibility, and a fundamental truth about
 software evolution: implementations change, but interfaces should be stable.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         PUBLIC DATA COUPLING FLOW                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Expose member variable                                                    │
+│                                     ▼                                     │
+│ Many callers read/write representation directly                           │
+│                                     ▼                                     │
+│ Internal layout cannot change safely                                      │
+│                                     ▼                                     │
+│ Validation/lazy/thread-safe logic cannot be inserted cleanly              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           PRIVATE DATA BENEFITS                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Preserve invariants                                                       │
+│ Change representation later                                               │
+│ Add validation/logging/lazy computation                                   │
+│ Keep one controlled access path                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### Why Not Public?
 

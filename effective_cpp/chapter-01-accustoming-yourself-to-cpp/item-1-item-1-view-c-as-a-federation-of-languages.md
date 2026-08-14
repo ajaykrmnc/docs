@@ -1,5 +1,55 @@
 # Item 1: View C++ as a Federation of Languages
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│               ITEM 1: VIEW C++ AS A FEDERATION OF LANGUAGES               │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Problem: treating C++ like one language makes rules feel               │
+│ inconsistent.                                                             │
+│ 2. C layer -> built-ins, pointers, macros: cheap values, manual           │
+│ discipline.                                                               │
+│ 3. OO layer -> classes and virtual dispatch: interfaces, invariants,      │
+│ refs.                                                                     │
+│ 4. Template layer -> type parameters: compile-time contracts and code     │
+│ gen.                                                                      │
+│ 5. STL layer -> containers + iterators + algorithms: value-like           │
+│ conventions.                                                              │
+│ 6. Meaning: first identify the sub-language, then choose the matching     │
+│ rule.                                                                     │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                       RULES CHANGE BY SUB-LANGUAGE                        │
+├───────────────────────────────────────────────────────────────────────────┤
+│ If you think...                   | Better model...                       │
+│ ----------------------------------+-------------------------------------  │
+│ One C++ rule fits all             | C / OO / Template / STL               │
+│ Macros feel normal                | Compiler-visible constructs           │
+│ Copies always same cost           | Cost depends on abstraction           │
+│ Runtime polymorphism only         | Runtime and compile-time polymorphis  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         HOW TO READ ANY C++ IDIOM                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ See the code style                                                        │
+│                                     ▼                                     │
+│ Identify sub-language: C, OO, Template, or STL                            │
+│                                     ▼                                     │
+│ Apply that layer's performance and safety rules                           │
+│                                     ▼                                     │
+│ Avoid mixing rules blindly                                                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 C++ is not a single unified language — it is a **federation of four sub-languages**, each with its own 

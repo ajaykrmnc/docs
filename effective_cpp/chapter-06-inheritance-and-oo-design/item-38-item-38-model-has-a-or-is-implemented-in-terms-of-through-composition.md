@@ -1,5 +1,50 @@
 # Item 38: Model "has-a" or "is-implemented-in-terms-of" through composition
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│ITEM 38: MODEL "HAS-A" OR "IS-IMPLEMENTED-IN-TERMS-OF" THROUGH COMPOSITION │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Class contains another object -> either has-a or                       │
+│ implemented-in-terms-of.                                                  │
+│ 2. Application domain -> Car has Engine.                                  │
+│ 3. Implementation domain -> Set implemented with list/vector/tree.        │
+│ 4. Composition keeps interfaces separate and coupling lower than          │
+│ inheritance.                                                              │
+│ 5. Meaning: prefer containment when the relationship is not               │
+│ substitutable is-a.                                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           COMPOSITION MEANINGS                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Application domain                | Implementation domain                 │
+│ ----------------------------------+-------------------------------------  │
+│ Car has Engine                    | Set uses Tree                         │
+│ Person has Address                | Queue uses List                       │
+│ Window has Menu                   | String uses Buffer                    │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           WHY COMPOSITION HELPS                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Contained object performs part of work                                    │
+│                                     ▼                                     │
+│ Outer class exposes its own interface                                     │
+│                                     ▼                                     │
+│ Representation can change later                                           │
+│                                     ▼                                     │
+│ No false is-a promise                                                     │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Composition vs. Inheritance
 
 Composition (also called layering, containment, aggregation, or embedding) is the relationship where one class *contains* an object of another class as a data member. It models two different relationships depending on the domain:

@@ -1,5 +1,53 @@
 # Item 46: Define non-member functions inside templates when type conversions are desired
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│ITEM 46: DEFINE NON-MEMBER FUNCTIONS INSIDE TEMPLATES WHEN TYPE CONVERSIONS│
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Class template + non-member operator -> conversions on both operands   │
+│ desired.                                                                  │
+│ 2. Function template argument deduction does not use implicit             │
+│ conversions.                                                              │
+│ 3. Define friend non-member inside class template -> concrete function    │
+│ generated with class.                                                     │
+│ 4. Then ordinary overload resolution can use conversions.                 │
+│ 5. Meaning: inside-template friend functions combine symmetry with        │
+│ usable conversions.                                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                     FUNCTION TEMPLATE DEDUCTION LIMIT                     │
+├───────────────────────────────────────────────────────────────────────────┤
+│ operator* is a separate function template                                 │
+│                                     ▼                                     │
+│ Compiler tries to deduce T from arguments                                 │
+│                                     ▼                                     │
+│ Implicit conversions are not used for deduction                           │
+│                                     ▼                                     │
+│ Mixed Rational/int call may fail                                          │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        FRIEND INSIDE TEMPLATE FLOW                        │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Class template instantiates Rational<T>                                   │
+│                                     ▼                                     │
+│ Friend non-member operator for that T is generated                        │
+│                                     ▼                                     │
+│ Overload resolution sees concrete function                                │
+│                                     ▼                                     │
+│ Implicit conversions can now apply                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The problem: templates and implicit type conversions don't mix
 
 Recall from Item 24 that mixed-mode arithmetic (e.g., `Rational * int`) requires non-member functions so that implicit conversions can apply to all arguments. When you templatize `Rational`, this breaks:

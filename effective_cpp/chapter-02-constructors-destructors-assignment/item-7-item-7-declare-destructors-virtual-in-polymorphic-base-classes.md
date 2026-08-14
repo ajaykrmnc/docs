@@ -1,5 +1,51 @@
 # Item 7: Declare Destructors Virtual in Polymorphic Base Classes
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│      ITEM 7: DECLARE DESTRUCTORS VIRTUAL IN POLYMORPHIC BASE CLASSES      │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Base pointer points to derived object -> delete through base pointer.  │
+│ 2. Base destructor non-virtual -> only base part is destroyed: undefined  │
+│ behavior risk.                                                            │
+│ 3. Base destructor virtual -> derived destructor runs, then base          │
+│ destructor.                                                               │
+│ 4. No polymorphic deletion needed -> non-virtual destructor is fine and   │
+│ smaller.                                                                  │
+│ 5. Meaning: virtual functions in a base usually imply a virtual           │
+│ destructor.                                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        DELETE THROUGH BASE POINTER                        │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Base* p = new Derived                                                     │
+│                                     ▼                                     │
+│ delete p                                                                  │
+│                                     ▼                                     │
+│ Non-virtual destructor -> base cleanup only / undefined behavior          │
+│                                     ▼                                     │
+│ Virtual destructor -> Derived cleanup, then Base cleanup                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                     WHEN VIRTUAL DESTRUCTOR IS NEEDED                     │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Needed                            | Not needed                            │
+│ ----------------------------------+-------------------------------------  │
+│ Base has virtual functions        | No polymorphic deletion               │
+│ Delete via base pointer           | Value-like tiny class                 │
+│ Polymorphic ownership             | No virtual interface                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 When a derived class object is deleted through a base class pointer, and the base class has a **non-virtual 

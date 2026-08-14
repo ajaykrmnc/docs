@@ -1,5 +1,50 @@
 # Item 40: Use multiple inheritance judiciously
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│               ITEM 40: USE MULTIPLE INHERITANCE JUDICIOUSLY               │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Multiple bases -> more interfaces/implementation enter one object.     │
+│ 2. Risks -> ambiguity, diamond duplication, constructor complexity.       │
+│ 3. Virtual inheritance -> solves shared base duplication with             │
+│ cost/complexity.                                                          │
+│ 4. Good use -> public interface + private implementation helper, or       │
+│ mixins.                                                                   │
+│ 5. Meaning: MI is powerful when relationships are precise and conflicts   │
+│ managed.                                                                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                               MI RISK FLOW                                │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Class has two or more bases                                               │
+│                                     ▼                                     │
+│ Same names or common base appear                                          │
+│                                     ▼                                     │
+│ Ambiguity or diamond duplication arises                                   │
+│                                     ▼                                     │
+│ Virtual inheritance can fix duplication with complexity/cost              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                               MI USE CASES                                │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Reasonable                        | Dangerous                             │
+│ ----------------------------------+-------------------------------------  │
+│ Interface + implementation helper | Two stateful bases                    │
+│ Mixins with no state              | Overlapping responsibilities          │
+│ Orthogonal pure interfaces        | Unclear ownership/invariants          │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The Basics of Multiple Inheritance
 
 Multiple inheritance (MI) means a class inherits from more than one base class. It introduces several complications that single inheritance does not have.

@@ -1,5 +1,46 @@
 # Item 37: Never redefine a function's inherited default parameter value
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│  ITEM 37: NEVER REDEFINE A FUNCTION'S INHERITED DEFAULT PARAMETER VALUE   │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Virtual dispatch chooses function body at runtime.                     │
+│ 2. Default argument is bound from static type at compile time.            │
+│ 3. Derived changes default -> body and default value can come from        │
+│ different classes.                                                        │
+│ 4. Use NVI or overloads to keep defaults centralized.                     │
+│ 5. Meaning: virtual functions are dynamic; default parameters are not.    │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         DEFAULT ARGUMENT BINDING                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Virtual function body selected at runtime                                 │
+│                                     ▼                                     │
+│ Default argument selected at compile time from static type                │
+│                                     ▼                                     │
+│ Derived override + changed default can mix two classes                    │
+│                                     ▼                                     │
+│ Caller sees surprising value                                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                               SAFER DESIGN                                │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Keep defaults in one non-virtual wrapper                                  │
+│ Let wrapper call virtual implementation with explicit argument            │
+│ Do not duplicate default values in overrides                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The Core Issue
 
 Virtual functions are dynamically bound, but **default parameter values are statically bound**. This mismatch leads to bizarre behavior:

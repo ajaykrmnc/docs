@@ -1,5 +1,51 @@
 # Item 17: Store newed objects in smart pointers in standalone statements
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│  ITEM 17: STORE NEWED OBJECTS IN SMART POINTERS IN STANDALONE STATEMENTS  │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Function call arguments may be evaluated in flexible order.            │
+│ 2. new object happens -> another argument throws before smart pointer     │
+│ construction.                                                             │
+│ 3. Raw pointer is stranded -> resource leaks.                             │
+│ 4. Standalone smart pointer statement -> ownership captured before risky  │
+│ work.                                                                     │
+│ 5. Meaning: never leave a freshly newed object temporarily unowned.       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         ARGUMENT EVALUATION LEAK                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ new Widget happens                                                        │
+│                                     ▼                                     │
+│ Another function argument is evaluated                                    │
+│                                     ▼                                     │
+│ That argument throws                                                      │
+│                                     ▼                                     │
+│ Smart pointer was not constructed yet -> leak                             │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         SAFE STANDALONE STATEMENT                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Create smart pointer in its own statement                                 │
+│                                     ▼                                     │
+│ Ownership captured immediately                                            │
+│                                     ▼                                     │
+│ Then call functions that may throw                                        │
+│                                     ▼                                     │
+│ Destructor releases on failure                                            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The Subtle Bug
 
 Consider this seemingly innocent code:

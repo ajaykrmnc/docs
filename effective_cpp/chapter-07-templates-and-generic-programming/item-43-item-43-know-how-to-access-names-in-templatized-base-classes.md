@@ -1,5 +1,46 @@
 # Item 43: Know how to access names in templatized base classes
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│       ITEM 43: KNOW HOW TO ACCESS NAMES IN TEMPLATIZED BASE CLASSES       │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Template derived from dependent base -> base contents depend on T.     │
+│ 2. Unqualified lookup does not assume dependent base members exist.       │
+│ 3. Use this->name, Base<T>::name, or using Base<T>::name.                 │
+│ 4. This makes dependency explicit to compiler and reader.                 │
+│ 5. Meaning: dependent base names must be made visible deliberately.       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        DEPENDENT BASE LOOKUP FLOW                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Derived<T> inherits Base<T>                                               │
+│                                     ▼                                     │
+│ Base<T> depends on T                                                      │
+│                                     ▼                                     │
+│ Compiler does not search dependent base for unqualified names             │
+│                                     ▼                                     │
+│ Use this->, Base<T>::, or using declaration                               │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                               ACCESS FORMS                                │
+├───────────────────────────────────────────────────────────────────────────┤
+│ this->sendCleartext(msg)                                                  │
+│ Base<T>::sendCleartext(msg)                                               │
+│ using Base<T>::sendCleartext;                                             │
+│ Each form makes dependency explicit                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The problem: names in dependent base classes are invisible
 
 Consider a messaging system with compile-time selection of the transport:

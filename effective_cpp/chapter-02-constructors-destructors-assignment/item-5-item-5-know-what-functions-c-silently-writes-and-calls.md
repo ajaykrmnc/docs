@@ -1,5 +1,48 @@
 # Item 5: Know What Functions C++ Silently Writes and Calls
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│         ITEM 5: KNOW WHAT FUNCTIONS C++ SILENTLY WRITES AND CALLS         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. You declare a class -> compiler may synthesize special member          │
+│ functions.                                                                │
+│ 2. Default ctor, dtor, copy ctor, copy assignment appear only when        │
+│ needed/allowed.                                                           │
+│ 3. Generated copy -> memberwise copy, not semantic resource ownership.    │
+│ 4. References/const members/base restrictions can block assignment        │
+│ generation.                                                               │
+│ 5. Meaning: know the invisible API before relying on class behavior.      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                      COMPILER-GENERATED FUNCTION SET                      │
+├───────────────────────────────────────────────────────────────────────────┤
+│ If needed and legal, compiler can generate:                               │
+│ default constructor, destructor, copy constructor, copy assignment        │
+│ Generated copy means memberwise copy, not ownership-aware copy            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                      WHEN DEFAULTS BECOME DANGEROUS                       │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Class gets raw pointer/resource member                                    │
+│                                     ▼                                     │
+│ Compiler copies pointer value only                                        │
+│                                     ▼                                     │
+│ Two objects now think they own same resource                              │
+│                                     ▼                                     │
+│ Double delete, leak, or stale shared state follows                        │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Core Concept
 
 When you declare an empty class, C++ does not leave it truly empty. The compiler will **automatically 

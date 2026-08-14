@@ -1,5 +1,51 @@
 # Item 44: Factor parameter-independent code out of templates
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│        ITEM 44: FACTOR PARAMETER-INDEPENDENT CODE OUT OF TEMPLATES        │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Template body repeated for many T/N values -> code bloat risk.         │
+│ 2. Logic independent of template parameter -> move to non-template        │
+│ base/helper.                                                              │
+│ 3. Parameter-dependent shell remains small.                               │
+│ 4. Tradeoff -> preserve type safety while sharing compiled code.          │
+│ 5. Meaning: templates should not duplicate code that does not depend on   │
+│ the template.                                                             │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            TEMPLATE BLOAT FLOW                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Template contains large helper logic                                      │
+│                                     ▼                                     │
+│ Instantiated for many T or N values                                       │
+│                                     ▼                                     │
+│ Same machine code idea repeated many times                                │
+│                                     ▼                                     │
+│ Binary grows and compile time increases                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                              FACTORING FLOW                               │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Find logic independent of template parameter                              │
+│                                     ▼                                     │
+│ Move it into non-template base/helper                                     │
+│                                     ▼                                     │
+│ Template shell calls shared implementation                                │
+│                                     ▼                                     │
+│ Only truly type-dependent code is duplicated                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The code bloat problem
 
 Templates generate code for each set of template arguments. If the generated code contains logic that does not actually depend on the template parameters, you get **code bloat** -- multiple identical (or nearly identical) copies of functions in your binary.

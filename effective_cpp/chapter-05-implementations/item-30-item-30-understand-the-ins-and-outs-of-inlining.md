@@ -1,5 +1,20 @@
 # Item 30: Understand the ins and outs of inlining
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│             ITEM 30: UNDERSTAND THE INS AND OUTS OF INLINING              │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. inline request -> compiler may expand function at call site.           │
+│ 2. Benefit -> remove call overhead and expose optimization.               │
+│ 3. Cost -> larger binaries, more compile dependencies, ABI churn.         │
+│ 4. Virtual/function pointer/complex code -> often cannot inline           │
+│ usefully.                                                                 │
+│ 5. Meaning: inline tiny stable hot functions, measure the rest.           │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 Inline functions --- what a wonderful idea! They look like functions, they act
 like functions, they are vastly better than macros (see Item 2), and you can
 call them without incurring the overhead of a function call. What is not to love?
@@ -7,6 +22,34 @@ call them without incurring the overhead of a function call. What is not to love
 Actually, quite a lot. The basic idea behind inlining is to replace each call
 of a function with its code body, and this has implications you need to
 understand before you wield this tool.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                              INLINE TRADEOFF                              │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Gain                              | Cost                                  │
+│ ----------------------------------+-------------------------------------  │
+│ Remove call overhead              | Code bloat                            │
+│ Expose optimization               | More recompilation                    │
+│ Good for tiny hot code            | ABI/change exposure                   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           INLINE DECISION FLOW                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Is function tiny and stable?                                              │
+│                                     ▼                                     │
+│ Is it on a measured hot path?                                             │
+│                                     ▼                                     │
+│ Can compiler actually inline this call?                                   │
+│                                     ▼                                     │
+│ If yes, inline; otherwise keep out-of-line                                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### What Inlining Actually Does
 

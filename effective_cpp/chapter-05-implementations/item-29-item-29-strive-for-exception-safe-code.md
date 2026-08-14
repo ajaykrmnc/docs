@@ -1,9 +1,53 @@
 # Item 29: Strive for exception-safe code
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                  ITEM 29: STRIVE FOR EXCEPTION-SAFE CODE                  │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Operation starts -> exception may interrupt at any point.              │
+│ 2. Basic guarantee -> invariants hold and no resources leak.              │
+│ 3. Strong guarantee -> operation either succeeds fully or changes         │
+│ nothing.                                                                  │
+│ 4. No-throw guarantee -> operation never emits exceptions.                │
+│ 5. RAII + copy-and-swap + commit/rollback create clear failure            │
+│ boundaries.                                                               │
+│ 6. Meaning: exception safety is about object state after failure.         │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 Exception safety is not about whether your code throws exceptions. It is about
 how your code behaves when exceptions are thrown --- possibly by code you call.
 Exception-safe functions offer one of three guarantees, and functions that offer
 no guarantee at all are not acceptable in well-written C++.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        EXCEPTION GUARANTEE LADDER                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ No guarantee -> object may be corrupt                                     │
+│ Basic -> valid invariants and no leaks                                    │
+│ Strong -> commit succeeds or object unchanged                             │
+│ No-throw -> operation cannot emit exceptions                              │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         STRONG GUARANTEE PATTERN                          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Build new state in temporary objects                                      │
+│                                     ▼                                     │
+│ All risky work happens before mutation                                    │
+│                                     ▼                                     │
+│ Commit with no-throw swap/rename                                          │
+│                                     ▼                                     │
+│ Failure leaves original state intact                                      │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### The Three Exception Safety Guarantees
 

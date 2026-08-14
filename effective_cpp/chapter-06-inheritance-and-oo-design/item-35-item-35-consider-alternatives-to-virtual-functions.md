@@ -1,5 +1,50 @@
 # Item 35: Consider alternatives to virtual functions
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│            ITEM 35: CONSIDER ALTERNATIVES TO VIRTUAL FUNCTIONS            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Need customizable behavior -> virtual function is one option.          │
+│ 2. NVI -> public non-virtual wrapper enforces invariants around private   │
+│ virtual hook.                                                             │
+│ 3. Strategy/function object -> behavior supplied by composition.          │
+│ 4. Templates -> compile-time customization without runtime dispatch.      │
+│ 5. Meaning: dynamic polymorphism is useful, but not the only variation    │
+│ point.                                                                    │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           CUSTOMIZATION OPTIONS                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Technique                         | Best when                             │
+│ ----------------------------------+-------------------------------------  │
+│ virtual function                  | runtime subtype behavior              │
+│ NVI                               | base enforces wrapper rules           │
+│ strategy object                   | behavior is replaceable data          │
+│ template                          | compile-time variation                │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                                 NVI FLOW                                  │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Public non-virtual function called                                        │
+│                                     ▼                                     │
+│ Base checks preconditions/invariants                                      │
+│                                     ▼                                     │
+│ Private virtual hook customizes step                                      │
+│                                     ▼                                     │
+│ Base checks postconditions/logging                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The Problem with a Straightforward Virtual Function Design
 
 Consider a simple health computation for game characters:

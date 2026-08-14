@@ -6,8 +6,7 @@
 % If there is not enough room left, start the block on the next page.
 \BeforeBeginEnvironment{verbatim}{\Needspace{18\baselineskip}\begin{samepage}}
 \AfterEndEnvironment{verbatim}{\end{samepage}}
-\BeforeBeginEnvironment{Highlighting}{\Needspace{18\baselineskip}\begin{samepage}}
-\AfterEndEnvironment{Highlighting}{\end{samepage}}
+\BeforeBeginEnvironment{Shaded}{\Needspace{18\baselineskip}}
 
 % Pandoc emits some markdown tables as longtable and some as table/tabular.
 % Prefer moving them intact to the next page over splitting them mid-table.

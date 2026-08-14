@@ -1,8 +1,52 @@
 # Item 24: Declare Non-Member Functions When Type Conversions Should Apply to All Parameters
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│ITEM 24: DECLARE NON-MEMBER FUNCTIONS WHEN TYPE CONVERSIONS SHOULD APPLY TO│
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Binary operator as member -> left operand must already be class type.  │
+│ 2. Implicit conversion only helps right operand.                          │
+│ 3. Non-member operator -> both operands can be converted symmetrically.   │
+│ 4. Friend only if private access is truly required.                       │
+│ 5. Meaning: symmetric operations usually belong outside the class.        │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 This item addresses a specific but important situation: when you want implicit type
 conversions to work for **all** arguments of a function, including the object on which
 a member function would be called (i.e., `*this`).
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         MEMBER OPERATOR ASYMMETRY                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ lhs.operator*(rhs) is required                                            │
+│                                     ▼                                     │
+│ lhs must already be class type                                            │
+│                                     ▼                                     │
+│ Only rhs can benefit from conversion                                      │
+│                                     ▼                                     │
+│ 2 * rational may fail while rational * 2 works                            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                            NON-MEMBER SYMMETRY                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ operator*(lhs, rhs) is ordinary function call                             │
+│                                     ▼                                     │
+│ Both operands participate in overload resolution                          │
+│                                     ▼                                     │
+│ Implicit conversions can apply to both sides                              │
+│                                     ▼                                     │
+│ Arithmetic feels natural                                                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### The Rational Number Multiplication Problem
 

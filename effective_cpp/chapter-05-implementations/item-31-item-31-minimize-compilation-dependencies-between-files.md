@@ -1,5 +1,20 @@
 # Item 31: Minimize compilation dependencies between files
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│         ITEM 31: MINIMIZE COMPILATION DEPENDENCIES BETWEEN FILES          │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Header includes concrete details -> every change recompiles users.     │
+│ 2. Forward declarations -> users see names without full definitions.      │
+│ 3. Pimpl/interface classes -> hide representation in implementation       │
+│ file.                                                                     │
+│ 4. Tradeoff -> more indirection for lower build coupling.                 │
+│ 5. Meaning: separate interface knowledge from implementation knowledge.   │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 C++ does not do a great job of separating interfaces from implementations.
 A class definition includes not just the interface (public member functions)
 but also a substantial amount of implementation detail (private members,
@@ -10,6 +25,36 @@ no client code uses the private member.
 In a large project, this can lead to devastating build times. A single change
 to a private data member in a core header can trigger recompilation of
 hundreds of source files.
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                           HEADER COUPLING FLOW                            │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Header includes concrete member types                                     │
+│                                     ▼                                     │
+│ Implementation detail changes                                             │
+│                                     ▼                                     │
+│ Every including file recompiles                                           │
+│                                     ▼                                     │
+│ Builds become slow and fragile                                            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                     PIMPL / FORWARD DECLARATION FLOW                      │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Header exposes stable interface only                                      │
+│                                     ▼                                     │
+│ Implementation type hidden in .cpp                                        │
+│                                     ▼                                     │
+│ Private representation changes                                            │
+│                                     ▼                                     │
+│ Only implementation file recompiles                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+```
 
 ### The Problem
 

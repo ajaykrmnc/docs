@@ -1,5 +1,48 @@
 # Item 34: Differentiate between inheritance of interface and inheritance of implementation
 
+## Visual Summary
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│ITEM 34: DIFFERENTIATE BETWEEN INHERITANCE OF INTERFACE AND INHERITANCE OF │
+├───────────────────────────────────────────────────────────────────────────┤
+│ 1. Pure virtual -> inherit interface only; derived must implement.        │
+│ 2. Impure virtual -> inherit interface plus overridable default           │
+│ implementation.                                                           │
+│ 3. Non-virtual -> inherit interface plus mandatory                        │
+│ implementation/invariant.                                                 │
+│ 4. Choose deliberately based on what derived classes may change.          │
+│ 5. Meaning: each function form communicates a different inheritance       │
+│ contract.                                                                 │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+## Visual Deep Dive
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                        VIRTUAL FUNCTION CONTRACTS                         │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Function form                     | Inheritance meaning                   │
+│ ----------------------------------+-------------------------------------  │
+│ pure virtual                      | interface only                        │
+│ impure virtual                    | interface + default impl              │
+│ non-virtual                       | interface + mandatory impl            │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
+```text
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          CHOOSING FUNCTION FORM                           │
+├───────────────────────────────────────────────────────────────────────────┤
+│ Must derived provide behavior? -> pure virtual                            │
+│                                     ▼                                     │
+│ Can base offer overridable default? -> virtual with body                  │
+│                                     ▼                                     │
+│ Must behavior never vary? -> non-virtual                                  │
+└───────────────────────────────────────────────────────────────────────────┘
+```
+
 ### The Three Kinds of Member Functions
 
 When you design a base class with member functions, you must decide among three choices for each function:
