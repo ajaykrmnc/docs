@@ -13,7 +13,8 @@
 
 ## The Slippery Concept of a Transaction
 
-A **transaction** groups several reads and writes into a logical unit. The entire transaction either **commits** (succeeds) or **aborts** (rolls back) — no partial results.
+A **transaction** groups several reads and writes into a logical unit. The entire transaction either **commits**
+(succeeds) or **aborts** (rolls back) — no partial results.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -449,14 +450,14 @@ The strongest isolation level: guarantees transactions execute as if they ran on
 
 ### Comparison of Serialization Approaches
 
-| Aspect | Actual Serial | 2PL | SSI |
-|--------|--------------|-----|-----|
-| **Strategy** | Pessimistic (one at a time) | Pessimistic (locks) | Optimistic (detect conflicts) |
-| **Concurrency** | None (single thread) | Limited (blocked by locks) | High (snapshot reads) |
-| **Deadlocks** | Impossible | Possible (detected) | Impossible |
-| **Performance** | Good if in-memory, low contention | Poor under contention | Good, but retries on abort |
-| **Phantoms** | Prevented (serial) | Predicate/range locks | Detected at commit |
-| **Cross-partition** | Very expensive | Possible but slow | Works across partitions |
+| Aspect              | Actual Serial                     | 2PL                        | SSI                           |
+| ------------------- | --------------------------------- | -------------------------- | ----------------------------- |
+| **Strategy**        | Pessimistic (one at a time)       | Pessimistic (locks)        | Optimistic (detect conflicts) |
+| **Concurrency**     | None (single thread)              | Limited (blocked by locks) | High (snapshot reads)         |
+| **Deadlocks**       | Impossible                        | Possible (detected)        | Impossible                    |
+| **Performance**     | Good if in-memory, low contention | Poor under contention      | Good, but retries on abort    |
+| **Phantoms**        | Prevented (serial)                | Predicate/range locks      | Detected at commit            |
+| **Cross-partition** | Very expensive                    | Possible but slow          | Works across partitions       |
 
 ---
 
@@ -464,24 +465,43 @@ The strongest isolation level: guarantees transactions execute as if they ran on
 
 ### Q1: What does each letter in ACID mean precisely?
 
-**Atomicity**: All writes in a transaction succeed or all are rolled back — no partial results. (Not about concurrency — "abortability" is a better name.) **Consistency**: Application-level invariants are maintained — this is the application's responsibility, not the database's. **Isolation**: Concurrent transactions don't interfere with each other; ideally each behaves as if running alone. **Durability**: Once committed, data survives crashes — implemented via WAL, replication, non-volatile storage.
+**Atomicity**: All writes in a transaction succeed or all are rolled back — no partial results. (Not about concurrency —
+"abortability" is a better name.) **Consistency**: Application-level invariants are maintained — this is the
+application's responsibility, not the database's. **Isolation**: Concurrent transactions don't interfere with each
+other; ideally each behaves as if running alone. **Durability**: Once committed, data survives crashes — implemented via
+WAL, replication, non-volatile storage.
 
 ### Q2: Explain the difference between Read Committed and Snapshot Isolation.
 
-**Read Committed** prevents dirty reads (reading uncommitted data) and dirty writes (overwriting uncommitted data). But it allows non-repeatable reads: within one transaction, reading the same data twice may give different results if another transaction commits in between. **Snapshot Isolation** fixes this by giving each transaction a consistent snapshot of the database as of the transaction's start time, using MVCC (multi-version concurrency control). All reads within the transaction see the same snapshot, regardless of concurrent commits.
+**Read Committed** prevents dirty reads (reading uncommitted data) and dirty writes (overwriting uncommitted data). But
+it allows non-repeatable reads: within one transaction, reading the same data twice may give different results if
+another transaction commits in between. **Snapshot Isolation** fixes this by giving each transaction a consistent
+snapshot of the database as of the transaction's start time, using MVCC (multi-version concurrency control). All reads
+within the transaction see the same snapshot, regardless of concurrent commits.
 
 ### Q3: What is write skew and how do you prevent it?
 
-Write skew occurs when two transactions read the same data, make decisions based on what they read, then write to **different** objects — causing a violation of an invariant that depends on both objects. Example: two doctors both check that 2 doctors are on call, then both go off call → zero on call. Prevention: (1) **Serializable isolation** (2PL or SSI) prevents it automatically. (2) **Materializing conflicts**: create explicit lock rows for the constraint, then use SELECT FOR UPDATE. (3) **Explicit application-level locking**.
+Write skew occurs when two transactions read the same data, make decisions based on what they read, then write to
+**different** objects — causing a violation of an invariant that depends on both objects. Example: two doctors both
+check that 2 doctors are on call, then both go off call → zero on call. Prevention: (1) **Serializable isolation** (2PL
+or SSI) prevents it automatically. (2) **Materializing conflicts**: create explicit lock rows for the constraint, then
+use SELECT FOR UPDATE. (3) **Explicit application-level locking**.
 
 ### Q4: Compare 2PL and SSI.
 
-**2PL** (pessimistic): Transactions acquire shared/exclusive locks and wait for conflicting locks to be released. Prevents all anomalies but causes blocking, deadlocks, and poor performance under contention. **SSI** (optimistic): Transactions proceed without locks using snapshot reads. At commit time, the database checks whether the transaction's reads are still valid. If a conflict is detected, the transaction is aborted and must retry. SSI has higher concurrency and no deadlocks but wastes work when transactions are aborted.
+**2PL** (pessimistic): Transactions acquire shared/exclusive locks and wait for conflicting locks to be released.
+Prevents all anomalies but causes blocking, deadlocks, and poor performance under contention. **SSI** (optimistic):
+Transactions proceed without locks using snapshot reads. At commit time, the database checks whether the transaction's
+reads are still valid. If a conflict is detected, the transaction is aborted and must retry. SSI has higher concurrency
+and no deadlocks but wastes work when transactions are aborted.
 
 ### Q5: When is actual serial execution appropriate?
 
-Actual serial execution works when: (1) the dataset fits in RAM (no disk I/O delays), (2) transactions are very short (OLTP, not OLAP), (3) write throughput is low enough for a single CPU core, (4) transactions are encapsulated as stored procedures (no multi-round-trip interactive transactions). Used by VoltDB, Redis, and Datomic. Cross-partition transactions degrade performance significantly because they require coordination across serial threads.
+Actual serial execution works when: (1) the dataset fits in RAM (no disk I/O delays), (2) transactions are very short
+(OLTP, not OLAP), (3) write throughput is low enough for a single CPU core, (4) transactions are encapsulated as stored
+procedures (no multi-round-trip interactive transactions). Used by VoltDB, Redis, and Datomic. Cross-partition
+transactions degrade performance significantly because they require coordination across serial threads.
 
 ---
 
-*Based on Chapter 7 of "Designing Data-Intensive Applications" by Martin Kleppmann*
+_Based on Chapter 7 of "Designing Data-Intensive Applications" by Martin Kleppmann_

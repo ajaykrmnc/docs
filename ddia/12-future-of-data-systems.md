@@ -14,7 +14,8 @@
 
 ## Data Integration
 
-The biggest challenge in modern data systems is not building any single tool, but **integrating data across different systems**.
+The biggest challenge in modern data systems is not building any single tool, but **integrating data across different 
+systems**.
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -84,7 +85,8 @@ The biggest challenge in modern data systems is not building any single tool, bu
 
 ## Unbundling Databases
 
-A database provides many features: storage, indexing, query processing, transactions, replication, access control. The "unbundling" idea: compose these from **separate, specialized tools**.
+A database provides many features: storage, indexing, query processing, transactions, replication, access control. The 
+"unbundling" idea: compose these from **separate, specialized tools**.
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -346,27 +348,53 @@ A database provides many features: storage, indexing, query processing, transact
 
 ### Q1: What is the dual-write problem and how do you solve it?
 
-The dual-write problem occurs when an application writes to two systems (e.g., database and search index) independently. If one write succeeds and the other fails, or if two concurrent writes arrive in different orders at the two systems, they go out of sync. The solution is to use a **single source of truth** and derive all other representations. Write to the database, and use **Change Data Capture (CDC)** to propagate changes to search indexes, caches, and other derived systems via an event log (Kafka). This ensures a single total order of changes.
+The dual-write problem occurs when an application writes to two systems (e.g., database and search index) independently. 
+If one write succeeds and the other fails, or if two concurrent writes arrive in different orders at the two systems, 
+they go out of sync. The solution is to use a **single source of truth** and derive all other representations. Write to 
+the database, and use **Change Data Capture (CDC)** to propagate changes to search indexes, caches, and other derived 
+systems via an event log (Kafka). This ensures a single total order of changes.
 
 ### Q2: Compare Lambda and Kappa architectures.
 
-**Lambda architecture** runs both a batch layer (for correctness using all historical data) and a speed layer (for low-latency using recent data), then merges their outputs. It provides accurate results but requires maintaining two separate codebases doing the same computation. **Kappa architecture** uses only a stream processing layer — to reprocess historical data, replay the event log from the beginning. It's simpler (one codebase) but requires the event log to retain data long-term. Kappa is increasingly preferred due to improvements in stream processing frameworks (Flink, Kafka Streams).
+**Lambda architecture** runs both a batch layer (for correctness using all historical data) and a speed layer (for 
+low-latency using recent data), then merges their outputs. It provides accurate results but requires maintaining two 
+separate codebases doing the same computation. **Kappa architecture** uses only a stream processing layer — to reprocess 
+historical data, replay the event log from the beginning. It's simpler (one codebase) but requires the event log to 
+retain data long-term. Kappa is increasingly preferred due to improvements in stream processing frameworks (Flink, Kafka 
+Streams).
 
 ### Q3: What does "unbundling the database" mean?
 
-Traditional databases bundle many features: storage, indexing, queries, transactions, replication, access control. "Unbundling" means decomposing these into separate specialized systems (e.g., PostgreSQL for storage, Elasticsearch for search, Redis for caching, Kafka for replication/CDC) and composing them together. The event log (Kafka) plays the role of the database's internal WAL but at a system level. This gives flexibility to use the best tool for each job but adds operational complexity and trades strong consistency for eventual consistency.
+Traditional databases bundle many features: storage, indexing, queries, transactions, replication, access control. 
+"Unbundling" means decomposing these into separate specialized systems (e.g., PostgreSQL for storage, Elasticsearch for 
+search, Redis for caching, Kafka for replication/CDC) and composing them together. The event log (Kafka) plays the role 
+of the database's internal WAL but at a system level. This gives flexibility to use the best tool for each job but adds 
+operational complexity and trades strong consistency for eventual consistency.
 
 ### Q4: Why is end-to-end verification important even with ACID transactions?
 
-ACID transactions guarantee correctness at the database level, but they don't protect against: application-level bugs, race conditions in application logic, data corruption in network transit, or issues in derived systems downstream. The **end-to-end argument** says reliability checks must also exist at the application level. Techniques include: immutable event logs for audit trails, checksums on application data, periodic reconciliation between source and derived systems, and deterministic derivation (so you can recompute and verify derived data matches the event log).
+ACID transactions guarantee correctness at the database level, but they don't protect against: application-level bugs, 
+race conditions in application logic, data corruption in network transit, or issues in derived systems downstream. The 
+**end-to-end argument** says reliability checks must also exist at the application level. Techniques include: immutable 
+event logs for audit trails, checksums on application data, periodic reconciliation between source and derived systems, 
+and deterministic derivation (so you can recompute and verify derived data matches the event log).
 
 ### Q5: What ethical considerations should engineers think about when building data systems?
 
-(1) **Bias and fairness**: ML models can perpetuate and amplify biases in training data, affecting credit, hiring, and justice. (2) **Privacy**: Data collected for one purpose may be used for surveillance or sold; users rarely understand the full scope. (3) **Data as liability**: Every piece of data collected is a breach risk; practice data minimization. (4) **Right to deletion**: With CDC, event logs, caches, and backups, true deletion is technically very difficult. (5) **Accountability**: Automated decisions affect real lives; engineers share responsibility for the impact of their systems.
+(1) **Bias and fairness**: ML models can perpetuate and amplify biases in training data, affecting credit, hiring, and 
+justice. (2) **Privacy**: Data collected for one purpose may be used for surveillance or sold; users rarely understand 
+the full scope. (3) **Data as liability**: Every piece of data collected is a breach risk; practice data minimization. 
+(4) **Right to deletion**: With CDC, event logs, caches, and backups, true deletion is technically very difficult. (5) 
+**Accountability**: Automated decisions affect real lives; engineers share responsibility for the impact of their 
+systems.
 
 ### Q6: How do you enforce a uniqueness constraint in an event-driven architecture?
 
-Three approaches: (1) **Log-based**: Route all requests for the same key to the same Kafka partition → single consumer processes them sequentially → first wins. (2) **Consensus**: Use a linearizable store (ZooKeeper, etcd) with compare-and-set to atomically claim the unique value. (3) **Compensating transactions**: Accept all requests optimistically, detect duplicates asynchronously, and compensate (e.g., cancel one, notify the user). The choice depends on whether the business can tolerate a brief window of inconsistency.
+Three approaches: (1) **Log-based**: Route all requests for the same key to the same Kafka partition → single consumer 
+processes them sequentially → first wins. (2) **Consensus**: Use a linearizable store (ZooKeeper, etcd) with 
+compare-and-set to atomically claim the unique value. (3) **Compensating transactions**: Accept all requests 
+optimistically, detect duplicates asynchronously, and compensate (e.g., cancel one, notify the user). The choice depends 
+on whether the business can tolerate a brief window of inconsistency.
 
 ---
 

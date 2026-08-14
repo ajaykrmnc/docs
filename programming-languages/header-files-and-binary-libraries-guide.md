@@ -7,7 +7,8 @@ When working with hardware SDKs from vendors like Qualcomm, NVIDIA, Intel, or AR
 - **Header files** (`.h`, `.hpp`): Human-readable interface definitions
 - **Binary libraries** (`.so`, `.a`, `.dll`, `.lib`): Compiled machine code
 
-This distribution model is fundamental to how compiled languages like C and C++ work, and serves multiple purposes from intellectual property protection to ensuring binary compatibility.
+This distribution model is fundamental to how compiled languages like C and C++ work, and serves multiple purposes from
+intellectual property protection to ensuring binary compatibility.
 
 This guide provides a comprehensive understanding of:
 
@@ -45,8 +46,8 @@ The most significant reason vendors provide only headers and binaries is to prot
 │                              │                                  │
 │                              ▼                                  │
 └─────────────────────────────────────────────────────────────────┘
-                               │
-                               ▼
+│
+▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    BINARY (Distributed)                         │
 │  ┌─────────────────────────────────────────────────────────┐   │
@@ -168,23 +169,23 @@ typedef void* qc_context_t;
  * ============================================================ */
 
 typedef enum {
-    QC_DEVICE_CPU = 0,
-    QC_DEVICE_GPU = 1,
-    QC_DEVICE_DSP = 2,
-    QC_DEVICE_NPU = 3
+  QC_DEVICE_CPU = 0,
+  QC_DEVICE_GPU = 1,
+  QC_DEVICE_DSP = 2,
+  QC_DEVICE_NPU = 3
 } qc_device_type_t;
 
 typedef enum {
-    QC_DTYPE_FLOAT32 = 0,
-    QC_DTYPE_FLOAT16 = 1,
-    QC_DTYPE_INT8    = 2,
-    QC_DTYPE_UINT8   = 3,
-    QC_DTYPE_INT32   = 4
+  QC_DTYPE_FLOAT32 = 0,
+  QC_DTYPE_FLOAT16 = 1,
+  QC_DTYPE_INT8    = 2,
+  QC_DTYPE_UINT8   = 3,
+  QC_DTYPE_INT32   = 4
 } qc_data_type_t;
 
 typedef enum {
-    QC_LAYOUT_NHWC = 0,  /* Batch, Height, Width, Channels */
-    QC_LAYOUT_NCHW = 1   /* Batch, Channels, Height, Width */
+  QC_LAYOUT_NHWC = 0,  /* Batch, Height, Width, Channels */
+  QC_LAYOUT_NCHW = 1   /* Batch, Channels, Height, Width */
 } qc_tensor_layout_t;
 
 /* ============================================================
@@ -196,32 +197,32 @@ typedef enum {
  * Describes the shape and properties of a tensor
  */
 typedef struct {
-    uint32_t dims[QC_MAX_TENSOR_DIMS];  /* Dimension sizes */
-    uint32_t num_dims;                   /* Number of dimensions */
-    qc_data_type_t dtype;                /* Data type */
-    qc_tensor_layout_t layout;           /* Memory layout */
-    size_t size_bytes;                   /* Total size in bytes */
+  uint32_t dims[QC_MAX_TENSOR_DIMS];  /* Dimension sizes */
+  uint32_t num_dims;                   /* Number of dimensions */
+  qc_data_type_t dtype;                /* Data type */
+  qc_tensor_layout_t layout;           /* Memory layout */
+  size_t size_bytes;                   /* Total size in bytes */
 } qc_tensor_desc_t;
 
 /**
  * Device configuration structure
  */
 typedef struct {
-    qc_device_type_t device_type;
-    uint32_t device_id;
-    uint32_t num_threads;
-    uint32_t priority;
-    uint32_t features;                   /* Bitmask of QC_FEATURE_* */
+  qc_device_type_t device_type;
+  uint32_t device_id;
+  uint32_t num_threads;
+  uint32_t priority;
+  uint32_t features;                   /* Bitmask of QC_FEATURE_* */
 } qc_device_config_t;
 
 /**
  * Performance metrics structure
  */
 typedef struct {
-    uint64_t inference_time_us;
-    uint64_t memory_peak_bytes;
-    uint32_t power_level;
-    float utilization_percent;
+  uint64_t inference_time_us;
+  uint64_t memory_peak_bytes;
+  uint32_t power_level;
+  float utilization_percent;
 } qc_perf_metrics_t;
 
 /* ============================================================
@@ -236,8 +237,8 @@ typedef struct {
  * @return          QC_SUCCESS on success, error code otherwise
  */
 qc_status_t qc_initialize(
-    const qc_device_config_t* config,
-    qc_context_t* context
+  const qc_device_config_t* config,
+  qc_context_t* context
 );
 
 /**
@@ -257,9 +258,9 @@ qc_status_t qc_shutdown(qc_context_t context);
  * @return              QC_SUCCESS on success
  */
 qc_status_t qc_load_model(
-    qc_context_t context,
-    const char* model_path,
-    qc_handle_t* handle
+  qc_context_t context,
+  const char* model_path,
+  qc_handle_t* handle
 );
 
 /**
@@ -273,11 +274,11 @@ qc_status_t qc_load_model(
  * @return              QC_SUCCESS on success
  */
 qc_status_t qc_run_inference(
-    qc_handle_t handle,
-    const void* input_data,
-    const qc_tensor_desc_t* input_desc,
-    void* output_data,
-    qc_tensor_desc_t* output_desc
+  qc_handle_t handle,
+  const void* input_data,
+  const qc_tensor_desc_t* input_desc,
+  void* output_data,
+  qc_tensor_desc_t* output_desc
 );
 
 /**
@@ -288,8 +289,8 @@ qc_status_t qc_run_inference(
  * @return          QC_SUCCESS on success
  */
 qc_status_t qc_get_metrics(
-    qc_handle_t handle,
-    qc_perf_metrics_t* metrics
+  qc_handle_t handle,
+  qc_perf_metrics_t* metrics
 );
 
 /**
@@ -456,16 +457,16 @@ objdump -d libqualcomm.so | head -50
 │                        COMPLETE BUILD PIPELINE                          │
 └─────────────────────────────────────────────────────────────────────────┘
 
-     SOURCE FILES                    HEADER FILES
-    ┌────────────┐                  ┌────────────┐
-    │  main.c    │                  │ qualcomm.h │
-    │  utils.c   │                  │ my_app.h   │
-    │  model.c   │                  │ config.h   │
-    └─────┬──────┘                  └─────┬──────┘
-          │                               │
-          └───────────────┬───────────────┘
-                          │
-                          ▼
+SOURCE FILES                    HEADER FILES
+┌────────────┐                  ┌────────────┐
+│  main.c    │                  │ qualcomm.h │
+│  utils.c   │                  │ my_app.h   │
+│  model.c   │                  │ config.h   │
+└─────┬──────┘                  └─────┬──────┘
+│                               │
+└───────────────┬───────────────┘
+│
+▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                      PHASE 1: PREPROCESSING                             │
 │                         (cpp / cc -E)                                   │
@@ -476,8 +477,8 @@ objdump -d libqualcomm.so | head -50
 │  • Removes comments                                                     │
 │  • Generates: main.i, utils.i, model.i (preprocessed source)            │
 └─────────────────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
+│
+▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                      PHASE 2: COMPILATION                               │
 │                         (cc -S)                                         │
@@ -489,8 +490,8 @@ objdump -d libqualcomm.so | head -50
 │  • Code generation                                                      │
 │  • Generates: main.s, utils.s, model.s (assembly code)                  │
 └─────────────────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
+│
+▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                      PHASE 3: ASSEMBLY                                  │
 │                         (as)                                            │
@@ -500,16 +501,16 @@ objdump -d libqualcomm.so | head -50
 │  • Generates relocation entries for unresolved symbols                  │
 │  • Generates: main.o, utils.o, model.o (object files)                   │
 └─────────────────────────────────────────────────────────────────────────┘
-                          │
-                          │    ┌─────────────────────┐
-                          │    │  BINARY LIBRARY     │
-                          │    │  libqualcomm.so     │
-                          │    │  (from Qualcomm)    │
-                          │    └──────────┬──────────┘
-                          │               │
-                          └───────┬───────┘
-                                  │
-                                  ▼
+│
+│    ┌─────────────────────┐
+│    │  BINARY LIBRARY     │
+│    │  libqualcomm.so     │
+│    │  (from Qualcomm)    │
+│    └──────────┬──────────┘
+│               │
+└───────┬───────┘
+│
+▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                      PHASE 4: LINKING                                   │
 │                         (ld)                                            │
@@ -521,12 +522,12 @@ objdump -d libqualcomm.so | head -50
 │  • Creates final executable or shared library                           │
 │  • Generates: my_application (executable)                               │
 └─────────────────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-                   ┌──────────────┐
-                   │ EXECUTABLE   │
-                   │ ./my_app     │
-                   └──────────────┘
+│
+▼
+┌──────────────┐
+│ EXECUTABLE   │
+│ ./my_app     │
+└──────────────┘
 ```
 
 ### Detailed Phase Breakdown
@@ -539,12 +540,12 @@ objdump -d libqualcomm.so | head -50
 #define BATCH_SIZE 32
 
 int main() {
-    qc_context_t ctx;
-    qc_device_config_t config = {
-        .device_type = QC_DEVICE_DSP,
-        .num_threads = BATCH_SIZE
-    };
-    return qc_initialize(&config, &ctx);
+  qc_context_t ctx;
+  qc_device_config_t config = {
+    .device_type = QC_DEVICE_DSP,
+    .num_threads = BATCH_SIZE
+  };
+  return qc_initialize(&config, &ctx);
 }
 ```
 
@@ -559,12 +560,12 @@ qc_status_t qc_initialize(const qc_device_config_t* config, qc_context_t* contex
 /* End of qualcomm.h */
 
 int main() {
-    qc_context_t ctx;
-    qc_device_config_t config = {
-        .device_type = 2,        /* QC_DEVICE_DSP replaced */
-        .num_threads = 32        /* BATCH_SIZE replaced */
-    };
-    return qc_initialize(&config, &ctx);
+  qc_context_t ctx;
+  qc_device_config_t config = {
+    .device_type = 2,        /* QC_DEVICE_DSP replaced */
+    .num_threads = 32        /* BATCH_SIZE replaced */
+  };
+  return qc_initialize(&config, &ctx);
 }
 ```
 
@@ -604,42 +605,42 @@ Object File: main.o
 #### Phase 4: Linking
 
 ```
-                    LINKER INPUT
-         ┌──────────────────────────────┐
-         │                              │
-    ┌────┴────┐                    ┌────┴────┐
-    │ main.o  │                    │libqc.so │
-    └────┬────┘                    └────┬────┘
-         │                              │
-         │  Symbol: qc_initialize       │  Symbol: qc_initialize
-         │  Status: UNDEFINED           │  Status: DEFINED @ 0x12340
-         │                              │
-         └──────────────┬───────────────┘
-                        │
-                        ▼
-              ┌─────────────────┐
-              │     LINKER      │
-              │                 │
-              │ 1. Find all     │
-              │    undefined    │
-              │    symbols      │
-              │                 │
-              │ 2. Search libs  │
-              │    for defs     │
-              │                 │
-              │ 3. Update       │
-              │    relocations  │
-              │                 │
-              │ 4. Create       │
-              │    executable   │
-              └────────┬────────┘
-                       │
-                       ▼
-              ┌─────────────────┐
-              │   EXECUTABLE    │
-              │                 │
-              │ call 0x12340    │ ← Address resolved!
-              └─────────────────┘
+LINKER INPUT
+┌──────────────────────────────┐
+│                              │
+┌────┴────┐                    ┌────┴────┐
+│ main.o  │                    │libqc.so │
+└────┬────┘                    └────┬────┘
+│                              │
+│  Symbol: qc_initialize       │  Symbol: qc_initialize
+│  Status: UNDEFINED           │  Status: DEFINED @ 0x12340
+│                              │
+└──────────────┬───────────────┘
+│
+▼
+┌─────────────────┐
+│     LINKER      │
+│                 │
+│ 1. Find all     │
+│    undefined    │
+│    symbols      │
+│                 │
+│ 2. Search libs  │
+│    for defs     │
+│                 │
+│ 3. Update       │
+│    relocations  │
+│                 │
+│ 4. Create       │
+│    executable   │
+└────────┬────────┘
+│
+▼
+┌─────────────────┐
+│   EXECUTABLE    │
+│                 │
+│ call 0x12340    │ ← Address resolved!
+└─────────────────┘
 ```
 
 ---
@@ -681,57 +682,57 @@ Object File: main.o
 │                      INFORMATION FLOW                                   │
 └─────────────────────────────────────────────────────────────────────────┘
 
-                        COMPILE TIME
-    ┌───────────────────────────────────────────────────────────┐
-    │                                                           │
-    │   Your Code              Header File                      │
-    │   ┌──────────┐          ┌──────────────┐                 │
-    │   │          │ includes │              │                 │
-    │   │ #include ├─────────►│ Declarations │                 │
-    │   │          │          │ Types        │                 │
-    │   │ call     │◄─────────┤ Signatures   │                 │
-    │   │ func()   │ validates│              │                 │
-    │   │          │          └──────────────┘                 │
-    │   └────┬─────┘                                           │
-    │        │                                                 │
-    │        │ generates                                       │
-    │        ▼                                                 │
-    │   ┌──────────┐                                           │
-    │   │ Object   │ (with unresolved symbols)                 │
-    │   │ File .o  │                                           │
-    │   └────┬─────┘                                           │
-    │        │                                                 │
-    └────────┼─────────────────────────────────────────────────┘
-             │
-             │              LINK TIME
-    ┌────────┼─────────────────────────────────────────────────┐
-    │        │                                                 │
-    │        │            Binary Library                       │
-    │        │            ┌──────────────┐                     │
-    │        │            │              │                     │
-    │        │  resolves  │ Symbol Table │                     │
-    │        ├───────────►│ Machine Code │                     │
-    │        │  against   │              │                     │
-    │        │            └──────────────┘                     │
-    │        │                                                 │
-    │        ▼                                                 │
-    │   ┌──────────┐                                           │
-    │   │Executable│ (all symbols resolved)                    │
-    │   └────┬─────┘                                           │
-    │        │                                                 │
-    └────────┼─────────────────────────────────────────────────┘
-             │
-             │              RUN TIME
-    ┌────────┼─────────────────────────────────────────────────┐
-    │        ▼                                                 │
-    │   ┌──────────┐          ┌──────────────┐                 │
-    │   │  Your    │ calls    │   Library    │                 │
-    │   │  Code    ├─────────►│   Code       │                 │
-    │   │          │◄─────────┤   Executes   │                 │
-    │   │          │ returns  │              │                 │
-    │   └──────────┘          └──────────────┘                 │
-    │                                                          │
-    └──────────────────────────────────────────────────────────┘
+COMPILE TIME
+┌───────────────────────────────────────────────────────────┐
+│                                                           │
+│   Your Code              Header File                      │
+│   ┌──────────┐          ┌──────────────┐                 │
+│   │          │ includes │              │                 │
+│   │ #include ├─────────►│ Declarations │                 │
+│   │          │          │ Types        │                 │
+│   │ call     │◄─────────┤ Signatures   │                 │
+│   │ func()   │ validates│              │                 │
+│   │          │          └──────────────┘                 │
+│   └────┬─────┘                                           │
+│        │                                                 │
+│        │ generates                                       │
+│        ▼                                                 │
+│   ┌──────────┐                                           │
+│   │ Object   │ (with unresolved symbols)                 │
+│   │ File .o  │                                           │
+│   └────┬─────┘                                           │
+│        │                                                 │
+└────────┼─────────────────────────────────────────────────┘
+│
+│              LINK TIME
+┌────────┼─────────────────────────────────────────────────┐
+│        │                                                 │
+│        │            Binary Library                       │
+│        │            ┌──────────────┐                     │
+│        │            │              │                     │
+│        │  resolves  │ Symbol Table │                     │
+│        ├───────────►│ Machine Code │                     │
+│        │  against   │              │                     │
+│        │            └──────────────┘                     │
+│        │                                                 │
+│        ▼                                                 │
+│   ┌──────────┐                                           │
+│   │Executable│ (all symbols resolved)                    │
+│   └────┬─────┘                                           │
+│        │                                                 │
+└────────┼─────────────────────────────────────────────────┘
+│
+│              RUN TIME
+┌────────┼─────────────────────────────────────────────────┐
+│        ▼                                                 │
+│   ┌──────────┐          ┌──────────────┐                 │
+│   │  Your    │ calls    │   Library    │                 │
+│   │  Code    ├─────────►│   Code       │                 │
+│   │          │◄─────────┤   Executes   │                 │
+│   │          │ returns  │              │                 │
+│   └──────────┘          └──────────────┘                 │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -978,59 +979,59 @@ The ABI defines low-level interface conventions between binary modules:
 #include "qualcomm_hexagon_sdk.h"  /* Header from Qualcomm */
 
 int main(int argc, char* argv[]) {
-    qc_status_t status;
-    qc_context_t ctx = NULL;
-    qc_handle_t model = 0;
+  qc_status_t status;
+  qc_context_t ctx = NULL;
+  qc_handle_t model = 0;
 
-    /* Configure for Hexagon DSP */
-    qc_device_config_t config = {
-        .device_type = QC_DEVICE_DSP,
-        .device_id = 0,
-        .num_threads = 4,
-        .priority = 1,
-        .features = QC_FEATURE_FP16 | QC_FEATURE_INT8
-    };
+  /* Configure for Hexagon DSP */
+  qc_device_config_t config = {
+    .device_type = QC_DEVICE_DSP,
+    .device_id = 0,
+    .num_threads = 4,
+    .priority = 1,
+    .features = QC_FEATURE_FP16 | QC_FEATURE_INT8
+  };
 
-    /* Initialize SDK */
-    status = qc_initialize(&config, &ctx);
-    if (status != QC_SUCCESS) {
-        fprintf(stderr, "Init failed: %s\n", qc_get_error_string(status));
-        return 1;
-    }
+  /* Initialize SDK */
+  status = qc_initialize(&config, &ctx);
+  if (status != QC_SUCCESS) {
+    fprintf(stderr, "Init failed: %s\n", qc_get_error_string(status));
+    return 1;
+  }
 
-    /* Load model */
-    status = qc_load_model(ctx, "model.dlc", &model);
-    if (status != QC_SUCCESS) {
-        fprintf(stderr, "Load failed: %s\n", qc_get_error_string(status));
-        qc_shutdown(ctx);
-        return 1;
-    }
-
-    /* Prepare input */
-    float input_data[224 * 224 * 3];
-    float output_data[1000];
-
-    qc_tensor_desc_t input_desc = {
-        .dims = {1, 224, 224, 3},
-        .num_dims = 4,
-        .dtype = QC_DTYPE_FLOAT32,
-        .layout = QC_LAYOUT_NHWC
-    };
-
-    qc_tensor_desc_t output_desc = {0};
-
-    /* Run inference */
-    status = qc_run_inference(model, input_data, &input_desc,
-                              output_data, &output_desc);
-
-    /* Get metrics */
-    qc_perf_metrics_t metrics;
-    qc_get_metrics(model, &metrics);
-    printf("Inference time: %lu us\n", metrics.inference_time_us);
-
-    /* Cleanup */
+  /* Load model */
+  status = qc_load_model(ctx, "model.dlc", &model);
+  if (status != QC_SUCCESS) {
+    fprintf(stderr, "Load failed: %s\n", qc_get_error_string(status));
     qc_shutdown(ctx);
-    return 0;
+    return 1;
+  }
+
+  /* Prepare input */
+  float input_data[224 * 224 * 3];
+  float output_data[1000];
+
+  qc_tensor_desc_t input_desc = {
+    .dims = {1, 224, 224, 3},
+    .num_dims = 4,
+    .dtype = QC_DTYPE_FLOAT32,
+    .layout = QC_LAYOUT_NHWC
+  };
+
+  qc_tensor_desc_t output_desc = {0};
+
+  /* Run inference */
+  status = qc_run_inference(model, input_data, &input_desc,
+                            output_data, &output_desc);
+
+  /* Get metrics */
+  qc_perf_metrics_t metrics;
+  qc_get_metrics(model, &metrics);
+  printf("Inference time: %lu us\n", metrics.inference_time_us);
+
+  /* Cleanup */
+  qc_shutdown(ctx);
+  return 0;
 }
 ```
 
@@ -1045,10 +1046,10 @@ gcc my_inference_app.o -L/path/to/qualcomm/lib -lqualcomm -o my_inference_app
 
 # Or all in one step
 gcc my_inference_app.c \
-    -I/path/to/qualcomm/include \
-    -L/path/to/qualcomm/lib \
-    -lqualcomm \
-    -o my_inference_app
+-I/path/to/qualcomm/include \
+-L/path/to/qualcomm/lib \
+-lqualcomm \
+-o my_inference_app
 
 # Run (needs library at runtime for .so)
 export LD_LIBRARY_PATH=/path/to/qualcomm/lib:$LD_LIBRARY_PATH

@@ -107,8 +107,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "295ae7fe5bc0b42d",
@@ -214,8 +213,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "0b42ed78a543bdb6",
+  "active": "c4cf197a9034e855",
   "lastOpenFiles": [
+    "notes",
     "low-latency-challenges/19-benchmarking-guide.md",
     "low-latency-challenges/18-build-optimization-ii.md",
     "low-latency-challenges/17-cross-ccx-ring-buffer.md",
@@ -250,7 +250,6 @@
     "aristadocs/public/build-and-tooling",
     "aristadocs/public/assets/chunks/theme.CvOKXBH0.js",
     "aristadocs/public/assets/chunks/framework.BZohXCq9.js",
-    "aristadocs/public/assets/chunks/VPLocalSearchBox.C6btgN7E.js",
-    "aristadocs/node_modules/vitepress/README.md"
+    "aristadocs/public/assets/chunks/VPLocalSearchBox.C6btgN7E.js"
   ]
 }

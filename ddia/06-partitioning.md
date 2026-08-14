@@ -13,7 +13,8 @@
 
 ## Why Partition?
 
-**Partitioning** (also called **sharding**) splits a large dataset across multiple nodes so that each node stores a subset of the data.
+**Partitioning** (also called **sharding**) splits a large dataset across multiple nodes so that each node stores a
+subset of the data.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -45,7 +46,8 @@
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Partitioning is usually combined with replication** — each partition is replicated on multiple nodes for fault tolerance.
+**Partitioning is usually combined with replication** — each partition is replicated on multiple nodes for fault
+tolerance.
 
 ---
 
@@ -336,24 +338,42 @@ How does a client know which node to connect to for a given key?
 
 ### Q1: What is the difference between key range and hash partitioning?
 
-**Key range**: Each partition owns a contiguous range of keys (A-G, H-N, O-Z). Supports efficient range queries but risks hot spots if access is skewed (e.g., all writes for today's date go to one partition). **Hash partitioning**: Keys are hashed and partitions own hash ranges. Distributes keys evenly (no hot spots) but loses the ability to do range queries since adjacent keys are scattered. Cassandra's compound keys combine both: hash the first part for partition assignment, sort the remaining parts within each partition.
+**Key range**: Each partition owns a contiguous range of keys (A-G, H-N, O-Z). Supports efficient range queries but
+risks hot spots if access is skewed (e.g., all writes for today's date go to one partition). **Hash partitioning**: Keys
+are hashed and partitions own hash ranges. Distributes keys evenly (no hot spots) but loses the ability to do range
+queries since adjacent keys are scattered. Cassandra's compound keys combine both: hash the first part for partition
+assignment, sort the remaining parts within each partition.
 
 ### Q2: Explain scatter/gather and why it's a problem.
 
-In a **document-partitioned (local) secondary index**, each partition maintains its own index covering only its local documents. A query on the secondary index (e.g., "find all red cars") must be sent to **every partition** (scatter), and results must be merged (gather). This is expensive and adds tail latency — the response is only as fast as the slowest partition. The alternative is a **global (term-partitioned) index** which is efficient for reads but makes writes slower and more complex.
+In a **document-partitioned (local) secondary index**, each partition maintains its own index covering only its local
+documents. A query on the secondary index (e.g., "find all red cars") must be sent to **every partition** (scatter), and
+results must be merged (gather). This is expensive and adds tail latency — the response is only as fast as the slowest
+partition. The alternative is a **global (term-partitioned) index** which is efficient for reads but makes writes slower
+and more complex.
 
 ### Q3: Why shouldn't you use hash mod N for partitioning?
 
-If N (number of nodes) changes by even one, `hash(key) mod N` changes for almost every key, requiring nearly all data to be moved between nodes. This is catastrophically expensive. Instead, use **fixed number of partitions** (more partitions than nodes, reassign whole partitions), **dynamic partitioning** (split/merge partitions based on size), or **consistent hashing** (only K/N keys move when a node is added/removed).
+If N (number of nodes) changes by even one, `hash(key) mod N` changes for almost every key, requiring nearly all data to
+be moved between nodes. This is catastrophically expensive. Instead, use **fixed number of partitions** (more partitions
+than nodes, reassign whole partitions), **dynamic partitioning** (split/merge partitions based on size), or **consistent
+hashing** (only K/N keys move when a node is added/removed).
 
 ### Q4: How does request routing work in partitioned databases?
 
-Three approaches: (1) **Any node**: client contacts any node, which forwards the request to the correct partition owner. (2) **Routing tier**: a partition-aware proxy/load balancer routes requests to the correct node. (3) **Client awareness**: the client itself maintains the partition-to-node mapping. The mapping is kept up-to-date via a coordination service like ZooKeeper (used by HBase, Kafka) or a gossip protocol (used by Cassandra, Riak).
+Three approaches: (1) **Any node**: client contacts any node, which forwards the request to the correct partition owner.
+(2) **Routing tier**: a partition-aware proxy/load balancer routes requests to the correct node. (3) **Client
+awareness**: the client itself maintains the partition-to-node mapping. The mapping is kept up-to-date via a
+coordination service like ZooKeeper (used by HBase, Kafka) or a gossip protocol (used by Cassandra, Riak).
 
 ### Q5: What is consistent hashing and how does it help with rebalancing?
 
-Consistent hashing maps both keys and nodes onto a circular hash ring. Each key is assigned to the nearest node clockwise on the ring. When a node is added, it takes over keys from the next node on the ring; when removed, its keys move to the next node. Only K/N keys move on average (where K = total keys, N = nodes), compared to nearly all keys with hash mod N. **Virtual nodes** (each physical node gets multiple positions on the ring) improve balance and ensure even distribution.
+Consistent hashing maps both keys and nodes onto a circular hash ring. Each key is assigned to the nearest node
+clockwise on the ring. When a node is added, it takes over keys from the next node on the ring; when removed, its keys
+move to the next node. Only K/N keys move on average (where K = total keys, N = nodes), compared to nearly all keys with
+hash mod N. **Virtual nodes** (each physical node gets multiple positions on the ring) improve balance and ensure even
+distribution.
 
 ---
 
-*Based on Chapter 6 of "Designing Data-Intensive Applications" by Martin Kleppmann*
+_Based on Chapter 6 of "Designing Data-Intensive Applications" by Martin Kleppmann_

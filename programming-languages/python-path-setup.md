@@ -8,7 +8,8 @@ When using Neovim with linters like `flake8`, you may encounter errors:
 Error running flake8: ENOENT: no such file or directory
 ```
 
-This happens because Python user-installed packages (via `pip install --user` or when site-packages is not writable) are installed to `~/Library/Python/<version>/bin/` on macOS, which is not in the default PATH.
+This happens because Python user-installed packages (via `pip install --user` or when site-packages is not writable) are
+installed to `~/Library/Python/<version>/bin/` on macOS, which is not in the default PATH.
 
 ## Solution
 
@@ -44,4 +45,3 @@ flake8 --version
 ## Related
 
 - [pip user installs documentation](https://pip.pypa.io/en/stable/user_guide/#user-installs)
-

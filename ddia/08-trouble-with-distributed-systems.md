@@ -41,7 +41,8 @@
 
 ## Unreliable Networks
 
-Distributed systems communicate via **asynchronous packet networks** (e.g., Ethernet, TCP/IP). The network is fundamentally unreliable.
+Distributed systems communicate via **asynchronous packet networks** (e.g., Ethernet, TCP/IP). The network is
+fundamentally unreliable.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -425,24 +426,42 @@ Each machine has its own clock (quartz oscillator). Clocks drift: faster or slow
 
 ### Q1: Why can't you simply use a timeout to detect node failure?
 
-In an asynchronous network, there is no upper bound on message delivery time. A node might be alive but experiencing a long GC pause, network congestion, or VM migration. A short timeout causes false positives (declaring live nodes dead), which can trigger unnecessary failovers and even cascading failures (overloading other nodes with the "dead" node's work). A long timeout means genuine failures take too long to detect. There is no perfect timeout — only trade-offs between speed of detection and false positive rate.
+In an asynchronous network, there is no upper bound on message delivery time. A node might be alive but experiencing a
+long GC pause, network congestion, or VM migration. A short timeout causes false positives (declaring live nodes dead),
+which can trigger unnecessary failovers and even cascading failures (overloading other nodes with the "dead" node's
+work). A long timeout means genuine failures take too long to detect. There is no perfect timeout — only trade-offs
+between speed of detection and false positive rate.
 
 ### Q2: Why are physical clocks unreliable for ordering events in distributed systems?
 
-Each machine's clock drifts independently (up to 200 ppm). NTP synchronization provides at best ~35ms accuracy over the internet. NTP can jump clocks forward or backward. GC pauses and VM suspensions can freeze a process while its clock advances. Using physical timestamps for Last-Write-Wins (LWW) ordering means clock skew between nodes silently determines which writes survive — leading to data loss. Instead, use logical clocks (Lamport timestamps, vector clocks) for causal ordering.
+Each machine's clock drifts independently (up to 200 ppm). NTP synchronization provides at best ~35ms accuracy over the
+internet. NTP can jump clocks forward or backward. GC pauses and VM suspensions can freeze a process while its clock
+advances. Using physical timestamps for Last-Write-Wins (LWW) ordering means clock skew between nodes silently
+determines which writes survive — leading to data loss. Instead, use logical clocks (Lamport timestamps, vector clocks)
+for causal ordering.
 
 ### Q3: What are fencing tokens and why are they needed?
 
-Fencing tokens solve the problem of expired leases after process pauses. When a lock/lease is granted, the lock service issues a monotonically increasing token number. Every write to the storage system must include the token. The storage server rejects writes with a token lower than the highest token it has already seen. This prevents a node that held an old lease (and experienced a long pause) from making writes that conflict with the new leaseholder.
+Fencing tokens solve the problem of expired leases after process pauses. When a lock/lease is granted, the lock service
+issues a monotonically increasing token number. Every write to the storage system must include the token. The storage
+server rejects writes with a token lower than the highest token it has already seen. This prevents a node that held an
+old lease (and experienced a long pause) from making writes that conflict with the new leaseholder.
 
 ### Q4: What is a Byzantine fault?
 
-A Byzantine fault is when a node not only crashes but acts **maliciously** — sending contradictory, fabricated, or incorrect messages. Named after the Byzantine Generals Problem. Most database systems don't try to tolerate Byzantine faults (it requires 3f+1 nodes to tolerate f Byzantine nodes). Byzantine fault tolerance is mainly relevant for blockchain/cryptocurrency systems, aerospace (bit-flip protection), and multi-party computation where nodes don't trust each other.
+A Byzantine fault is when a node not only crashes but acts **maliciously** — sending contradictory, fabricated, or
+incorrect messages. Named after the Byzantine Generals Problem. Most database systems don't try to tolerate Byzantine
+faults (it requires 3f+1 nodes to tolerate f Byzantine nodes). Byzantine fault tolerance is mainly relevant for
+blockchain/cryptocurrency systems, aerospace (bit-flip protection), and multi-party computation where nodes don't trust
+each other.
 
 ### Q5: What is the most realistic system model for distributed databases?
 
-**Partially synchronous timing + crash-recovery failure model**. Partially synchronous means the system usually meets timing bounds but occasionally exceeds them (realistic for networks and OS scheduling). Crash-recovery means nodes can crash and restart with their persistent storage intact (realistic for servers with SSDs/HDDs). This model is assumed by most practical distributed algorithms (Raft, Paxos, etc.).
+**Partially synchronous timing + crash-recovery failure model**. Partially synchronous means the system usually meets
+timing bounds but occasionally exceeds them (realistic for networks and OS scheduling). Crash-recovery means nodes can
+crash and restart with their persistent storage intact (realistic for servers with SSDs/HDDs). This model is assumed by
+most practical distributed algorithms (Raft, Paxos, etc.).
 
 ---
 
-*Based on Chapter 8 of "Designing Data-Intensive Applications" by Martin Kleppmann*
+_Based on Chapter 8 of "Designing Data-Intensive Applications" by Martin Kleppmann_

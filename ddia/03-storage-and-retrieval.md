@@ -21,11 +21,11 @@ The world's simplest database — two Bash functions:
 ```bash
 #!/bin/bash
 db_set() {
-    echo "$1,$2" >> database        # Append to end of file
+  echo "$1,$2" >> database        # Append to end of file
 }
 
 db_get() {
-    grep "^$1," database | sed -e "s/^$1,//" | tail -n 1   # Scan for last occurrence
+  grep "^$1," database | sed -e "s/^$1,//" | tail -n 1   # Scan for last occurrence
 }
 ```
 
@@ -107,13 +107,13 @@ The log file grows forever — solved by **compaction** (removing duplicate keys
 
 ### Practical Considerations
 
-| Concern | Solution |
-|---------|----------|
-| **File format** | Binary format (length-prefixed strings) faster than CSV |
-| **Deleting records** | Append a **tombstone** marker; merging discards tombstoned keys |
-| **Crash recovery** | Rebuild hash map by scanning segments (slow); or keep hash map snapshots on disk |
-| **Partially written records** | Use checksums to detect and ignore corrupted records |
-| **Concurrency** | Single writer thread; reads can be concurrent (immutable segments) |
+| Concern                       | Solution                                                                         |
+| ----------------------------- | -------------------------------------------------------------------------------- |
+| **File format**               | Binary format (length-prefixed strings) faster than CSV                          |
+| **Deleting records**          | Append a **tombstone** marker; merging discards tombstoned keys                  |
+| **Crash recovery**            | Rebuild hash map by scanning segments (slow); or keep hash map snapshots on disk |
+| **Partially written records** | Use checksums to detect and ignore corrupted records                             |
+| **Concurrency**               | Single writer thread; reads can be concurrent (immutable segments)               |
 
 ### Limitations of Hash Indexes
 
@@ -180,7 +180,8 @@ An improvement over hash-indexed segments: **keys are sorted** within each segme
 
 ### Constructing SSTables from a Memtable (LSM-Tree)
 
-You can't sort writes as they arrive (random order). Solution: use an **in-memory balanced tree** (red-black tree or AVL tree) called a **memtable**:
+You can't sort writes as they arrive (random order). Solution: use an **in-memory balanced tree** (red-black tree or AVL
+tree) called a **memtable**:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -346,7 +347,8 @@ The most widely used index structure. Used by virtually every relational databas
 
 ### Write-Ahead Log (WAL) for B-Trees
 
-Every B-tree modification is first written to a **write-ahead log** (WAL / redo log) before modifying the tree pages. On crash, the WAL is replayed to restore the B-tree to a consistent state.
+Every B-tree modification is first written to a **write-ahead log** (WAL / redo log) before modifying the tree pages. On
+crash, the WAL is replayed to restore the B-tree to a consistent state.
 
 ```
 Write flow:  Write → WAL (append-only) → Modify B-tree page(s)
@@ -558,7 +560,8 @@ Crash:       Replay WAL to fix any partially-written pages
 
 ## Column-Oriented Storage
 
-In OLAP queries, you typically access only 3-5 columns out of 100+ in a table. Column-oriented storage stores all values of a column together:
+In OLAP queries, you typically access only 3-5 columns out of 100+ in a table. Column-oriented storage stores all values
+of a column together:
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -651,24 +654,42 @@ In OLAP queries, you typically access only 3-5 columns out of 100+ in a table. C
 
 ### Q1: Explain the difference between B-Trees and LSM-Trees.
 
-B-Trees update data **in place** on fixed-size pages, using a balanced tree structure with O(log n) reads. LSM-Trees use an **append-only** approach: writes go to an in-memory memtable, which is periodically flushed to sorted SSTables on disk. Background compaction merges SSTables. B-Trees have faster reads (single lookup path) but slower writes (random I/O). LSM-Trees have faster writes (sequential I/O) but slower reads (must check multiple levels). B-Trees are used by most relational DBs; LSM-Trees by RocksDB, Cassandra, HBase.
+B-Trees update data **in place** on fixed-size pages, using a balanced tree structure with O(log n) reads. LSM-Trees use
+an **append-only** approach: writes go to an in-memory memtable, which is periodically flushed to sorted SSTables on
+disk. Background compaction merges SSTables. B-Trees have faster reads (single lookup path) but slower writes (random
+I/O). LSM-Trees have faster writes (sequential I/O) but slower reads (must check multiple levels). B-Trees are used by
+most relational DBs; LSM-Trees by RocksDB, Cassandra, HBase.
 
 ### Q2: What is write amplification and why does it matter?
 
-Write amplification is when one application write causes multiple actual disk writes. In B-Trees: WAL write + page write = ~2x. In LSM-Trees: WAL + memtable flush + multiple compaction levels = 10-30x. It matters because: (1) it consumes disk bandwidth that could serve other operations, (2) on SSDs it reduces drive lifetime (limited write cycles per cell). However, LSM-Trees compensate with sequential writes which are much faster than B-Tree's random writes.
+Write amplification is when one application write causes multiple actual disk writes. In B-Trees: WAL write + page write
+= ~2x. In LSM-Trees: WAL + memtable flush + multiple compaction levels = 10-30x. It matters because: (1) it consumes
+disk bandwidth that could serve other operations, (2) on SSDs it reduces drive lifetime (limited write cycles per cell).
+However, LSM-Trees compensate with sequential writes which are much faster than B-Tree's random writes.
 
 ### Q3: Why do analytics databases use column-oriented storage?
 
-OLAP queries typically read only 3-5 columns out of 100+ in a wide fact table. Row-oriented storage must load all columns for each row. Column-oriented storage stores each column separately, so a query reads only the needed columns. Additional benefits: (1) better compression (similar values in a column compress well — bitmap encoding, RLE), (2) vectorized processing (compressed column chunks fit in CPU L1 cache for SIMD operations), (3) sort order can cluster related values for even better compression and locality.
+OLAP queries typically read only 3-5 columns out of 100+ in a wide fact table. Row-oriented storage must load all
+columns for each row. Column-oriented storage stores each column separately, so a query reads only the needed columns.
+Additional benefits: (1) better compression (similar values in a column compress well — bitmap encoding, RLE), (2)
+vectorized processing (compressed column chunks fit in CPU L1 cache for SIMD operations), (3) sort order can cluster
+related values for even better compression and locality.
 
 ### Q4: What is a Bloom filter and why is it used in LSM-Trees?
 
-A Bloom filter is a memory-efficient probabilistic data structure that tells you either "definitely NOT in the set" or "possibly in the set" (with a small false-positive rate). In LSM-Trees, looking up a non-existent key requires checking every SSTable level — very expensive. A Bloom filter per SSTable lets you skip SSTables that definitely don't contain the key, dramatically reducing unnecessary disk reads.
+A Bloom filter is a memory-efficient probabilistic data structure that tells you either "definitely NOT in the set" or
+"possibly in the set" (with a small false-positive rate). In LSM-Trees, looking up a non-existent key requires checking
+every SSTable level — very expensive. A Bloom filter per SSTable lets you skip SSTables that definitely don't contain
+the key, dramatically reducing unnecessary disk reads.
 
 ### Q5: Explain the star schema in data warehousing.
 
-The star schema has a central **fact table** (each row = an event, like a sale) surrounded by **dimension tables** (who, what, where, when). The fact table contains foreign keys to dimensions plus metric columns (quantity, price). It's called "star" because the fact table sits at the center with dimension tables radiating outward. A variant called the **snowflake schema** further normalizes dimensions into sub-dimensions. Star schemas are simpler to query and are the standard for OLAP workloads.
+The star schema has a central **fact table** (each row = an event, like a sale) surrounded by **dimension tables** (who,
+what, where, when). The fact table contains foreign keys to dimensions plus metric columns (quantity, price). It's
+called "star" because the fact table sits at the center with dimension tables radiating outward. A variant called the
+**snowflake schema** further normalizes dimensions into sub-dimensions. Star schemas are simpler to query and are the
+standard for OLAP workloads.
 
 ---
 
-*Based on Chapter 3 of "Designing Data-Intensive Applications" by Martin Kleppmann*
+_Based on Chapter 3 of "Designing Data-Intensive Applications" by Martin Kleppmann_

@@ -29,8 +29,8 @@
 
 ### What This Guide Covers
 
-This comprehensive guide explores one of the most fundamental yet often misunderstood mechanisms in C++: the 
-Virtual Table (VTable). Understanding VTables is crucial for:
+This comprehensive guide explores one of the most fundamental yet often misunderstood mechanisms in C++: the Virtual
+Table (VTable). Understanding VTables is crucial for:
 
 - Writing efficient polymorphic code
 - Debugging complex inheritance hierarchies
@@ -50,9 +50,9 @@ Before diving into VTables, you should have a solid understanding of:
 
 ### A Brief History
 
-The concept of virtual tables dates back to the early days of object-oriented programming. When Bjarne 
-Stroustrup designed C++ in the early 1980s, he needed a mechanism to support runtime polymorphism efficiently. 
-The VTable mechanism was chosen as the implementation strategy because it provides:
+The concept of virtual tables dates back to the early days of object-oriented programming. When Bjarne Stroustrup
+designed C++ in the early 1980s, he needed a mechanism to support runtime polymorphism efficiently. The VTable mechanism
+was chosen as the implementation strategy because it provides:
 
 1. **Constant-time dispatch**: Virtual function calls have O(1) complexity
 2. **Memory efficiency**: Only one VTable per class (not per object)
@@ -118,11 +118,11 @@ private:
   double radius;
 public:
   Circle(double r) : radius(r) {}
-    
+
   double area() const override {
     return 3.14159 * radius * radius;
   }
-    
+
   double perimeter() const override {
     return 2 * 3.14159 * radius;
   }
@@ -133,11 +133,11 @@ private:
   double width, height;
 public:
   Rectangle(double w, double h) : width(w), height(h) {}
-    
+
   double area() const override {
     return width * height;
   }
-    
+
   double perimeter() const override {
     return 2 * (width + height);
   }
@@ -162,9 +162,9 @@ int main() {
 
 ### Why Dynamic Polymorphism Needs VTables
 
-Consider the `printShapeInfo` function above. At compile time, the compiler only knows that `shape` is a 
-pointer to `Shape`. It cannot know whether the actual object is a `Circle`, `Rectangle`, or any other shape. 
-The compiler needs a mechanism to:
+Consider the `printShapeInfo` function above. At compile time, the compiler only knows that `shape` is a pointer to
+`Shape`. It cannot know whether the actual object is a `Circle`, `Rectangle`, or any other shape. The compiler needs a
+mechanism to:
 
 1. Look up the correct function implementation at runtime
 2. Do this efficiently without expensive type checking
@@ -178,9 +178,9 @@ This is exactly what VTables provide.
 
 ### Definition
 
-A **Virtual Table (VTable)**, also known as a **Virtual Method Table (VMT)** or **Virtual Function Table**, is 
-a lookup table of function pointers used to resolve virtual function calls at runtime. It is the mechanism 
-that enables dynamic dispatch in C++.
+A **Virtual Table (VTable)**, also known as a **Virtual Method Table (VMT)** or **Virtual Function Table**, is a lookup
+table of function pointers used to resolve virtual function calls at runtime. It is the mechanism that enables dynamic
+dispatch in C++.
 
 ### Key Characteristics
 
@@ -192,8 +192,7 @@ that enables dynamic dispatch in C++.
 
 ### The VPointer (vptr)
 
-Each object of a class with virtual functions contains a hidden pointer called the **VPointer (vptr)**. This 
-pointer:
+Each object of a class with virtual functions contains a hidden pointer called the **VPointer (vptr)**. This pointer:
 
 - Points to the class's VTable
 - Is typically stored at the beginning of the object
@@ -355,6 +354,7 @@ int main() {
 ```
 
 **Typical Output (64-bit system):**
+
 ```
 Size of Base: 16 (8 bytes vptr + 4 bytes x + 4 bytes y)
 Size of Derived: 24 (8 bytes vptr + 4 bytes x + 4 bytes y + 4 bytes z + 4 bytes padding)
@@ -443,27 +443,27 @@ In single inheritance, the VTable mechanism is straightforward:
 ```cpp
 class Base {
 public:
-    int baseData;
+  int baseData;
 
-    virtual void func1() { std::cout << "Base::func1" << std::endl; }
-    virtual void func2() { std::cout << "Base::func2" << std::endl; }
-    virtual ~Base() = default;
+  virtual void func1() { std::cout << "Base::func1" << std::endl; }
+  virtual void func2() { std::cout << "Base::func2" << std::endl; }
+  virtual ~Base() = default;
 };
 
 class Derived : public Base {
 public:
-    int derivedData;
+  int derivedData;
 
-    void func1() override { std::cout << "Derived::func1" << std::endl; }
-    virtual void func3() { std::cout << "Derived::func3" << std::endl; }
+  void func1() override { std::cout << "Derived::func1" << std::endl; }
+  virtual void func3() { std::cout << "Derived::func3" << std::endl; }
 };
 
 class MoreDerived : public Derived {
 public:
-    int moreDerivedData;
+  int moreDerivedData;
 
-    void func2() override { std::cout << "MoreDerived::func2" << std::endl; }
-    void func3() override { std::cout << "MoreDerived::func3" << std::endl; }
+  void func2() override { std::cout << "MoreDerived::func2" << std::endl; }
+  void func3() override { std::cout << "MoreDerived::func3" << std::endl; }
 };
 ```
 
@@ -555,31 +555,32 @@ Base* b = &md;        // Same address
 
 ### The Complexity of Multiple Inheritance
 
-Multiple inheritance introduces significant complexity to the VTable mechanism. When a class inherits from multiple base classes with virtual functions, it needs multiple VTables.
+Multiple inheritance introduces significant complexity to the VTable mechanism. When a class inherits from multiple base
+classes with virtual functions, it needs multiple VTables.
 
 ```cpp
 class Base1 {
 public:
-    int data1;
-    virtual void func1() { std::cout << "Base1::func1\n"; }
-    virtual void funcA() { std::cout << "Base1::funcA\n"; }
-    virtual ~Base1() = default;
+  int data1;
+  virtual void func1() { std::cout << "Base1::func1\n"; }
+  virtual void funcA() { std::cout << "Base1::funcA\n"; }
+  virtual ~Base1() = default;
 };
 
 class Base2 {
 public:
-    int data2;
-    virtual void func2() { std::cout << "Base2::func2\n"; }
-    virtual void funcB() { std::cout << "Base2::funcB\n"; }
-    virtual ~Base2() = default;
+  int data2;
+  virtual void func2() { std::cout << "Base2::func2\n"; }
+  virtual void funcB() { std::cout << "Base2::funcB\n"; }
+  virtual ~Base2() = default;
 };
 
 class Derived : public Base1, public Base2 {
 public:
-    int data3;
-    void func1() override { std::cout << "Derived::func1\n"; }
-    void func2() override { std::cout << "Derived::func2\n"; }
-    virtual void func3() { std::cout << "Derived::func3\n"; }
+  int data3;
+  void func1() override { std::cout << "Derived::func1\n"; }
+  void func2() override { std::cout << "Derived::func2\n"; }
+  virtual void func3() { std::cout << "Derived::func3\n"; }
 };
 ```
 
@@ -642,16 +643,18 @@ Derived's VTable for Base2 (Secondary VTable):
 
 ### Understanding Thunks
 
-A **thunk** is a small piece of code that adjusts the `this` pointer before calling the actual function. This is necessary because when calling through a secondary base class pointer, the `this` pointer points to the secondary base subobject, not the complete object.
+A **thunk** is a small piece of code that adjusts the `this` pointer before calling the actual function. This is
+necessary because when calling through a secondary base class pointer, the `this` pointer points to the secondary base
+subobject, not the complete object.
 
 ```cpp
 // Conceptual thunk for Derived::func2 called through Base2*
 void Derived_func2_thunk(Base2* this_ptr) {
-    // Adjust this pointer from Base2 subobject to Derived object
-    Derived* adjusted_this = reinterpret_cast<Derived*>(
-        reinterpret_cast<char*>(this_ptr) - 16  // offset-to-top
-    );
-    adjusted_this->func2();  // Call actual function
+  // Adjust this pointer from Base2 subobject to Derived object
+  Derived* adjusted_this = reinterpret_cast<Derived*>(
+    reinterpret_cast<char*>(this_ptr) - 16  // offset-to-top
+  );
+  adjusted_this->func2();  // Call actual function
 }
 ```
 
@@ -680,81 +683,81 @@ std::cout << "Base2* address:  " << b2 << std::endl;
 
 class Printable {
 public:
-    virtual void print() const = 0;
-    virtual ~Printable() = default;
+  virtual void print() const = 0;
+  virtual ~Printable() = default;
 };
 
 class Serializable {
 public:
-    virtual std::string serialize() const = 0;
-    virtual void deserialize(const std::string& data) = 0;
-    virtual ~Serializable() = default;
+  virtual std::string serialize() const = 0;
+  virtual void deserialize(const std::string& data) = 0;
+  virtual ~Serializable() = default;
 };
 
 class Comparable {
 public:
-    virtual bool equals(const Comparable& other) const = 0;
-    virtual int compareTo(const Comparable& other) const = 0;
-    virtual ~Comparable() = default;
+  virtual bool equals(const Comparable& other) const = 0;
+  virtual int compareTo(const Comparable& other) const = 0;
+  virtual ~Comparable() = default;
 };
 
 class Document : public Printable, public Serializable, public Comparable {
 private:
-    std::string content;
-    std::string title;
+  std::string content;
+  std::string title;
 
 public:
-    Document(const std::string& t, const std::string& c)
-        : title(t), content(c) {}
+  Document(const std::string& t, const std::string& c)
+  : title(t), content(c) {}
 
-    // Implement Printable
-    void print() const override {
-        std::cout << "=== " << title << " ===" << std::endl;
-        std::cout << content << std::endl;
-    }
+  // Implement Printable
+  void print() const override {
+    std::cout << "=== " << title << " ===" << std::endl;
+    std::cout << content << std::endl;
+  }
 
-    // Implement Serializable
-    std::string serialize() const override {
-        return title + "|" + content;
-    }
+  // Implement Serializable
+  std::string serialize() const override {
+    return title + "|" + content;
+  }
 
-    void deserialize(const std::string& data) override {
-        size_t pos = data.find('|');
-        if (pos != std::string::npos) {
-            title = data.substr(0, pos);
-            content = data.substr(pos + 1);
-        }
+  void deserialize(const std::string& data) override {
+    size_t pos = data.find('|');
+    if (pos != std::string::npos) {
+      title = data.substr(0, pos);
+      content = data.substr(pos + 1);
     }
+  }
 
-    // Implement Comparable
-    bool equals(const Comparable& other) const override {
-        const Document* doc = dynamic_cast<const Document*>(&other);
-        return doc && doc->title == title && doc->content == content;
-    }
+  // Implement Comparable
+  bool equals(const Comparable& other) const override {
+    const Document* doc = dynamic_cast<const Document*>(&other);
+    return doc && doc->title == title && doc->content == content;
+  }
 
-    int compareTo(const Comparable& other) const override {
-        const Document* doc = dynamic_cast<const Document*>(&other);
-        if (!doc) return -1;
-        return title.compare(doc->title);
-    }
+  int compareTo(const Comparable& other) const override {
+    const Document* doc = dynamic_cast<const Document*>(&other);
+    if (!doc) return -1;
+    return title.compare(doc->title);
+  }
 };
 
 int main() {
-    Document doc("My Document", "Hello, World!");
+  Document doc("My Document", "Hello, World!");
 
-    // Can be used polymorphically through any base
-    Printable* p = &doc;
-    p->print();
+  // Can be used polymorphically through any base
+  Printable* p = &doc;
+  p->print();
 
-    Serializable* s = &doc;
-    std::cout << "Serialized: " << s->serialize() << std::endl;
+  Serializable* s = &doc;
+  std::cout << "Serialized: " << s->serialize() << std::endl;
 
-    Document doc2("Another Doc", "Content here");
-    Comparable* c1 = &doc;
-    Comparable* c2 = &doc2;
-    std::cout << "Equal: " << c1->equals(*c2) << std::endl;
+  Document doc2("Another Doc", "Content here");
+  Comparable* c1 = &doc;
+  Comparable* c2 = &doc2;
+  std::cout << "Equal: " << c1->equals(*c2) << std::endl;
 
-    return 0;
+  return 0;
 }
 ```
 
@@ -781,23 +784,23 @@ Without virtual inheritance:
 ```cpp
 class Animal {
 public:
-    int age;
-    virtual void eat() { std::cout << "Animal eating\n"; }
+  int age;
+  virtual void eat() { std::cout << "Animal eating\n"; }
 };
 
 class Mammal : public Animal {
 public:
-    virtual void giveBirth() { std::cout << "Giving live birth\n"; }
+  virtual void giveBirth() { std::cout << "Giving live birth\n"; }
 };
 
 class Bird : public Animal {
 public:
-    virtual void layEggs() { std::cout << "Laying eggs\n"; }
+  virtual void layEggs() { std::cout << "Laying eggs\n"; }
 };
 
 class Bat : public Mammal, public Bird {
-    // Problem: Bat has TWO Animal subobjects!
-    // Bat::Mammal::Animal and Bat::Bird::Animal
+  // Problem: Bat has TWO Animal subobjects!
+  // Bat::Mammal::Animal and Bat::Bird::Animal
 };
 
 Bat bat;
@@ -810,25 +813,25 @@ bat.eat();    // Error: ambiguous - which Animal's eat?
 ```cpp
 class Animal {
 public:
-    int age;
-    virtual void eat() { std::cout << "Animal eating\n"; }
-    virtual ~Animal() = default;
+  int age;
+  virtual void eat() { std::cout << "Animal eating\n"; }
+  virtual ~Animal() = default;
 };
 
 class Mammal : virtual public Animal {  // Virtual inheritance
 public:
-    virtual void giveBirth() { std::cout << "Giving live birth\n"; }
+  virtual void giveBirth() { std::cout << "Giving live birth\n"; }
 };
 
 class Bird : virtual public Animal {    // Virtual inheritance
 public:
-    virtual void layEggs() { std::cout << "Laying eggs\n"; }
+  virtual void layEggs() { std::cout << "Laying eggs\n"; }
 };
 
 class Bat : public Mammal, public Bird {
 public:
-    void eat() override { std::cout << "Bat eating insects\n"; }
-    void giveBirth() override { std::cout << "Bat giving birth\n"; }
+  void eat() override { std::cout << "Bat eating insects\n"; }
+  void giveBirth() override { std::cout << "Bat giving birth\n"; }
 };
 
 Bat bat;
@@ -893,26 +896,26 @@ Virtual bases are constructed first, and by the most derived class:
 ```cpp
 class Animal {
 public:
-    Animal() { std::cout << "Animal()\n"; }
-    Animal(int age) { std::cout << "Animal(" << age << ")\n"; }
+  Animal() { std::cout << "Animal()\n"; }
+  Animal(int age) { std::cout << "Animal(" << age << ")\n"; }
 };
 
 class Mammal : virtual public Animal {
 public:
-    Mammal() : Animal() { std::cout << "Mammal()\n"; }
+  Mammal() : Animal() { std::cout << "Mammal()\n"; }
 };
 
 class Bird : virtual public Animal {
 public:
-    Bird() : Animal() { std::cout << "Bird()\n"; }
+  Bird() : Animal() { std::cout << "Bird()\n"; }
 };
 
 class Bat : public Mammal, public Bird {
 public:
-    // Bat MUST initialize Animal because it's a virtual base
-    Bat() : Animal(5), Mammal(), Bird() {
-        std::cout << "Bat()\n";
-    }
+  // Bat MUST initialize Animal because it's a virtual base
+  Bat() : Animal(5), Mammal(), Bird() {
+    std::cout << "Bat()\n";
+  }
 };
 
 // Construction order: Animal(5) → Mammal() → Bird() → Bat()
@@ -961,29 +964,29 @@ VTable Layout (Itanium ABI):
 
 class Base {
 public:
-    virtual ~Base() = default;
+  virtual ~Base() = default;
 };
 
 class Derived : public Base {};
 
 int main() {
-    Base base;
-    Derived derived;
-    Base* ptr = &derived;
+  Base base;
+  Derived derived;
+  Base* ptr = &derived;
 
-    // Static type information
-    std::cout << typeid(Base).name() << std::endl;
-    std::cout << typeid(Derived).name() << std::endl;
+  // Static type information
+  std::cout << typeid(Base).name() << std::endl;
+  std::cout << typeid(Derived).name() << std::endl;
 
-    // Dynamic type information (uses vtable)
-    std::cout << typeid(*ptr).name() << std::endl;  // Returns Derived's type
+  // Dynamic type information (uses vtable)
+  std::cout << typeid(*ptr).name() << std::endl;  // Returns Derived's type
 
-    // Type comparison
-    if (typeid(*ptr) == typeid(Derived)) {
-        std::cout << "ptr points to a Derived object\n";
-    }
+  // Type comparison
+  if (typeid(*ptr) == typeid(Derived)) {
+    std::cout << "ptr points to a Derived object\n";
+  }
 
-    return 0;
+  return 0;
 }
 ```
 
@@ -996,47 +999,47 @@ int main() {
 
 class Animal {
 public:
-    virtual ~Animal() = default;
-    virtual void speak() = 0;
+  virtual ~Animal() = default;
+  virtual void speak() = 0;
 };
 
 class Dog : public Animal {
 public:
-    void speak() override { std::cout << "Woof!\n"; }
-    void fetch() { std::cout << "Fetching...\n"; }
+  void speak() override { std::cout << "Woof!\n"; }
+  void fetch() { std::cout << "Fetching...\n"; }
 };
 
 class Cat : public Animal {
 public:
-    void speak() override { std::cout << "Meow!\n"; }
-    void purr() { std::cout << "Purring...\n"; }
+  void speak() override { std::cout << "Meow!\n"; }
+  void purr() { std::cout << "Purring...\n"; }
 };
 
 void handleAnimal(Animal* animal) {
-    animal->speak();
+  animal->speak();
 
-    // Try to downcast to Dog
-    if (Dog* dog = dynamic_cast<Dog*>(animal)) {
-        dog->fetch();  // Safe to call
-    }
+  // Try to downcast to Dog
+  if (Dog* dog = dynamic_cast<Dog*>(animal)) {
+    dog->fetch();  // Safe to call
+  }
 
-    // Try to downcast to Cat
-    if (Cat* cat = dynamic_cast<Cat*>(animal)) {
-        cat->purr();  // Safe to call
-    }
+  // Try to downcast to Cat
+  if (Cat* cat = dynamic_cast<Cat*>(animal)) {
+    cat->purr();  // Safe to call
+  }
 }
 
 int main() {
-    Dog dog;
-    Cat cat;
+  Dog dog;
+  Cat cat;
 
-    std::cout << "Handling dog:\n";
-    handleAnimal(&dog);
+  std::cout << "Handling dog:\n";
+  handleAnimal(&dog);
 
-    std::cout << "\nHandling cat:\n";
-    handleAnimal(&cat);
+  std::cout << "\nHandling cat:\n";
+  handleAnimal(&cat);
 
-    return 0;
+  return 0;
 }
 ```
 
@@ -1051,35 +1054,37 @@ int main() {
 // Conceptual implementation of dynamic_cast
 template<typename Target, typename Source>
 Target* my_dynamic_cast(Source* source) {
-    if (source == nullptr) return nullptr;
+  if (source == nullptr) return nullptr;
 
-    // Get vtable pointer
-    void** vtable = *reinterpret_cast<void***>(source);
+  // Get vtable pointer
+  void** vtable = *reinterpret_cast<void***>(source);
 
-    // Get typeinfo (at vtable[-1] in Itanium ABI)
-    std::type_info* source_type = reinterpret_cast<std::type_info*>(vtable[-1]);
-    std::type_info* target_type = &typeid(Target);
+  // Get typeinfo (at vtable[-1] in Itanium ABI)
+  std::type_info* source_type = reinterpret_cast<std::type_info*>(vtable[-1]);
+  std::type_info* target_type = &typeid(Target);
 
-    // Check type compatibility
-    if (can_cast(source_type, target_type)) {
-        // Calculate offset and return adjusted pointer
-        return reinterpret_cast<Target*>(
-            reinterpret_cast<char*>(source) + get_offset(source_type, target_type)
-        );
-    }
+  // Check type compatibility
+  if (can_cast(source_type, target_type)) {
+    // Calculate offset and return adjusted pointer
+    return reinterpret_cast<Target*>(
+      reinterpret_cast<char*>(source) + get_offset(source_type, target_type)
+    );
+  }
 
-    return nullptr;
+  return nullptr;
 }
 ```
 
 ### RTTI Overhead and Disabling
 
 RTTI adds overhead:
+
 - Additional type_info object per class
 - Larger VTable (typeinfo pointer)
 - Runtime cost for dynamic_cast and typeid
 
 Disabling RTTI:
+
 ```bash
 # GCC/Clang
 g++ -fno-rtti source.cpp
@@ -1089,6 +1094,7 @@ cl /GR- source.cpp
 ```
 
 When RTTI is disabled:
+
 - `dynamic_cast` to non-void pointers won't compile
 - `typeid` on polymorphic types won't work
 - Can slightly reduce binary size
@@ -1104,9 +1110,11 @@ The vptr is set to each class's VTable as construction progresses:
 1. In Base constructor → vptr points to Base's VTable
 2. In Derived constructor → vptr points to Derived's VTable
 
-**Key rule**: Virtual function calls in constructors/destructors use the current class's version, not the most derived version. This prevents calling methods on uninitialized derived parts.
+**Key rule**: Virtual function calls in constructors/destructors use the current class's version, not the most derived
+version. This prevents calling methods on uninitialized derived parts.
 
 **Output:**
+
 ```
 Destroying Derived object:
 Derived destructor - calling whoAmI()
@@ -1116,14 +1124,15 @@ I am Base                              ← VTable changed during destruction
 ```
 
 ### Destruction sequence:
+
 ```
 1. Start Derived destructor:
-   a. vptr still points to Derived's VTable
-   b. Execute Derived destructor body
-   c. Set vptr to Base's VTable        ← VTable changes!
+a. vptr still points to Derived's VTable
+b. Execute Derived destructor body
+c. Set vptr to Base's VTable        ← VTable changes!
 2. Start Base destructor:
-   a. vptr now points to Base's VTable
-   b. Execute Base destructor body
+a. vptr now points to Base's VTable
+b. Execute Base destructor body
 3. Memory freed
 ```
 
@@ -1139,26 +1148,26 @@ This is a well-known C++ guideline. Calling virtual functions from constructors 
 // BAD EXAMPLE - Don't do this
 class Base {
 public:
-    Base() {
-        initialize();  // Dangerous!
-    }
+  Base() {
+    initialize();  // Dangerous!
+  }
 
-    virtual void initialize() {
-        // Base initialization
-    }
+  virtual void initialize() {
+    // Base initialization
+  }
 };
 
 class Derived : public Base {
 public:
-    int* data;
+  int* data;
 
-    Derived() : data(nullptr) {
-        // data is initialized AFTER Base() returns
-    }
+  Derived() : data(nullptr) {
+    // data is initialized AFTER Base() returns
+  }
 
-    void initialize() override {
-        data = new int[100];  // Called from Base(), but data not yet initialized!
-    }
+  void initialize() override {
+    data = new int[100];  // Called from Base(), but data not yet initialized!
+  }
 };
 ```
 
@@ -1169,26 +1178,26 @@ public:
 ```cpp
 class Base {
 public:
-    Base() = default;
+  Base() = default;
 
-    // Non-virtual initialization - called after construction
-    void setup() {
-        doSetup();  // Now safe to call virtual
-    }
+  // Non-virtual initialization - called after construction
+  void setup() {
+    doSetup();  // Now safe to call virtual
+  }
 
-    virtual ~Base() = default;
+  virtual ~Base() = default;
 
 protected:
-    virtual void doSetup() {
-        std::cout << "Base setup\n";
-    }
+  virtual void doSetup() {
+    std::cout << "Base setup\n";
+  }
 };
 
 class Derived : public Base {
 protected:
-    void doSetup() override {
-        std::cout << "Derived setup\n";
-    }
+  void doSetup() override {
+    std::cout << "Derived setup\n";
+  }
 };
 
 // Usage:
@@ -1201,34 +1210,34 @@ d.setup();  // Calls Derived::doSetup()
 ```cpp
 class Widget {
 protected:
-    Widget() = default;  // Protected constructor
+  Widget() = default;  // Protected constructor
 
 public:
-    virtual void initialize() {
-        std::cout << "Widget initialized\n";
-    }
+  virtual void initialize() {
+    std::cout << "Widget initialized\n";
+  }
 
-    virtual ~Widget() = default;
+  virtual ~Widget() = default;
 
-    template<typename T, typename... Args>
-    static std::unique_ptr<T> create(Args&&... args) {
-        auto obj = std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-        obj->initialize();  // Called after full construction
-        return obj;
-    }
+  template<typename T, typename... Args>
+  static std::unique_ptr<T> create(Args&&... args) {
+    auto obj = std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    obj->initialize();  // Called after full construction
+    return obj;
+  }
 };
 
 class SpecialWidget : public Widget {
-    friend class Widget;  // Allow factory access
+  friend class Widget;  // Allow factory access
 
 protected:
-    SpecialWidget() = default;
+  SpecialWidget() = default;
 
 public:
-    void initialize() override {
-        Widget::initialize();
-        std::cout << "SpecialWidget initialized\n";
-    }
+  void initialize() override {
+    Widget::initialize();
+    std::cout << "SpecialWidget initialized\n";
+  }
 };
 
 // Usage:
@@ -1246,9 +1255,9 @@ A pure virtual function is a virtual function with no implementation in the base
 ```cpp
 class AbstractShape {
 public:
-    virtual double area() const = 0;      // Pure virtual
-    virtual double perimeter() const = 0; // Pure virtual
-    virtual ~AbstractShape() = default;   // Not pure virtual
+  virtual double area() const = 0;      // Pure virtual
+  virtual double perimeter() const = 0; // Pure virtual
+  virtual ~AbstractShape() = default;   // Not pure virtual
 };
 ```
 
@@ -1285,24 +1294,24 @@ AbstractShape's VTable:
 
 class Base {
 public:
-    Base() {
-        // Dangerous: calling pure virtual indirectly
-        callPureVirtual();
-    }
+  Base() {
+    // Dangerous: calling pure virtual indirectly
+    callPureVirtual();
+  }
 
-    void callPureVirtual() {
-        doSomething();  // Pure virtual call!
-    }
+  void callPureVirtual() {
+    doSomething();  // Pure virtual call!
+  }
 
-    virtual void doSomething() = 0;
-    virtual ~Base() = default;
+  virtual void doSomething() = 0;
+  virtual ~Base() = default;
 };
 
 class Derived : public Base {
 public:
-    void doSomething() override {
-        std::cout << "Doing something\n";
-    }
+  void doSomething() override {
+    std::cout << "Doing something\n";
+  }
 };
 
 // If you try to create Derived, the program will likely crash
@@ -1320,7 +1329,7 @@ Makes a class abstract without other pure virtuals. Must still provide an implem
 ```cpp
 class Interface {
 public:
-    virtual ~Interface() = 0;
+  virtual ~Interface() = 0;
 };
 Interface::~Interface() {}  // Must provide!
 ```
@@ -1383,13 +1392,13 @@ MSVC VTable Layout:
 
 ### Key Differences Between ABIs
 
-| Feature | Itanium ABI | MSVC ABI |
-|---------|-------------|----------|
-| RTTI location | Before vptr entry | Before vptr entry |
-| Virtual bases | offset-to-top in vtable | Separate vbtable |
-| Thunks | In main vtable | Separate thunk table |
-| Name mangling | `_Z` prefix | `?` prefix |
-| Object layout | Base subobjects first | Base subobjects first |
+| Feature       | Itanium ABI             | MSVC ABI              |
+| ------------- | ----------------------- | --------------------- |
+| RTTI location | Before vptr entry       | Before vptr entry     |
+| Virtual bases | offset-to-top in vtable | Separate vbtable      |
+| Thunks        | In main vtable          | Separate thunk table  |
+| Name mangling | `_Z` prefix             | `?` prefix            |
+| Object layout | Base subobjects first   | Base subobjects first |
 
 ### Examining VTables with Compiler Tools
 
@@ -1411,37 +1420,37 @@ clang++ -Xclang -fdump-vtable-layouts source.cpp
 ```cpp
 class Base {
 public:
-    virtual void foo();
-    virtual void bar();
-    virtual ~Base();
+  virtual void foo();
+  virtual void bar();
+  virtual ~Base();
 };
 
 class Derived : public Base {
 public:
-    void foo() override;
-    virtual void baz();
+  void foo() override;
+  virtual void baz();
 };
 ```
 
 ```
 VTable for 'Base':
-  vtable address: 0x...
-  offset: 0
-  --
-  0 | void Base::foo()
-  1 | void Base::bar()
-  2 | Base::~Base() [complete]
-  3 | Base::~Base() [deleting]
+vtable address: 0x...
+offset: 0
+--
+0 | void Base::foo()
+1 | void Base::bar()
+2 | Base::~Base() [complete]
+3 | Base::~Base() [deleting]
 
 VTable for 'Derived':
-  vtable address: 0x...
-  offset: 0
-  --
-  0 | void Derived::foo()
-  1 | void Base::bar()
-  2 | Derived::~Derived() [complete]
-  3 | Derived::~Derived() [deleting]
-  4 | void Derived::baz()
+vtable address: 0x...
+offset: 0
+--
+0 | void Derived::foo()
+1 | void Base::bar()
+2 | Derived::~Derived() [complete]
+3 | Derived::~Derived() [deleting]
+4 | void Derived::baz()
 ```
 
 ### MSVC Tools
@@ -1461,7 +1470,7 @@ cl /d1reportAllClassLayout source.cpp
 // libfoo.so
 class Foo {
 public:
-    virtual void method();
+  virtual void method();
 };
 
 // Application compiled with different compiler or settings
@@ -1469,12 +1478,13 @@ public:
 #include "foo.h"
 
 int main() {
-    Foo foo;
-    foo.method();  // May crash if ABI doesn't match!
+  Foo foo;
+  foo.method();  // May crash if ABI doesn't match!
 }
 ```
 
 **Solutions:**
+
 1. Use the same compiler and version
 2. Use C interfaces at boundaries
 3. Use pImpl idiom
@@ -1491,18 +1501,18 @@ Virtual functions can return different (but related) types:
 ```cpp
 class Animal {
 public:
-    virtual Animal* clone() const {
-        return new Animal(*this);
-    }
-    virtual ~Animal() = default;
+  virtual Animal* clone() const {
+    return new Animal(*this);
+  }
+  virtual ~Animal() = default;
 };
 
 class Dog : public Animal {
 public:
-    // Covariant return type - returns Dog* instead of Animal*
-    Dog* clone() const override {
-        return new Dog(*this);
-    }
+  // Covariant return type - returns Dog* instead of Animal*
+  Dog* clone() const override {
+    return new Dog(*this);
+  }
 };
 
 // VTable entry for clone() includes adjustment information
@@ -1526,28 +1536,29 @@ Dog's VTable (with covariant return):
 ```cpp
 class A {
 public:
-    virtual void funcA() {}
+  virtual void funcA() {}
 };
 
 class B : virtual public A {
 public:
-    virtual void funcB() {}
+  virtual void funcB() {}
 };
 
 class C : virtual public A {
 public:
-    virtual void funcC() {}
+  virtual void funcC() {}
 };
 
 class D : public B, public C {
 public:
-    void funcA() override {}
-    void funcB() override {}
-    void funcC() override {}
+  void funcA() override {}
+  void funcB() override {}
+  void funcC() override {}
 };
 ```
 
 D ends up with a complex VTable structure:
+
 - Primary VTable (for B base)
 - Secondary VTable (for C base)
 - VTable for virtual base A
@@ -1596,11 +1607,11 @@ VTable pointers can be manipulated directly (undefined behavior!):
 
 ```cpp
 void dangerous_example() {
-    // Copy vptr from one object to another
-    void** victim_vptr = reinterpret_cast<void**>(&victim);
-    void** attacker_vptr = reinterpret_cast<void**>(&attacker);
-    std::memcpy(victim_vptr, attacker_vptr, sizeof(void*));
-    // This is dangerous: undefined behavior, security vulnerabilities
+  // Copy vptr from one object to another
+  void** victim_vptr = reinterpret_cast<void**>(&victim);
+  void** attacker_vptr = reinterpret_cast<void**>(&attacker);
+  std::memcpy(victim_vptr, attacker_vptr, sizeof(void*));
+  // This is dangerous: undefined behavior, security vulnerabilities
 }
 ```
 
@@ -1620,29 +1631,29 @@ void dangerous_example() {
 ```cpp
 class Base {
 public:
-    int x = 1;
-    virtual void print() { std::cout << "Base: " << x << "\n"; }
+  int x = 1;
+  virtual void print() { std::cout << "Base: " << x << "\n"; }
 };
 
 class Derived : public Base {
 public:
-    int y = 2;
-    void print() override { std::cout << "Derived: " << x << ", " << y << "\n"; }
+  int y = 2;
+  void print() override { std::cout << "Derived: " << x << ", " << y << "\n"; }
 };
 
 void byValue(Base b) {
-    b.print();  // Always calls Base::print!
+  b.print();  // Always calls Base::print!
 }
 
 void byReference(Base& b) {
-    b.print();  // Polymorphic - calls actual type's print
+  b.print();  // Polymorphic - calls actual type's print
 }
 
 int main() {
-    Derived d;
+  Derived d;
 
-    byValue(d);      // Sliced! Output: "Base: 1"
-    byReference(d);  // Correct! Output: "Derived: 1, 2"
+  byValue(d);      // Sliced! Output: "Base: 1"
+  byReference(d);  // Correct! Output: "Derived: 1, 2"
 }
 ```
 
@@ -1651,25 +1662,25 @@ int main() {
 ```cpp
 class Base {
 public:
-    ~Base() { std::cout << "~Base\n"; }  // NOT virtual!
+  ~Base() { std::cout << "~Base\n"; }  // NOT virtual!
 };
 
 class Derived : public Base {
 public:
-    int* data;
-    Derived() : data(new int[100]) {}
-    ~Derived() { delete[] data; std::cout << "~Derived\n"; }
+  int* data;
+  Derived() : data(new int[100]) {}
+  ~Derived() { delete[] data; std::cout << "~Derived\n"; }
 };
 
 int main() {
-    Base* ptr = new Derived();
-    delete ptr;  // Only ~Base called - memory leak!
+  Base* ptr = new Derived();
+  delete ptr;  // Only ~Base called - memory leak!
 }
 
 // ALWAYS make destructors virtual when you have virtual functions:
 class GoodBase {
 public:
-    virtual ~GoodBase() = default;
+  virtual ~GoodBase() = default;
 };
 ```
 
@@ -1678,26 +1689,26 @@ public:
 ```cpp
 class Base {
 public:
-    Base() {
-        init();  // Calls Base::init, not Derived::init!
-    }
+  Base() {
+    init();  // Calls Base::init, not Derived::init!
+  }
 
-    virtual void init() {
-        std::cout << "Base::init\n";
-    }
+  virtual void init() {
+    std::cout << "Base::init\n";
+  }
 };
 
 class Derived : public Base {
 public:
-    int* resource;
+  int* resource;
 
-    void init() override {
-        resource = new int[100];  // Never called from Base()!
-    }
+  void init() override {
+    resource = new int[100];  // Never called from Base()!
+  }
 
-    void use() {
-        resource[0] = 42;  // Crash! resource is uninitialized
-    }
+  void use() {
+    resource[0] = 42;  // Crash! resource is uninitialized
+  }
 };
 ```
 
@@ -1750,18 +1761,18 @@ clang++ -fsanitize=address -g source.cpp -o program
 // Plugin interface - all methods are virtual for dynamic loading
 class IPlugin {
 public:
-    virtual std::string getName() const = 0;
-    virtual void initialize() = 0;
-    virtual void execute() = 0;
-    virtual void shutdown() = 0;
-    virtual ~IPlugin() = default;
+  virtual std::string getName() const = 0;
+  virtual void initialize() = 0;
+  virtual void execute() = 0;
+  virtual void shutdown() = 0;
+  virtual ~IPlugin() = default;
 };
 
 // Plugin manager loads .so/.dll files and calls virtual methods
 // Uses extern "C" factory functions to create/destroy plugin instances
 extern "C" {
-    IPlugin* createPlugin() { return new MyPlugin(); }
-    void destroyPlugin(IPlugin* p) { delete p; }
+IPlugin* createPlugin() { return new MyPlugin(); }
+void destroyPlugin(IPlugin* p) { delete p; }
 }
 ```
 
@@ -1770,12 +1781,12 @@ extern "C" {
 ```cpp
 // Event dispatcher using virtual methods for type-safe event handling
 class EventDispatcher {
-    std::unordered_map<std::type_index,
-                       std::vector<std::unique_ptr<IEventHandler>>> handlers;
+  std::unordered_map<std::type_index,
+  std::vector<std::unique_ptr<IEventHandler>>> handlers;
 public:
-    template<typename EventType>
-    void subscribe(std::function<void(const EventType&)> callback);
-    void dispatch(const Event& event);
+  template<typename EventType>
+  void subscribe(std::function<void(const EventType&)> callback);
+  void dispatch(const Event& event);
 };
 ```
 
@@ -1787,7 +1798,9 @@ public:
 
 **Q1: What is a VTable?**
 
-A VTable (Virtual Table) is a lookup table of function pointers used to implement dynamic dispatch in C++. Each class with virtual functions has one VTable, and each object of such a class contains a hidden pointer (vptr) to its class's VTable.
+A VTable (Virtual Table) is a lookup table of function pointers used to implement dynamic dispatch in C++. Each class
+with virtual functions has one VTable, and each object of such a class contains a hidden pointer (vptr) to its class's
+VTable.
 
 **Q2: What is the size overhead of virtual functions?**
 
@@ -1796,12 +1809,13 @@ A VTable (Virtual Table) is a lookup table of function pointers used to implemen
 
 **Q3: Why should destructors be virtual in base classes?**
 
-When deleting a derived object through a base class pointer, a non-virtual destructor only calls the base destructor, causing resource leaks. Virtual destructors ensure the complete destruction chain is called.
+When deleting a derived object through a base class pointer, a non-virtual destructor only calls the base destructor,
+causing resource leaks. Virtual destructors ensure the complete destruction chain is called.
 
 ```cpp
 Base* ptr = new Derived();
 delete ptr;  // Without virtual destructor: only ~Base() called
-             // With virtual destructor: ~Derived() then ~Base() called
+// With virtual destructor: ~Derived() then ~Base() called
 ```
 
 ### Intermediate Level
@@ -1809,13 +1823,15 @@ delete ptr;  // Without virtual destructor: only ~Base() called
 **Q4: Can constructors be virtual?**
 
 No, constructors cannot be virtual because:
+
 1. When a constructor runs, there's no object yet - the vptr hasn't been set up
 2. The purpose of virtual is to call based on actual type, but during construction the type is fixed
 3. Factory patterns can simulate virtual construction
 
 **Q5: What happens if you call a virtual function from a constructor?**
 
-The base class version is called, not the derived version. This is because during base class construction, the vptr points to the base class VTable. The derived class hasn't been constructed yet.
+The base class version is called, not the derived version. This is because during base class construction, the vptr
+points to the base class VTable. The derived class hasn't been constructed yet.
 
 **Q6: Explain object slicing.**
 
@@ -1834,16 +1850,16 @@ b.virtualFunc();  // Always calls Base::virtualFunc
 
 ```cpp
 class A {
-    virtual void func();
+  virtual void func();
 };
 
 class B : public A {
-    void func() override;        // Must match A::func signature
-    void func() final;           // Cannot be overridden further
+  void func() override;        // Must match A::func signature
+  void func() final;           // Cannot be overridden further
 };
 
 class C final : public A {       // C cannot be inherited
-    void func() override;
+  void func() override;
 };
 ```
 
@@ -1851,29 +1867,33 @@ class C final : public A {       // C cannot be inherited
 
 **Q8: Explain VTable layout in multiple inheritance.**
 
-With multiple inheritance, a class has multiple VTables (one per base class with virtual functions). The object layout contains multiple vptrs, and pointer casts between base types may require address adjustment.
+With multiple inheritance, a class has multiple VTables (one per base class with virtual functions). The object layout
+contains multiple vptrs, and pointer casts between base types may require address adjustment.
 
 **Q9: What are thunks?**
 
-Thunks are small code snippets that adjust the `this` pointer before calling the actual virtual function. They're needed in multiple inheritance when calling through secondary base class pointers.
+Thunks are small code snippets that adjust the `this` pointer before calling the actual virtual function. They're needed
+in multiple inheritance when calling through secondary base class pointers.
 
 **Q10: Explain the diamond problem and virtual inheritance.**
 
 The diamond problem occurs when a class inherits from two classes that share a common base:
 
 ```
-    A
-   / \
-  B   C
-   \ /
-    D
+A
+/ \
+B   C
+\ /
+D
 ```
 
-Without virtual inheritance, D contains two copies of A. Virtual inheritance ensures only one A subobject exists, but complicates object layout with virtual base pointers.
+Without virtual inheritance, D contains two copies of A. Virtual inheritance ensures only one A subobject exists, but
+complicates object layout with virtual base pointers.
 
 **Q11: How does `dynamic_cast` work internally?**
 
 `dynamic_cast` uses RTTI from the VTable:
+
 1. Retrieves typeinfo pointer from the source object's VTable
 2. Walks the inheritance hierarchy to check if target type is reachable
 3. Calculates any necessary pointer adjustments
@@ -1881,7 +1901,8 @@ Without virtual inheritance, D contains two copies of A. Virtual inheritance ens
 
 **Q12: What is devirtualization?**
 
-Devirtualization is a compiler optimization that converts virtual calls to direct calls when the exact type is known at compile time:
+Devirtualization is a compiler optimization that converts virtual calls to direct calls when the exact type is known at
+compile time:
 
 ```cpp
 Derived d;
@@ -1892,7 +1913,7 @@ ptr->virtualFunc();  // May be devirtualized with optimization
 
 class Final final : public Base {};
 void foo(Final* f) {
-    f->virtualFunc();  // Always devirtualized - Final is final
+  f->virtualFunc();  // Always devirtualized - Final is final
 }
 ```
 
@@ -1903,19 +1924,20 @@ NVI separates the public interface from the customization points:
 ```cpp
 class Base {
 public:
-    void process() {          // Non-virtual public interface
-        preProcess();
-        doProcess();          // Virtual private/protected
-        postProcess();
-    }
+  void process() {          // Non-virtual public interface
+    preProcess();
+    doProcess();          // Virtual private/protected
+    postProcess();
+  }
 private:
-    virtual void doProcess() = 0;  // Customization point
-    void preProcess() {}
-    void postProcess() {}
+  virtual void doProcess() = 0;  // Customization point
+  void preProcess() {}
+  void postProcess() {}
 };
 ```
 
 Benefits:
+
 - Base class controls flow
 - Can add pre/post processing without changing derived classes
 - Clearer separation of interface and implementation
@@ -1926,29 +1948,35 @@ Benefits:
 
 ### Key Takeaways
 
-1. **VTables enable runtime polymorphism** - They provide efficient O(1) dispatch for virtual function calls through a table of function pointers.
+1. **VTables enable runtime polymorphism** - They provide efficient O(1) dispatch for virtual function calls through a
+   table of function pointers.
 
-2. **Memory overhead is minimal** - Each object adds only a single vptr (8 bytes on 64-bit), regardless of the number of virtual functions.
+2. **Memory overhead is minimal** - Each object adds only a single vptr (8 bytes on 64-bit), regardless of the number of
+   virtual functions.
 
-3. **Construction order matters** - VTables are updated during construction, so virtual calls from constructors call the base version.
+3. **Construction order matters** - VTables are updated during construction, so virtual calls from constructors call the
+   base version.
 
 4. **Multiple inheritance adds complexity** - Objects may have multiple vptrs and require thunks for pointer adjustment.
 
 5. **Virtual inheritance solves the diamond problem** - But at the cost of additional complexity and indirection.
 
-6. **Performance is generally good** - The overhead of virtual calls is small, and modern compilers can devirtualize in many cases.
+6. **Performance is generally good** - The overhead of virtual calls is small, and modern compilers can devirtualize in
+   many cases.
 
 7. **RTTI is integrated with VTables** - `dynamic_cast` and `typeid` use type information stored in the VTable.
 
 ### When to Use Virtual Functions
 
 **Use virtual functions when:**
+
 - You need runtime polymorphism
 - The set of derived types may change
 - You're building plugin/extension systems
 - Different implementations need different behavior
 
 **Consider alternatives when:**
+
 - Performance is critical
 - The type set is fixed (use `std::variant`)
 - You can use static polymorphism (templates/CRTP)
@@ -1966,8 +1994,8 @@ Benefits:
 
 ## References
 
-- Lippman, S.B. *Inside the C++ Object Model* (Addison-Wesley)
-- Meyers, S. *Effective C++*, *Effective Modern C++*
+- Lippman, S.B. _Inside the C++ Object Model_ (Addison-Wesley)
+- Meyers, S. _Effective C++_, _Effective Modern C++_
 - Itanium C++ ABI: https://itanium-cxx-abi.github.io/cxx-abi/
 - CppReference: https://en.cppreference.com/w/cpp/language/virtual
 
@@ -1975,25 +2003,24 @@ Benefits:
 
 ## Quick Reference
 
-| Term | Definition |
-|------|------------|
-| VTable | Table of function pointers for virtual dispatch |
-| vptr | Hidden pointer in object pointing to VTable (8 bytes on 64-bit) |
-| override | Specifier to verify function overrides base class virtual |
-| final | Prevents further overriding or inheritance |
-| Thunk | Code adjusting `this` pointer in multiple inheritance |
-| RTTI | Runtime Type Information for dynamic_cast and typeid |
+| Term     | Definition                                                      |
+| -------- | --------------------------------------------------------------- |
+| VTable   | Table of function pointers for virtual dispatch                 |
+| vptr     | Hidden pointer in object pointing to VTable (8 bytes on 64-bit) |
+| override | Specifier to verify function overrides base class virtual       |
+| final    | Prevents further overriding or inheritance                      |
+| Thunk    | Code adjusting `this` pointer in multiple inheritance           |
+| RTTI     | Runtime Type Information for dynamic_cast and typeid            |
 
 ### Common Issues
 
-| Problem | Cause | Solution |
-|---------|-------|----------|
-| Memory leak on delete | Non-virtual destructor | Make destructor virtual |
-| Wrong virtual called | Called from constructor | Use two-phase init |
-| Object slicing | Pass by value | Pass by pointer/reference |
-| Pure virtual called | Virtual in constructor | Avoid or use factory |
+| Problem               | Cause                   | Solution                  |
+| --------------------- | ----------------------- | ------------------------- |
+| Memory leak on delete | Non-virtual destructor  | Make destructor virtual   |
+| Wrong virtual called  | Called from constructor | Use two-phase init        |
+| Object slicing        | Pass by value           | Pass by pointer/reference |
+| Pure virtual called   | Virtual in constructor  | Avoid or use factory      |
 
 ---
 
-*Document Version: 1.0 | Last Updated: 2026-01-23*
-
+_Document Version: 1.0 | Last Updated: 2026-01-23_
